@@ -1,0 +1,191 @@
+x-python-service: &python-service
+  env_file:
+    - ../.env
+  environment:
+    REDIS_URL: redis://redis:6379/0
+  depends_on:
+    redis:
+      condition: service_healthy
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  knowledge-botanical:
+    <<: *python-service
+    build:
+      context: ..
+      dockerfile: services/knowledge/botanical/Dockerfile
+    ports:
+      - "8090:8000"
+
+  knowledge-compound:
+    <<: *python-service
+    build:
+      context: ..
+      dockerfile: services/knowledge/compound/Dockerfile
+    ports:
+      - "8091:8000"
+
+  knowledge-toxicology:
+    <<: *python-service
+    build:
+      context: ..
+      dockerfile: services/knowledge/toxicology/Dockerfile
+    ports:
+      - "8092:8000"
+
+  knowledge-rules:
+    <<: *python-service
+    build:
+      context: ..
+      dockerfile: services/knowledge/rules/Dockerfile
+    ports:
+      - "8093:8000"
+
+  agent-intake:
+    <<: *python-service
+    build:
+      context: ..
+      dockerfile: services/agents/intake/Dockerfile
+    ports:
+      - "8100:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      knowledge-toxicology:
+        condition: service_started
+
+  agent-mapping:
+    <<: *python-service
+    build:
+      context: ..
+      dockerfile: services/agents/mapping/Dockerfile
+    ports:
+      - "8101:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      knowledge-toxicology:
+        condition: service_started
+
+  agent-retrieval:
+    <<: *python-service
+    build:
+      context: ..
+      dockerfile: services/agents/retrieval/Dockerfile
+    ports:
+      - "8102:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      knowledge-botanical:
+        condition: service_started
+      knowledge-compound:
+        condition: service_started
+
+  agent-safety:
+    <<: *python-service
+    build:
+      context: ..
+      dockerfile: services/agents/safety/Dockerfile
+    ports:
+      - "8103:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      knowledge-rules:
+        condition: service_started
+
+  agent-scoring:
+    <<: *python-service
+    build:
+      context: ..
+      dockerfile: services/agents/scoring/Dockerfile
+    ports:
+      - "8104:8000"
+
+  agent-explanation:
+    <<: *python-service
+    build:
+      context: ..
+      dockerfile: services/agents/explanation/Dockerfile
+    ports:
+      - "8105:8000"
+
+  agent-reporting:
+    <<: *python-service
+    build:
+      context: ..
+      dockerfile: services/agents/reporting/Dockerfile
+    ports:
+      - "8106:8000"
+
+  email:
+    <<: *python-service
+    build:
+      context: ..
+      dockerfile: services/email/Dockerfile
+    ports:
+      - "8110:8000"
+
+  orchestrator:
+    <<: *python-service
+    build:
+      context: ..
+      dockerfile: services/orchestrator/Dockerfile
+    ports:
+      - "8081:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      agent-intake:
+        condition: service_started
+      agent-mapping:
+        condition: service_started
+      agent-retrieval:
+        condition: service_started
+      agent-safety:
+        condition: service_started
+      agent-scoring:
+        condition: service_started
+      agent-explanation:
+        condition: service_started
+      agent-reporting:
+        condition: service_started
+      email:
+        condition: service_started
+
+  gateway:
+    <<: *python-service
+    build:
+      context: ..
+      dockerfile: services/gateway/Dockerfile
+    ports:
+      - "8082:8000"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      CORS_ALLOW_ORIGINS: http://localhost:3000
+    depends_on:
+      redis:
+        condition: service_healthy
+      orchestrator:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_GATEWAY_URL: http://localhost:8082
+    depends_on:
+      - gateway
