@@ -12,4 +12,4 @@ WORKDIR /app
 COPY --from=build /build/target/app.jar app.jar
 
 EXPOSE 8000
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Xmx256m", "-XX:MaxMetaspaceSize=96m", "-XX:+UseSerialGC", "-jar", "app.jar"]

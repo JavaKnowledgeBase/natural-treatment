@@ -176,7 +176,72 @@ Choices, each deliberate:
 
 Result: `app-vm` running at external IP `35.231.127.22`.
 
+## 9. Getting code onto the VM (git push blocked)
+
+Plan was `git push origin master` then `git clone` on the VM. Blocked:
+Windows Credential Manager had a cached GitHub credential for an
+unrelated account (`steadfast-services`) with no write access to this
+repo. Deleted the stale entry (`cmdkey /delete`) and retried — GCM's
+browser re-auth flow still resolved to the same account, and the user
+then had trouble logging into GitHub at all (cause undetermined this
+session). Rather than block deployment on unwinding a GitHub account
+issue, fell back to a direct transfer:
+
+```
+git archive --format=tar HEAD | gzip > app.tar.gz
+gcloud compute scp app.tar.gz app-vm:/home/kafleyravi/app.tar.gz --project=natural-remedy-research --zone=us-east1-b
+gcloud compute ssh app-vm --project=natural-remedy-research --zone=us-east1-b \
+  --command="mkdir -p ~/app && tar xzf ~/app.tar.gz -C ~/app"
+```
+
+`git archive` (not a raw directory copy) so only the committed tree
+ships — no `.git` internals, no local build artifacts. This means the
+VM's code is a point-in-time snapshot, not a git checkout: future
+deploys need either a repeat of this same archive+scp step, or the
+GitHub auth issue fixed so `git pull` works normally. Flagged as a
+follow-up, not solved here.
+
+## 10. JVM heap caps -- and an honest capacity check
+
+Set explicit heap caps on all 10 Java services (the actual count, found
+via `grep -rl 'ENTRYPOINT \["java", "-jar", "app.jar"\]' services/` --
+`CLAUDE.md`'s "8 Java services" undercounts by 2; worth fixing there
+separately):
+
+```
+ENTRYPOINT ["java", "-Xmx192m", "-XX:MaxMetaspaceSize=96m", "-XX:+UseSerialGC", "-jar", "app.jar"]
+```
+
+(`orchestrator` gets `-Xmx256m` since it coordinates every other call;
+the 4 `knowledge-*` services get `-Xmx160m` since they're thin
+Redis-read wrappers with the least logic. `-XX:+UseSerialGC` specifically
+because it has the smallest memory overhead of any HotSpot collector --
+the right trade for small, low-throughput containers where GC pause time
+matters far less than baseline footprint.)
+
+**Did the math before deploying, not after an OOM kill:** heap + capped
+metaspace + thread/JIT overhead puts each JVM's worst-case RSS around
+300-400MB. Across 10 services that's 3-3.5GB *before* the 4 Python
+services, Next.js, Redis, and nginx -- on a 2GB `e2-small`. This is
+exactly the risk `PRODUCTION_READINESS.md` §4 flagged and explicitly
+left unverified ("needs to be measured on the VM directly... not assumed
+correct from the plan alone").
+
+Checked `e2-medium` (4GB) as the fallback size: no live pricing API
+response came back, but GCP's e2 tier prices scale ~2x per size step,
+and `e2-small` is confirmed at $12.23/mo -- so `e2-medium` should land
+around $24-25/mo (matches `PRODUCTION_READINESS.md`'s own guess when it
+flagged the $80.64 figure as unreliable). That's over the confirmed
+$15/mo ceiling.
+
+**Decision: deploy on `e2-small` first and measure real usage before
+resizing.** The worst-case math assumes every JVM is under load
+simultaneously with a full heap, which won't be true for a low-traffic
+personal project most of the time. This is the actual test the
+production-readiness doc called for -- resize with real numbers if it
+OOMs, not by guessing upfront.
+
 ---
 
-*(This log is appended to as the remaining steps — nginx reverse proxy,
-app deployment, DNS, TLS — are completed.)*
+*(This log is appended to as the remaining steps -- docker compose up,
+memory measurement, DNS -- are completed.)*
