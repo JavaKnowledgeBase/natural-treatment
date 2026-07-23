@@ -1,0 +1,102 @@
+{
+  "Metadata": {
+    "title": "Rootwell",
+    "description": "Rootwell rastrea tus síntomas hasta su probable causa bioquímica y sugiere apoyo herbal respaldado por evidencia."
+  },
+  "Header": {
+    "aboutContact": "Acerca de y contacto",
+    "language": "Idioma"
+  },
+  "Footer": {
+    "tagline": "Rootwell. Solo con fines informativos — no sustituye el consejo médico.",
+    "aboutContact": "Acerca de y contacto",
+    "privacy": "Privacidad",
+    "terms": "Términos"
+  },
+  "Home": {
+    "initError": "No pudimos conectar con el servidor. ¿Docker Compose está en ejecución?",
+    "startingSession": "Iniciando una nueva sesión...",
+    "purgedTitle": "Gracias por confiar en nosotros",
+    "purgedBody": "Tu resumen está en camino, y todo lo relacionado con esta conversación ya ha sido eliminado de nuestro sistema. Cuando quieras, no dudes en actualizar esta página para comenzar una nueva conversación, independiente de esta."
+  },
+  "SummaryPanel": {
+    "currentStep": "Paso actual",
+    "disclaimer": "Estamos aquí para ayudarte a explorar, no para reemplazar la atención de un profesional de la salud con licencia. Y tu privacidad nos importa — nada de lo que compartas aquí se conserva más allá de esta conversación, a menos que elijas enviarte una copia por correo electrónico.",
+    "symptoms": "Síntomas",
+    "possibleCauses": "Posibles causas",
+    "nothingAddedYet": "Aún no se ha añadido nada.",
+    "topRecommendations": "Principales recomendaciones",
+    "confidenceLabel": "{band, select, high {confianza alta} moderate {confianza moderada} low {confianza baja} other {confianza {band}}}",
+    "evidenceLevel": "Nivel de evidencia",
+    "stepGreeting": "Comenzando",
+    "stepSymptomCollection": "Compartiendo síntomas",
+    "stepCauseCollection": "Compartiendo posibles causas",
+    "stepAnalysis": "Analizando",
+    "stepResults": "Resultados listos",
+    "stepEmailSent": "Enviado — sesión finalizada"
+  },
+  "ChatPanel": {
+    "placeholderSymptom": "Cuéntame cómo te sientes...",
+    "placeholderCause": "¿Qué crees que pudo haber contribuido a esto?",
+    "send": "Enviar",
+    "shareMoreZero": "Tómate tu tiempo — cuanto más compartas, mejor podremos ayudarte. Un par de síntomas es un buen comienzo.",
+    "shareMoreOne": "Vas muy bien — con un síntoma más tendremos suficiente para empezar a explorar juntos las posibles causas.",
+    "advanceLink": "Ya he contado todo sobre mis síntomas — hablemos de las posibles causas",
+    "advanceConfirmQuestion": "Antes de continuar, ¿hay algo más sobre cómo te has sentido que te gustaría compartir?",
+    "keepGoing": "Déjame añadir más",
+    "advanceConfirm": "No, hablemos de las causas",
+    "analyzeButton": "Ya he dicho todo lo que sé por ahora — analiza y dame sugerencias",
+    "analyzing": "Analizando...",
+    "analyzeConfirmQuestionSymptoms": "¿Hay algo más que te gustaría añadir antes de preparar esto para ti?",
+    "analyzeConfirmQuestionCauses": "¿Hay algo más sobre las posibles causas antes de preparar esto para ti?",
+    "analyzeConfirm": "No, analiza ahora"
+  },
+  "EmailExport": {
+    "prompt": "¿Te gustaría conservar una copia de esta conversación y tus recomendaciones?",
+    "privacyNote": "Solo te pediremos tu correo electrónico si deseas que te enviemos esto — y todo se elimina de nuestro sistema justo después.",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "sendMe": "Envíame esto",
+    "sending": "Enviando...",
+    "codePlaceholderMock": "Revisa la consola del servidor para tu código",
+    "codePlaceholder": "Ingresa el código que enviamos",
+    "confirmAndSend": "Confirmar y enviar",
+    "errorRequest": "No pudimos enviar un código de verificación. Por favor, inténtalo de nuevo.",
+    "errorConfirm": "Ese código no coincide o ha expirado. Puedes solicitar uno nuevo.",
+    "sentMessage": "En camino a tu bandeja de entrada. Gracias por confiar en nosotros hoy — todo lo relacionado con esta conversación ya ha sido eliminado de nuestro sistema."
+  },
+  "About": {
+    "heading": "Rastreando tus síntomas hasta su probable causa raíz",
+    "intro": "Rootwell es un asistente conversacional basado en evidencia que te ayuda a explorar cómo los síntomas cotidianos pueden estar relacionados con patrones bioquímicos subyacentes — y qué hierbas cuentan con evidencia histórica o clínica que las respalde. Todo lo que compartes vive únicamente en la memoria de esta sesión y se elimina en el momento en que termina, ya sea porque solicitaste un resumen por correo o simplemente cerraste la pestaña.",
+    "disclaimer": "Rootwell tiene fines exclusivamente informativos y no sustituye el consejo médico profesional, el diagnóstico ni el tratamiento. Consulta siempre a un profesional de la salud con licencia ante síntomas graves, persistentes o preocupantes.",
+    "whoTitle": "Quién está detrás de esto",
+    "whoBody": "Ravi Kafley, Fundador",
+    "contactTitle": "Contacto",
+    "contactBody": "Preguntas, comentarios o inquietudes sobre una recomendación:"
+  },
+  "Privacy": {
+    "title": "Política de privacidad",
+    "draftNote": "Borrador — refleja la implementación actual. Debe ser revisado por un asesor legal antes del lanzamiento.",
+    "whatWeStoreTitle": "Qué almacenamos",
+    "whatWeStoreBody": "Rootwell no tiene base de datos. Todo lo relacionado con tu sesión — la conversación, los síntomas y posibles causas que compartes, y las recomendaciones resultantes — se mantiene únicamente en una caché en memoria durante la duración de esa sesión.",
+    "whatWeNeverAskTitle": "Lo que nunca pedimos",
+    "whatWeNeverAskBody": "Rootwell nunca pregunta proactivamente por tu edad, estado de embarazo, medicamentos, alergias o condiciones médicas. Si compartes voluntariamente esa información con tus propias palabras, se usa únicamente para aplicar las verificaciones de seguridad relevantes durante esa sesión y se elimina junto con todo lo demás cuando esta termina.",
+    "whenDeletedTitle": "Cuándo se eliminan tus datos",
+    "whenDeletedBody": "Tu sesión se elimina automáticamente tras un período de inactividad, de inmediato cuando la finalizas, o de inmediato tras el envío de un resumen por correo si eliges esa opción.",
+    "emailSummariesTitle": "Resúmenes por correo electrónico",
+    "emailSummariesBody": "Si solicitas que te enviemos tu sesión por correo, te pedimos confirmar un código de un solo uso enviado a esa dirección antes de enviar nada, para que esta función no pueda usarse para enviar correos a una dirección que no es la tuya. El correo en sí se envía a través de un proveedor externo de correo transaccional.",
+    "contactTitle": "Contacto",
+    "contactBody": "Preguntas sobre esta política:"
+  },
+  "Terms": {
+    "title": "Términos de uso",
+    "draftNote": "Borrador — debe ser revisado por un asesor legal antes del lanzamiento.",
+    "notMedicalAdviceTitle": "Esto no es un consejo médico",
+    "notMedicalAdviceBody": "Rootwell ofrece contenido general e informativo sobre hierbas y sus asociaciones tradicionales o estudiadas con ciertos síntomas. No diagnostica afecciones, no prescribe tratamientos ni reemplaza la consulta con un profesional de la salud con licencia. Busca siempre asesoramiento médico profesional ante síntomas graves, persistentes o preocupantes, y antes de comenzar, suspender o combinar cualquier hierba o suplemento — especialmente si estás embarazada, en período de lactancia, manejando una condición crónica o tomando medicamentos.",
+    "starterDatasetTitle": "Conjunto de datos inicial",
+    "starterDatasetBody": "Los datos de hierbas, compuestos y síntomas que utiliza actualmente Rootwell son un conjunto de datos inicial sin revisar, reunido con fines de desarrollo. No ha pasado por un proceso de curación experta ni de revisión clínica.",
+    "noGuaranteeTitle": "Sin garantía de resultados",
+    "noGuaranteeBody": "Las recomendaciones son estimaciones puntuadas basadas en la evidencia disponible y no constituyen una garantía de seguridad ni de eficacia para ningún individuo.",
+    "contactTitle": "Contacto",
+    "contactBody": "Preguntas sobre estos términos:"
+  }
+}

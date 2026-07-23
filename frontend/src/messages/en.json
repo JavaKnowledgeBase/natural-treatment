@@ -1,0 +1,102 @@
+{
+  "Metadata": {
+    "title": "Rootwell",
+    "description": "Rootwell traces symptoms back to their likely biochemical root cause and suggests evidence-aware herbal support."
+  },
+  "Header": {
+    "aboutContact": "About & Contact",
+    "language": "Language"
+  },
+  "Footer": {
+    "tagline": "Rootwell. Informational only — not medical advice.",
+    "aboutContact": "About & Contact",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "Home": {
+    "initError": "Couldn't reach the backend. Is docker-compose running?",
+    "startingSession": "Starting a new session...",
+    "purgedTitle": "Thank you for sharing with us",
+    "purgedBody": "Your summary is on its way, and everything from this conversation has now been cleared from our system. Whenever you're ready, feel free to refresh this page to start a new, separate conversation."
+  },
+  "SummaryPanel": {
+    "currentStep": "Current step",
+    "disclaimer": "We're here to help you explore, not to replace care from a licensed clinician. And your privacy matters to us — nothing you share here is kept beyond this conversation unless you choose to email yourself a copy.",
+    "symptoms": "Symptoms",
+    "possibleCauses": "Possible causes",
+    "nothingAddedYet": "Nothing added yet.",
+    "topRecommendations": "Top recommendations",
+    "confidenceLabel": "{band, select, high {high confidence} moderate {moderate confidence} low {low confidence} other {{band} confidence}}",
+    "evidenceLevel": "Evidence level",
+    "stepGreeting": "Getting started",
+    "stepSymptomCollection": "Sharing symptoms",
+    "stepCauseCollection": "Sharing possible causes",
+    "stepAnalysis": "Analyzing",
+    "stepResults": "Results ready",
+    "stepEmailSent": "Sent — session ended"
+  },
+  "ChatPanel": {
+    "placeholderSymptom": "Tell me how you're feeling...",
+    "placeholderCause": "What might have contributed to this?",
+    "send": "Send",
+    "shareMoreZero": "Take your time — the more you share, the better we can help. A couple of symptoms is a great start.",
+    "shareMoreOne": "You're doing great — just one more symptom and we'll have enough to start exploring possible causes together.",
+    "advanceLink": "I've said everything about my symptoms — let's talk about possible causes",
+    "advanceConfirmQuestion": "Before we move on, is there anything else about how you've been feeling that you'd like to share?",
+    "keepGoing": "Let me add more",
+    "advanceConfirm": "No, let's talk about causes",
+    "analyzeButton": "I have said everything I know now — analyze and give me suggestions",
+    "analyzing": "Analyzing...",
+    "analyzeConfirmQuestionSymptoms": "Is there anything else on your mind before we put this together for you?",
+    "analyzeConfirmQuestionCauses": "Is there anything else on your mind about possible causes before we put this together for you?",
+    "analyzeConfirm": "No, analyze now"
+  },
+  "EmailExport": {
+    "prompt": "Would you like a copy of this conversation and your recommendations to keep?",
+    "privacyNote": "We'll only ever ask for your email if you'd like this sent to you — and everything is cleared from our system right after.",
+    "emailPlaceholder": "you@example.com",
+    "sendMe": "Email me this",
+    "sending": "Sending...",
+    "codePlaceholderMock": "Check the server console for your code",
+    "codePlaceholder": "Enter the code we sent",
+    "confirmAndSend": "Confirm and send",
+    "errorRequest": "Couldn't send a verification code. Please try again.",
+    "errorConfirm": "That code didn't match, or it expired. You can request a new one.",
+    "sentMessage": "On its way to your inbox. Thank you for sharing with us today — everything from this conversation has now been cleared from our system."
+  },
+  "About": {
+    "heading": "Tracing symptoms back to their likely root cause",
+    "intro": "Rootwell is a conversational, evidence-aware assistant that helps you explore how everyday symptoms may connect to underlying biochemical patterns — and which herbs have historical or clinical evidence for supporting them. Everything you share lives only in this session's cache and is deleted the moment the session ends, whether that's because you asked for an email summary or simply closed the tab.",
+    "disclaimer": "Rootwell is informational only and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a licensed clinician about symptoms that are severe, persistent, or concerning.",
+    "whoTitle": "Who's behind this",
+    "whoBody": "Ravi Kafley, Founder",
+    "contactTitle": "Contact",
+    "contactBody": "Questions, feedback, or concerns about a recommendation:"
+  },
+  "Privacy": {
+    "title": "Privacy Policy",
+    "draftNote": "Draft — reflects the current implementation. Have this reviewed by counsel before launch.",
+    "whatWeStoreTitle": "What we store",
+    "whatWeStoreBody": "Rootwell has no database. Everything about your session — the conversation, the symptoms and possible causes you share, and the resulting recommendations — is kept only in an in-memory cache for the duration of that session.",
+    "whatWeNeverAskTitle": "What we never ask for",
+    "whatWeNeverAskBody": "Rootwell never proactively asks for your age, pregnancy status, medications, allergies, or medical conditions. If you volunteer any of that in your own words, it's used only to apply relevant safety checks for that session and is deleted along with everything else when the session ends.",
+    "whenDeletedTitle": "When your data is deleted",
+    "whenDeletedBody": "Your session is deleted automatically after a period of inactivity, or immediately when you end it, or immediately after an email summary is sent if you choose that option.",
+    "emailSummariesTitle": "Email summaries",
+    "emailSummariesBody": "If you ask to have your session emailed to you, we ask you to confirm a one-time code sent to that address before anything is sent, so the feature can't be used to send mail to an address that isn't yours. The email itself is sent through a third-party transactional email provider.",
+    "contactTitle": "Contact",
+    "contactBody": "Questions about this policy:"
+  },
+  "Terms": {
+    "title": "Terms of Use",
+    "draftNote": "Draft — have this reviewed by counsel before launch.",
+    "notMedicalAdviceTitle": "Not medical advice",
+    "notMedicalAdviceBody": "Rootwell provides general, informational content about herbs and traditional or researched associations with symptoms. It does not diagnose conditions, prescribe treatment, or replace consultation with a licensed clinician. Always seek professional medical advice for symptoms that are severe, persistent, or concerning, and before starting, stopping, or combining any herb or supplement — especially if you are pregnant, nursing, managing a chronic condition, or taking medication.",
+    "starterDatasetTitle": "Starter dataset",
+    "starterDatasetBody": "The herb, compound, and symptom data currently used by Rootwell is an unreviewed starter dataset assembled for development purposes. It has not been through an expert curation or clinical review process.",
+    "noGuaranteeTitle": "No guarantee of outcome",
+    "noGuaranteeBody": "Recommendations are scored estimates based on available evidence and are not a guarantee of safety or effectiveness for any individual.",
+    "contactTitle": "Contact",
+    "contactBody": "Questions about these terms:"
+  }
+}

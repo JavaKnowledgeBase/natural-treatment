@@ -52,11 +52,12 @@ public class SessionCacheService {
         }
     }
 
-    public void createSession(String sid) {
+    public void createSession(String sid, String language) {
         String now = formatEpochSeconds(nowEpochSeconds());
         Map<String, String> meta = new HashMap<>();
         meta.put("session_id", sid);
         meta.put("current_step", "greeting");
+        meta.put("language", language);
         meta.put("created_at", now);
         meta.put("last_active_at", now);
         redisTemplate.opsForHash().putAll(prefix(sid) + "meta", meta);

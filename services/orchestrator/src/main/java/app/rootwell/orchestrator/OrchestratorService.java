@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,11 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class OrchestratorService {
 
+    /** UI + LLM-conversation languages only (see docs/ARCHITECTURE.md) --
+     * backend catalog matching stays English regardless of this value. */
+    private static final Set<String> SUPPORTED_LANGUAGES = Set.of("en", "hi", "zh", "fr", "es");
+    private static final String DEFAULT_LANGUAGE = "en";
+
     private final SessionCacheService cache;
     private final AgentClients agents;
 
@@ -30,10 +36,15 @@ public class OrchestratorService {
         this.agents = agents;
     }
 
-    public Map<String, Object> createSession() {
+    private String normalizeLanguage(String language) {
+        return language != null && SUPPORTED_LANGUAGES.contains(language) ? language : DEFAULT_LANGUAGE;
+    }
+
+    public Map<String, Object> createSession(String language) {
         String sid = newSessionId();
-        cache.createSession(sid);
-        Map<String, Object> greetingResp = agents.intake.get("/intake/greeting");
+        String lang = normalizeLanguage(language);
+        cache.createSession(sid, lang);
+        Map<String, Object> greetingResp = agents.intake.get("/intake/greeting?language=" + lang);
         String greeting = String.valueOf(greetingResp.get("message"));
         cache.appendChatMessage(sid, "assistant", greeting);
         return Map.of("session_id", sid, "greeting", greeting);
@@ -54,6 +65,7 @@ public class OrchestratorService {
     public Map<String, Object> postMessage(String sid, MessageRequest req) {
         Map<String, Object> meta = requireSession(sid);
         String step = String.valueOf(meta.get("current_step"));
+        String language = normalizeLanguage((String) meta.get("language"));
         cache.appendChatMessage(sid, "user", req.text());
 
         List<Map<String, Object>> suggestions;
@@ -70,7 +82,8 @@ public class OrchestratorService {
 
             Map<String, Object> result = agents.intake.post("/intake/symptom-turn", Map.of(
                     "user_message", req.text(),
-                    "known_symptom_ids", knownIds));
+                    "known_symptom_ids", knownIds,
+                    "language", language));
 
             for (Map<String, Object> m : (List<Map<String, Object>>) result.getOrDefault("matched", List.of())) {
                 String id = String.valueOf(m.get("id"));
@@ -86,7 +99,8 @@ public class OrchestratorService {
 
             Map<String, Object> result = agents.intake.post("/intake/cause-turn", Map.of(
                     "user_message", req.text(),
-                    "known_cause_labels", knownLabels));
+                    "known_cause_labels", knownLabels,
+                    "language", language));
 
             for (Map<String, Object> m : (List<Map<String, Object>>) result.getOrDefault("matched", List.of())) {
                 String itemId = shortId();
@@ -156,8 +170,11 @@ public class OrchestratorService {
 
         List<String> symptomIds = symptoms.stream().map(s -> String.valueOf(s.get("id"))).toList();
         Map<String, Object> profile = cache.getProfile(sid);
+        String language = normalizeLanguage((String) meta.get("language"));
 
-        Map<String, Object> mappingResult = agents.mapping.post("/mapping/analyze", Map.of("symptom_ids", symptomIds));
+        Map<String, Object> mappingResult = agents.mapping.post("/mapping/analyze", Map.of(
+                "symptom_ids", symptomIds,
+                "language", language));
         Map<String, Object> retrievalResult = agents.retrieval.post("/retrieval/candidates", Map.of(
                 "symptom_ids", symptomIds,
                 "imbalances", mappingResult.getOrDefault("imbalances", List.of())));
@@ -171,7 +188,8 @@ public class OrchestratorService {
         Map<String, Object> explanationResult = agents.explanation.post("/explanation/generate", Map.of(
                 "candidates", candidates,
                 "ranked", scoringResult.get("ranked"),
-                "verdicts", safetyResult.get("verdicts")));
+                "verdicts", safetyResult.get("verdicts"),
+                "language", language));
 
         List<Map<String, Object>> recommendations = (List<Map<String, Object>>) explanationResult.get("recommendations");
         cache.clearList(sid, "recommendations");

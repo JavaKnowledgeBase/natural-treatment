@@ -19,11 +19,39 @@ SYSTEM_PROMPT = (
     "never diagnose, and mention the evidence level. Keep it to one sentence."
 )
 
+# UI + LLM-conversation language support only (see docs/ARCHITECTURE.md) --
+# the per-herb "reason" sentence is the only user-visible text this agent
+# produces; herb names/evidence levels come from the (always-English)
+# starter dataset and stay as-is.
+LANGUAGE_NAMES = {
+    "en": "English",
+    "hi": "Hindi",
+    "zh": "Simplified Chinese",
+    "fr": "French",
+    "es": "Spanish",
+}
+DEFAULT_LANGUAGE = "en"
+
+
+def _normalize_language(language: str | None) -> str:
+    return language if language in LANGUAGE_NAMES else DEFAULT_LANGUAGE
+
+
+def _localized_system_prompt(language: str) -> str:
+    if language == DEFAULT_LANGUAGE:
+        return SYSTEM_PROMPT
+    return (
+        SYSTEM_PROMPT
+        + f"\n\nWrite the sentence entirely in {LANGUAGE_NAMES[language]}, even though the herb name "
+        "and evidence level given to you are in English -- weave them into the sentence naturally."
+    )
+
 
 class GenerateRequest(BaseModel):
     candidates: list[dict]
     ranked: list[dict]
     verdicts: list[dict]
+    language: str | None = None
 
 
 class GenerateResponse(BaseModel):
@@ -49,6 +77,7 @@ async def healthz():
 async def generate(req: GenerateRequest):
     herbs_by_id = {c["id"]: c for c in req.candidates}
     verdicts_by_id = {v["herb_id"]: v for v in req.verdicts}
+    language = _normalize_language(req.language)
 
     recommendations: list[dict] = []
     for entry in req.ranked:
@@ -59,7 +88,7 @@ async def generate(req: GenerateRequest):
             continue
 
         reason = await llm.complete_or_none(
-            SYSTEM_PROMPT,
+            _localized_system_prompt(language),
             f"Herb: {herb['name']}. Evidence level: {herb.get('evidence_level')}. "
             f"Mechanism notes: {[l.get('mechanism_summary') for l in herb.get('compounds', [])]}. "
             f"Confidence band: {entry['confidence_band']}.",

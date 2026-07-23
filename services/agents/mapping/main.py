@@ -25,9 +25,31 @@ SYSTEM_PROMPT = (
     "that isn't in the provided list."
 )
 
+# UI + LLM-conversation language support only (see docs/ARCHITECTURE.md) --
+# the reasoning summary is the only user-visible text this agent produces.
+LANGUAGE_NAMES = {
+    "en": "English",
+    "hi": "Hindi",
+    "zh": "Simplified Chinese",
+    "fr": "French",
+    "es": "Spanish",
+}
+DEFAULT_LANGUAGE = "en"
+
+
+def _normalize_language(language: str | None) -> str:
+    return language if language in LANGUAGE_NAMES else DEFAULT_LANGUAGE
+
+
+def _localized_system_prompt(language: str) -> str:
+    if language == DEFAULT_LANGUAGE:
+        return SYSTEM_PROMPT
+    return SYSTEM_PROMPT + f"\n\nWrite your summary entirely in {LANGUAGE_NAMES[language]}."
+
 
 class AnalyzeRequest(BaseModel):
     symptom_ids: list[str]
+    language: str | None = None
 
 
 class AnalyzeResponse(BaseModel):
@@ -56,8 +78,9 @@ async def analyze(req: AnalyzeRequest):
             symptom_names.append(record["name"])
 
     imbalance_list = sorted(imbalances)
+    language = _normalize_language(req.language)
     reasoning = await llm.complete_or_none(
-        SYSTEM_PROMPT,
+        _localized_system_prompt(language),
         f"Reported symptoms: {', '.join(symptom_names) or 'none'}. "
         f"Candidate imbalance patterns from the curated dataset: {', '.join(imbalance_list) or 'none'}.",
         max_tokens=200,

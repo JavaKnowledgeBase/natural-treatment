@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { api } from "@/lib/api";
 
 type Phase = "idle" | "requesting" | "awaiting-code" | "confirming" | "sent" | "error";
@@ -12,6 +13,7 @@ export default function EmailExport({
   sessionId: string;
   onSessionPurged: () => void;
 }) {
+  const t = useTranslations("EmailExport");
   const [phase, setPhase] = useState<Phase>("idle");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -29,7 +31,7 @@ export default function EmailExport({
       setMockMode(result.mock_mode);
       setPhase("awaiting-code");
     } catch (e) {
-      setError("Couldn't send a verification code. Please try again.");
+      setError(t("errorRequest"));
       setPhase("error");
     }
   };
@@ -43,28 +45,23 @@ export default function EmailExport({
       setPhase("sent");
       onSessionPurged();
     } catch (e) {
-      setError("That code didn't match, or it expired. You can request a new one.");
+      setError(t("errorConfirm"));
       setPhase("awaiting-code");
     }
   };
 
   if (phase === "sent") {
     return (
-      <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-900">
-        Sent — this session's data has been deleted from our cache.
+      <div className="rounded-xl border border-brand-200 bg-brand-50 p-4 text-sm text-brand-900 shadow-card">
+        {t("sentMessage")}
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-stone-200 bg-white p-4">
-      <p className="mb-2 text-sm font-medium text-stone-700">
-        Want a copy of this conversation and your recommendations?
-      </p>
-      <p className="mb-3 text-xs text-stone-500">
-        We only ask for your email if you choose to send yourself this summary. Nothing is
-        stored after it's sent.
-      </p>
+    <div className="rounded-xl border border-brand-100 bg-white p-4 shadow-card">
+      <p className="mb-2 text-sm font-medium text-stone-700">{t("prompt")}</p>
+      <p className="mb-3 text-xs text-stone-500">{t("privacyNote")}</p>
 
       {phase === "idle" || phase === "requesting" || phase === "error" ? (
         <div className="flex gap-2">
@@ -72,15 +69,15 @@ export default function EmailExport({
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="flex-1 rounded-full border border-stone-300 px-3 py-1.5 text-sm focus:border-emerald-500 focus:outline-none"
+            placeholder={t("emailPlaceholder")}
+            className="flex-1 rounded-full border border-stone-300 px-3 py-1.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           />
           <button
             onClick={requestCode}
             disabled={phase === "requesting" || !email.trim()}
-            className="rounded-full bg-emerald-600 px-4 py-1.5 text-sm text-white disabled:opacity-40"
+            className="rounded-full bg-brand-700 px-4 py-1.5 text-sm font-medium text-white shadow-card transition-colors hover:bg-brand-800 disabled:opacity-40"
           >
-            {phase === "requesting" ? "Sending..." : "Email me this"}
+            {phase === "requesting" ? t("sending") : t("sendMe")}
           </button>
         </div>
       ) : (
@@ -88,15 +85,15 @@ export default function EmailExport({
           <input
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            placeholder={mockMode ? "Check the server console for your code" : "Enter the code we sent"}
-            className="flex-1 rounded-full border border-stone-300 px-3 py-1.5 text-sm focus:border-emerald-500 focus:outline-none"
+            placeholder={mockMode ? t("codePlaceholderMock") : t("codePlaceholder")}
+            className="flex-1 rounded-full border border-stone-300 px-3 py-1.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           />
           <button
             onClick={confirmAndSend}
             disabled={phase === "confirming" || !code.trim()}
-            className="rounded-full bg-stone-900 px-4 py-1.5 text-sm text-white disabled:opacity-40"
+            className="rounded-full bg-brand-900 px-4 py-1.5 text-sm font-medium text-white shadow-card transition-colors hover:bg-brand-800 disabled:opacity-40"
           >
-            {phase === "confirming" ? "Sending..." : "Confirm and send"}
+            {phase === "confirming" ? t("sending") : t("confirmAndSend")}
           </button>
         </div>
       )}

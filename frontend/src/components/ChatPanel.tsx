@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChatMessage, Suggestion } from "@/lib/api";
 import EmailExport from "./EmailExport";
 
@@ -9,8 +10,10 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
-          isUser ? "bg-emerald-600 text-white" : "bg-white text-stone-800 border border-stone-200"
+        className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+          isUser
+            ? "bg-brand-700 text-white shadow-card"
+            : "border border-brand-100 bg-white text-stone-800 shadow-card"
         }`}
       >
         {message.text}
@@ -19,6 +22,45 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   );
 }
 
+function ConfirmDone({
+  question,
+  keepGoingLabel,
+  confirmLabel,
+  onKeepGoing,
+  onConfirm,
+  confirming,
+}: {
+  question: string;
+  keepGoingLabel: string;
+  confirmLabel: string;
+  onKeepGoing: () => void;
+  onConfirm: () => void;
+  confirming: boolean;
+}) {
+  return (
+    <div className="rounded-xl border border-gold-200 bg-gold-50 p-3">
+      <p className="text-sm text-gold-700">{question}</p>
+      <div className="mt-2 flex gap-2">
+        <button
+          onClick={onKeepGoing}
+          className="rounded-full border border-gold-300 bg-white px-3 py-1.5 text-xs font-medium text-gold-700 transition-colors hover:bg-gold-100"
+        >
+          {keepGoingLabel}
+        </button>
+        <button
+          onClick={onConfirm}
+          disabled={confirming}
+          className="rounded-full bg-brand-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-800 disabled:opacity-50"
+        >
+          {confirmLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const MIN_SYMPTOMS_BEFORE_ADVANCE = 2;
+
 export default function ChatPanel({
   sessionId,
   messages,
@@ -26,6 +68,7 @@ export default function ChatPanel({
   step,
   sending,
   analyzing,
+  symptomCount,
   canAnalyze,
   onSend,
   onPickSuggestion,
@@ -39,6 +82,7 @@ export default function ChatPanel({
   step: string;
   sending: boolean;
   analyzing: boolean;
+  symptomCount: number;
   canAnalyze: boolean;
   onSend: (text: string) => void;
   onPickSuggestion: (s: Suggestion) => void;
@@ -46,20 +90,31 @@ export default function ChatPanel({
   onAnalyze: () => void;
   onSessionPurged: () => void;
 }) {
+  const t = useTranslations("ChatPanel");
   const [draft, setDraft] = useState("");
+  const [confirmAdvance, setConfirmAdvance] = useState(false);
+  const [confirmAnalyze, setConfirmAnalyze] = useState(false);
 
   const submit = () => {
     const text = draft.trim();
     if (!text || sending) return;
+    setConfirmAdvance(false);
+    setConfirmAnalyze(false);
     onSend(text);
     setDraft("");
+  };
+
+  const pickSuggestion = (s: Suggestion) => {
+    setConfirmAdvance(false);
+    setConfirmAnalyze(false);
+    onPickSuggestion(s);
   };
 
   const canChat = step === "greeting" || step === "symptom_collection" || step === "cause_collection";
   const canShowStickyButton = (step === "symptom_collection" || step === "cause_collection") && canAnalyze;
 
   return (
-    <div className="flex h-full flex-col bg-stone-100">
+    <div className="flex h-full flex-col bg-paper-100">
       <div className="flex-1 space-y-3 overflow-y-auto p-6">
         {messages.map((m, i) => (
           <MessageBubble key={i} message={m} />
@@ -70,8 +125,8 @@ export default function ChatPanel({
             {suggestions.map((s, i) => (
               <button
                 key={`${s.label}-${i}`}
-                onClick={() => onPickSuggestion(s)}
-                className="rounded-full border border-emerald-400 bg-white px-3 py-1 text-sm text-emerald-700 hover:bg-emerald-50"
+                onClick={() => pickSuggestion(s)}
+                className="rounded-full border border-brand-300 bg-white px-3 py-1 text-sm text-brand-800 shadow-card transition-colors hover:border-brand-400 hover:bg-brand-50"
               >
                 + {s.label}
               </button>
@@ -81,12 +136,30 @@ export default function ChatPanel({
 
         {step === "symptom_collection" && (
           <div className="pt-2">
-            <button
-              onClick={onAdvanceToCauses}
-              className="text-sm text-stone-500 underline hover:text-stone-700"
-            >
-              I've said everything about my symptoms — let's talk about possible causes
-            </button>
+            {symptomCount < MIN_SYMPTOMS_BEFORE_ADVANCE ? (
+              <p className="text-xs text-stone-400">
+                {symptomCount === 0 ? t("shareMoreZero") : t("shareMoreOne")}
+              </p>
+            ) : confirmAdvance ? (
+              <ConfirmDone
+                question={t("advanceConfirmQuestion")}
+                keepGoingLabel={t("keepGoing")}
+                confirmLabel={t("advanceConfirm")}
+                confirming={false}
+                onKeepGoing={() => setConfirmAdvance(false)}
+                onConfirm={() => {
+                  setConfirmAdvance(false);
+                  onAdvanceToCauses();
+                }}
+              />
+            ) : (
+              <button
+                onClick={() => setConfirmAdvance(true)}
+                className="text-sm font-medium text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-800"
+              >
+                {t("advanceLink")}
+              </button>
+            )}
           </div>
         )}
 
@@ -98,39 +171,52 @@ export default function ChatPanel({
       </div>
 
       {canChat && (
-        <div className="border-t border-stone-200 bg-white p-4">
+        <div className="border-t border-brand-100 bg-white p-4">
           <div className="flex gap-2">
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submit()}
-              placeholder={
-                step === "cause_collection"
-                  ? "What might have contributed to this?"
-                  : "Tell me how you're feeling..."
-              }
-              className="flex-1 rounded-full border border-stone-300 px-4 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+              placeholder={step === "cause_collection" ? t("placeholderCause") : t("placeholderSymptom")}
+              className="flex-1 rounded-full border border-stone-300 px-4 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
             />
             <button
               onClick={submit}
               disabled={sending || !draft.trim()}
-              className="rounded-full bg-emerald-600 px-4 py-2 text-sm text-white disabled:opacity-40"
+              className="rounded-full bg-brand-700 px-5 py-2 text-sm font-medium text-white shadow-card transition-colors hover:bg-brand-800 disabled:opacity-40"
             >
-              Send
+              {t("send")}
             </button>
           </div>
         </div>
       )}
 
       {canShowStickyButton && (
-        <div className="sticky bottom-0 border-t border-stone-200 bg-white p-4">
-          <button
-            onClick={onAnalyze}
-            disabled={analyzing}
-            className="w-full rounded-full bg-stone-900 py-3 text-sm font-medium text-white hover:bg-stone-800 disabled:opacity-50"
-          >
-            {analyzing ? "Analyzing..." : "I have said everything I know now — analyze and give me suggestions"}
-          </button>
+        <div className="sticky bottom-0 border-t border-brand-100 bg-white p-4">
+          {confirmAnalyze ? (
+            <ConfirmDone
+              question={
+                step === "cause_collection"
+                  ? t("analyzeConfirmQuestionCauses")
+                  : t("analyzeConfirmQuestionSymptoms")
+              }
+              keepGoingLabel={t("keepGoing")}
+              confirmLabel={analyzing ? t("analyzing") : t("analyzeConfirm")}
+              confirming={analyzing}
+              onKeepGoing={() => setConfirmAnalyze(false)}
+              onConfirm={() => {
+                onAnalyze();
+              }}
+            />
+          ) : (
+            <button
+              onClick={() => setConfirmAnalyze(true)}
+              disabled={analyzing}
+              className="w-full rounded-full bg-brand-900 py-3 text-sm font-medium tracking-wide text-white shadow-card transition-colors hover:bg-brand-800 disabled:opacity-50"
+            >
+              {analyzing ? t("analyzing") : t("analyzeButton")}
+            </button>
+          )}
         </div>
       )}
     </div>

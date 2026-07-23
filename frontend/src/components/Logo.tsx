@@ -31,10 +31,10 @@ export default function Logo({
 
   return (
     <div className="flex items-center gap-2">
-      <LogoMark className={`${iconSize} text-emerald-700`} />
+      <LogoMark className={`${iconSize} text-brand-700`} />
       {showWordmark && (
-        <span className={`${textSize} font-semibold tracking-tight text-stone-800`}>
-          Root<span className="text-emerald-600">well</span>
+        <span className={`${textSize} font-serif font-semibold tracking-tight text-brand-900`}>
+          Root<span className="text-gold-600">well</span>
         </span>
       )}
     </div>

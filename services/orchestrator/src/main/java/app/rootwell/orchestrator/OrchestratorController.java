@@ -22,8 +22,8 @@ public class OrchestratorController {
     }
 
     @PostMapping("/sessions")
-    public Map<String, Object> createSession() {
-        return orchestratorService.createSession();
+    public Map<String, Object> createSession(@RequestBody(required = false) CreateSessionRequest req) {
+        return orchestratorService.createSession(req != null ? req.language() : null);
     }
 
     @GetMapping("/sessions/{sid}/state")

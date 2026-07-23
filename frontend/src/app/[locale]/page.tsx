@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { api, CachedItem, ChatMessage, Recommendation, Suggestion } from "@/lib/api";
 import SummaryPanel from "@/components/SummaryPanel";
 import ChatPanel from "@/components/ChatPanel";
 
 export default function Home() {
+  const locale = useLocale();
+  const t = useTranslations("Home");
+
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [step, setStep] = useState("greeting");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -20,13 +24,13 @@ export default function Home() {
 
   useEffect(() => {
     api
-      .createSession()
+      .createSession(locale)
       .then((res) => {
         setSessionId(res.session_id);
         setMessages([{ role: "assistant", text: res.greeting, ts: Date.now() / 1000 }]);
       })
-      .catch(() => setInitError("Couldn't reach the backend. Is docker-compose running?"));
-  }, []);
+      .catch(() => setInitError(t("initError")));
+  }, [locale, t]);
 
   const handleSend = async (text: string) => {
     if (!sessionId) return;
@@ -95,25 +99,22 @@ export default function Home() {
 
   if (purged) {
     return (
-      <div className="flex h-full items-center justify-center bg-stone-50 text-center">
-        <div className="max-w-md rounded-lg border border-emerald-200 bg-white p-8 shadow-sm">
-          <h1 className="text-lg font-semibold text-stone-800">Session complete</h1>
-          <p className="mt-2 text-sm text-stone-600">
-            Your summary was sent, and everything from this session has been deleted from our cache.
-            Refresh this page to start a new, separate session.
-          </p>
+      <div className="flex h-full items-center justify-center bg-paper text-center">
+        <div className="max-w-md rounded-2xl border border-brand-100 bg-white p-8 shadow-panel">
+          <h1 className="font-serif text-xl font-semibold text-brand-900">{t("purgedTitle")}</h1>
+          <p className="mt-2 text-sm text-stone-600">{t("purgedBody")}</p>
         </div>
       </div>
     );
   }
 
   if (!sessionId) {
-    return <div className="flex h-full items-center justify-center text-stone-400">Starting a new session...</div>;
+    return <div className="flex h-full items-center justify-center text-stone-400">{t("startingSession")}</div>;
   }
 
   return (
-    <main className="flex h-full w-full">
-      <div className="hidden w-1/2 border-r border-stone-200 md:block">
+    <main className="flex h-full w-full bg-paper">
+      <div className="hidden w-1/2 border-r border-brand-100 md:block">
         <SummaryPanel
           step={step}
           symptoms={symptoms}
@@ -131,7 +132,8 @@ export default function Home() {
           step={step}
           sending={sending}
           analyzing={analyzing}
-          canAnalyze={symptoms.length > 0 || causes.length > 0}
+          symptomCount={symptoms.length}
+          canAnalyze={symptoms.length >= 2}
           onSend={handleSend}
           onPickSuggestion={handlePickSuggestion}
           onAdvanceToCauses={handleAdvanceToCauses}

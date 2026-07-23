@@ -49,7 +49,11 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  createSession: () => request<{ session_id: string; greeting: string }>("/session", { method: "POST" }),
+  createSession: (language?: string) =>
+    request<{ session_id: string; greeting: string }>("/session", {
+      method: "POST",
+      body: JSON.stringify({ language }),
+    }),
 
   getState: (sid: string) => request<SessionState>(`/session/${sid}`),
 

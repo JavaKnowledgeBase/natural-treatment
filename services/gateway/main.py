@@ -55,6 +55,10 @@ async def _forward(method: str, path: str, json_body: dict | None = None) -> dic
         return resp.json()
 
 
+class CreateSessionBody(BaseModel):
+    language: str | None = None
+
+
 class MessageBody(BaseModel):
     text: str
 
@@ -86,8 +90,8 @@ async def healthz():
 
 
 @app.post("/session")
-async def create_session():
-    return await _forward("POST", "/sessions")
+async def create_session(body: CreateSessionBody = CreateSessionBody()):
+    return await _forward("POST", "/sessions", body.model_dump())
 
 
 @app.get("/session/{sid}")

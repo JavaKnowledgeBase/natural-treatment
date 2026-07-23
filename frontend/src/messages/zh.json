@@ -1,0 +1,102 @@
+{
+  "Metadata": {
+    "title": "Rootwell",
+    "description": "Rootwell 帮助您追溯症状背后可能的生化根源，并根据循证依据推荐草本调理方案。"
+  },
+  "Header": {
+    "aboutContact": "关于我们与联系方式",
+    "language": "语言"
+  },
+  "Footer": {
+    "tagline": "Rootwell。仅供参考 — 不能替代医生的专业建议。",
+    "aboutContact": "关于我们与联系方式",
+    "privacy": "隐私政策",
+    "terms": "使用条款"
+  },
+  "Home": {
+    "initError": "无法连接到服务器，请确认 docker-compose 是否正在运行。",
+    "startingSession": "正在开始新的对话...",
+    "purgedTitle": "感谢您与我们分享",
+    "purgedBody": "您的摘要正在发送中，这次对话的所有内容现已从我们的系统中清除。准备好后，欢迎随时刷新此页面，开始一段全新、独立的对话。"
+  },
+  "SummaryPanel": {
+    "currentStep": "当前阶段",
+    "disclaimer": "我们在这里帮助您探索可能性，而不是替代持证医生的诊疗。您的隐私对我们很重要 —— 除非您选择将摘要发送到自己的邮箱，否则您在此分享的一切都不会在本次对话之外被保留。",
+    "symptoms": "症状",
+    "possibleCauses": "可能的原因",
+    "nothingAddedYet": "还没有添加任何内容。",
+    "topRecommendations": "重点推荐",
+    "confidenceLabel": "{band, select, high {高置信度} moderate {中等置信度} low {低置信度} other {置信度：{band}}}",
+    "evidenceLevel": "证据等级",
+    "stepGreeting": "开始对话",
+    "stepSymptomCollection": "了解症状",
+    "stepCauseCollection": "了解可能的原因",
+    "stepAnalysis": "正在分析",
+    "stepResults": "结果已生成",
+    "stepEmailSent": "已发送 — 对话已结束"
+  },
+  "ChatPanel": {
+    "placeholderSymptom": "告诉我您现在感觉如何……",
+    "placeholderCause": "您觉得可能是什么原因造成的？",
+    "send": "发送",
+    "shareMoreZero": "别着急，慢慢说 —— 您分享得越多，我们越能帮到您。先说说一两个症状就是很好的开始。",
+    "shareMoreOne": "做得很好 —— 再补充一个症状，我们就能开始一起探讨可能的原因了。",
+    "advanceLink": "关于症状我已经说完了 —— 我们来聊聊可能的原因吧",
+    "advanceConfirmQuestion": "在继续之前，关于您的感受，还有什么想补充的吗？",
+    "keepGoing": "我再多说一些",
+    "advanceConfirm": "没有了，聊聊原因吧",
+    "analyzeButton": "我现在能说的都说了 —— 请为我分析并给出建议",
+    "analyzing": "正在分析……",
+    "analyzeConfirmQuestionSymptoms": "在我们为您整理结果之前，还有什么想补充的吗？",
+    "analyzeConfirmQuestionCauses": "关于可能的原因，在我们整理结果之前还有什么想补充的吗？",
+    "analyzeConfirm": "没有了，现在开始分析"
+  },
+  "EmailExport": {
+    "prompt": "需要保留这段对话和您的建议摘要吗？",
+    "privacyNote": "只有当您希望我们把摘要发送给您时，我们才会询问您的邮箱地址 —— 发送后相关信息会立即从我们的系统中清除。",
+    "emailPlaceholder": "you@example.com",
+    "sendMe": "发送给我",
+    "sending": "发送中……",
+    "codePlaceholderMock": "请在服务器控制台查看您的验证码",
+    "codePlaceholder": "请输入我们发送的验证码",
+    "confirmAndSend": "确认并发送",
+    "errorRequest": "验证码发送失败，请重试。",
+    "errorConfirm": "验证码不正确或已过期，您可以重新获取。",
+    "sentMessage": "邮件正在发送到您的邮箱。感谢您今天与我们分享 —— 这次对话的所有内容现已从我们的系统中清除。"
+  },
+  "About": {
+    "heading": "追溯症状，找到可能的根源",
+    "intro": "Rootwell 是一款基于循证依据的对话式助手，帮助您探索日常症状与潜在生化失衡之间可能的联系，并了解哪些草本植物拥有历史或临床证据的支持。您分享的一切内容仅保存在本次对话的临时缓存中，一旦对话结束 —— 无论是您要求发送邮件摘要，还是您直接关闭了页面 —— 都会立即被删除。",
+    "disclaimer": "Rootwell 仅供参考，不能替代专业的医疗建议、诊断或治疗。如果症状严重、持续或令人担忧，请务必咨询持证医生。",
+    "whoTitle": "关于创始人",
+    "whoBody": "Ravi Kafley，创始人",
+    "contactTitle": "联系方式",
+    "contactBody": "如有关于某项建议的问题、反馈或疑虑，请联系："
+  },
+  "Privacy": {
+    "title": "隐私政策",
+    "draftNote": "草案 —— 反映当前的实际实现方式。正式上线前需经法律顾问审核。",
+    "whatWeStoreTitle": "我们保存哪些信息",
+    "whatWeStoreBody": "Rootwell 不使用任何数据库。关于您对话的一切 —— 包括对话内容、您分享的症状和可能原因，以及由此得出的建议 —— 仅在本次对话期间保存在内存缓存中。",
+    "whatWeNeverAskTitle": "我们绝不会主动询问的内容",
+    "whatWeNeverAskBody": "Rootwell 绝不会主动询问您的年龄、怀孕状态、用药情况、过敏史或既往病史。如果您主动用自己的话提到这些信息，我们仅会用它来为本次对话进行相关的安全核查，并在对话结束时与其他信息一并删除。",
+    "whenDeletedTitle": "您的数据何时会被删除",
+    "whenDeletedBody": "您的对话会在一段闲置时间后自动删除，或在您主动结束对话时立即删除，若您选择发送邮件摘要，则会在发送成功后立即删除。",
+    "emailSummariesTitle": "邮件摘要",
+    "emailSummariesBody": "如果您要求将对话内容发送到您的邮箱，我们会要求您先确认发送到该邮箱的一次性验证码，然后才会发送任何内容，以防止该功能被用于向非您本人的邮箱发送邮件。邮件本身通过第三方事务性邮件服务商发送。",
+    "contactTitle": "联系方式",
+    "contactBody": "如对本政策有任何疑问，请联系："
+  },
+  "Terms": {
+    "title": "使用条款",
+    "draftNote": "草案 —— 正式上线前需经法律顾问审核。",
+    "notMedicalAdviceTitle": "本服务不构成医疗建议",
+    "notMedicalAdviceBody": "Rootwell 提供的是关于草本植物及其与症状之间传统或研究关联的一般性、参考性内容。它不对任何疾病进行诊断、不开具治疗方案，也不能替代持证医生的诊疗。如果症状严重、持续或令人担忧，或在开始、停止、联合使用任何草本或补充剂之前 —— 尤其是在您怀孕、哺乳、患有慢性疾病或正在服药的情况下 —— 请务必寻求专业医疗建议。",
+    "starterDatasetTitle": "初始数据集说明",
+    "starterDatasetBody": "Rootwell 目前使用的草本、化合物及症状数据是为开发目的整理的、尚未经过审核的初始数据集，尚未经过专家整理或临床审查流程。",
+    "noGuaranteeTitle": "结果不作任何保证",
+    "noGuaranteeBody": "所有建议均为基于现有证据的评分估算，并不保证对任何特定个人安全或有效。",
+    "contactTitle": "联系方式",
+    "contactBody": "如对本条款有任何疑问，请联系："
+  }
+}

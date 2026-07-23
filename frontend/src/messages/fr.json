@@ -1,0 +1,102 @@
+{
+  "Metadata": {
+    "title": "Rootwell",
+    "description": "Rootwell retrace vos symptômes jusqu'à leur cause biochimique probable et propose un accompagnement à base de plantes fondé sur des données probantes."
+  },
+  "Header": {
+    "aboutContact": "À propos et contact",
+    "language": "Langue"
+  },
+  "Footer": {
+    "tagline": "Rootwell. Informations générales — ne remplace pas un avis médical.",
+    "aboutContact": "À propos et contact",
+    "privacy": "Confidentialité",
+    "terms": "Conditions d'utilisation"
+  },
+  "Home": {
+    "initError": "Impossible de joindre le serveur. Docker Compose est-il bien lancé ?",
+    "startingSession": "Démarrage d'une nouvelle session...",
+    "purgedTitle": "Merci de vous être confié(e) à nous",
+    "purgedBody": "Votre résumé est en route, et tout ce qui concerne cette conversation a maintenant été supprimé de notre système. Quand vous serez prêt(e), n'hésitez pas à actualiser cette page pour démarrer une nouvelle conversation, distincte de celle-ci."
+  },
+  "SummaryPanel": {
+    "currentStep": "Étape en cours",
+    "disclaimer": "Nous sommes là pour vous aider à explorer, pas pour remplacer les soins d'un professionnel de santé agréé. Et votre vie privée compte pour nous — rien de ce que vous partagez ici n'est conservé au-delà de cette conversation, sauf si vous choisissez de vous en envoyer une copie par e-mail.",
+    "symptoms": "Symptômes",
+    "possibleCauses": "Causes possibles",
+    "nothingAddedYet": "Rien n'a encore été ajouté.",
+    "topRecommendations": "Principales recommandations",
+    "confidenceLabel": "{band, select, high {confiance élevée} moderate {confiance modérée} low {confiance faible} other {confiance {band}}}",
+    "evidenceLevel": "Niveau de preuve",
+    "stepGreeting": "Pour commencer",
+    "stepSymptomCollection": "Partage des symptômes",
+    "stepCauseCollection": "Partage des causes possibles",
+    "stepAnalysis": "Analyse en cours",
+    "stepResults": "Résultats prêts",
+    "stepEmailSent": "Envoyé — session terminée"
+  },
+  "ChatPanel": {
+    "placeholderSymptom": "Dites-moi comment vous vous sentez...",
+    "placeholderCause": "Qu'est-ce qui aurait pu y contribuer ?",
+    "send": "Envoyer",
+    "shareMoreZero": "Prenez votre temps — plus vous partagez, mieux nous pouvons vous aider. Deux ou trois symptômes suffisent pour commencer.",
+    "shareMoreOne": "Vous y êtes presque — encore un symptôme et nous aurons de quoi commencer à explorer les causes possibles ensemble.",
+    "advanceLink": "J'ai tout dit sur mes symptômes — parlons des causes possibles",
+    "advanceConfirmQuestion": "Avant de continuer, y a-t-il autre chose sur ce que vous ressentez que vous aimeriez partager ?",
+    "keepGoing": "Laissez-moi en dire plus",
+    "advanceConfirm": "Non, parlons des causes",
+    "analyzeButton": "J'ai tout dit pour l'instant — analysez et proposez-moi des suggestions",
+    "analyzing": "Analyse en cours...",
+    "analyzeConfirmQuestionSymptoms": "Y a-t-il autre chose que vous aimeriez ajouter avant que nous préparions cela pour vous ?",
+    "analyzeConfirmQuestionCauses": "Y a-t-il autre chose sur les causes possibles avant que nous préparions cela pour vous ?",
+    "analyzeConfirm": "Non, analysez maintenant"
+  },
+  "EmailExport": {
+    "prompt": "Souhaitez-vous conserver une copie de cette conversation et de vos recommandations ?",
+    "privacyNote": "Nous ne vous demandons votre e-mail que si vous souhaitez recevoir ce résumé — et tout est ensuite effacé de notre système.",
+    "emailPlaceholder": "vous@exemple.com",
+    "sendMe": "Envoyez-moi cela",
+    "sending": "Envoi en cours...",
+    "codePlaceholderMock": "Consultez la console du serveur pour votre code",
+    "codePlaceholder": "Entrez le code que nous avons envoyé",
+    "confirmAndSend": "Confirmer et envoyer",
+    "errorRequest": "Impossible d'envoyer un code de vérification. Veuillez réessayer.",
+    "errorConfirm": "Ce code ne correspond pas ou a expiré. Vous pouvez en demander un nouveau.",
+    "sentMessage": "En route vers votre boîte de réception. Merci de vous être confié(e) à nous aujourd'hui — tout ce qui concerne cette conversation a maintenant été effacé de notre système."
+  },
+  "About": {
+    "heading": "Retracer vos symptômes jusqu'à leur cause probable",
+    "intro": "Rootwell est un assistant conversationnel fondé sur des données probantes qui vous aide à explorer comment vos symptômes du quotidien peuvent être liés à des déséquilibres biochimiques sous-jacents — et quelles plantes disposent de preuves historiques ou cliniques pour les soutenir. Tout ce que vous partagez reste uniquement dans la mémoire de cette session et est supprimé dès qu'elle se termine, que ce soit parce que vous avez demandé un résumé par e-mail ou simplement fermé l'onglet.",
+    "disclaimer": "Rootwell est fourni à titre purement informatif et ne remplace pas un avis médical, un diagnostic ou un traitement professionnel. Consultez toujours un professionnel de santé agréé pour des symptômes sévères, persistants ou préoccupants.",
+    "whoTitle": "Qui est derrière ce projet",
+    "whoBody": "Ravi Kafley, Fondateur",
+    "contactTitle": "Contact",
+    "contactBody": "Questions, retours ou préoccupations concernant une recommandation :"
+  },
+  "Privacy": {
+    "title": "Politique de confidentialité",
+    "draftNote": "Brouillon — reflète l'implémentation actuelle. À faire réviser par un conseiller juridique avant tout lancement public.",
+    "whatWeStoreTitle": "Ce que nous conservons",
+    "whatWeStoreBody": "Rootwell ne dispose d'aucune base de données. Tout ce qui concerne votre session — la conversation, les symptômes et causes possibles que vous partagez, ainsi que les recommandations qui en résultent — n'est conservé qu'en mémoire, le temps de cette session.",
+    "whatWeNeverAskTitle": "Ce que nous ne demandons jamais",
+    "whatWeNeverAskBody": "Rootwell ne demande jamais spontanément votre âge, votre statut de grossesse, vos médicaments, allergies ou conditions médicales. Si vous partagez l'une de ces informations de votre propre initiative, elle n'est utilisée que pour appliquer les vérifications de sécurité pertinentes à cette session, puis supprimée avec tout le reste à la fin de celle-ci.",
+    "whenDeletedTitle": "Quand vos données sont supprimées",
+    "whenDeletedBody": "Votre session est supprimée automatiquement après une période d'inactivité, immédiatement lorsque vous y mettez fin, ou immédiatement après l'envoi d'un résumé par e-mail si vous choisissez cette option.",
+    "emailSummariesTitle": "Résumés par e-mail",
+    "emailSummariesBody": "Si vous demandez à recevoir votre session par e-mail, nous vous demandons de confirmer un code à usage unique envoyé à cette adresse avant tout envoi, afin que cette fonctionnalité ne puisse pas servir à envoyer des e-mails à une adresse qui n'est pas la vôtre. L'e-mail lui-même est envoyé via un fournisseur tiers de messagerie transactionnelle.",
+    "contactTitle": "Contact",
+    "contactBody": "Questions concernant cette politique :"
+  },
+  "Terms": {
+    "title": "Conditions d'utilisation",
+    "draftNote": "Brouillon — à faire réviser par un conseiller juridique avant tout lancement public.",
+    "notMedicalAdviceTitle": "Ceci n'est pas un avis médical",
+    "notMedicalAdviceBody": "Rootwell fournit un contenu général et informatif sur les plantes et leurs associations traditionnelles ou étudiées avec certains symptômes. Il ne diagnostique aucune affection, ne prescrit aucun traitement et ne remplace pas la consultation d'un professionnel de santé agréé. Consultez toujours un avis médical professionnel pour des symptômes sévères, persistants ou préoccupants, et avant de commencer, d'arrêter ou de combiner une plante ou un complément — en particulier si vous êtes enceinte, allaitez, gérez une condition chronique ou prenez un médicament.",
+    "starterDatasetTitle": "Jeu de données de démarrage",
+    "starterDatasetBody": "Les données sur les plantes, composés et symptômes actuellement utilisées par Rootwell constituent un jeu de données de démarrage non révisé, assemblé à des fins de développement. Elles n'ont pas fait l'objet d'un processus de curation par des experts ni d'une révision clinique.",
+    "noGuaranteeTitle": "Aucune garantie de résultat",
+    "noGuaranteeBody": "Les recommandations sont des estimations basées sur les preuves disponibles et ne constituent en aucun cas une garantie de sécurité ou d'efficacité pour un individu donné.",
+    "contactTitle": "Contact",
+    "contactBody": "Questions concernant ces conditions :"
+  }
+}

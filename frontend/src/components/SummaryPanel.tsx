@@ -1,24 +1,22 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { CachedItem, Recommendation } from "@/lib/api";
 
-const STEP_LABELS: Record<string, string> = {
-  greeting: "Getting started",
-  symptom_collection: "Sharing symptoms",
-  cause_collection: "Sharing possible causes",
-  analysis: "Analyzing",
-  results: "Results ready",
-  email_sent: "Sent — session ended",
+const CONFIDENCE_BADGE: Record<string, string> = {
+  high: "bg-brand-100 text-brand-800",
+  moderate: "bg-gold-100 text-gold-700",
+  low: "bg-stone-100 text-stone-600",
 };
 
 function ItemChip({ item, onRemove }: { item: CachedItem; onRemove: () => void }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-900">
+    <span className="inline-flex items-center gap-1 rounded-full bg-brand-100 px-3 py-1 text-sm text-brand-900">
       {item.label}
       <button
         onClick={onRemove}
         aria-label={`Remove ${item.label}`}
-        className="ml-1 text-emerald-700 hover:text-emerald-950"
+        className="ml-1 text-brand-700 hover:text-brand-950"
       >
         ×
       </button>
@@ -41,22 +39,34 @@ export default function SummaryPanel({
   onRemoveSymptom: (id: string) => void;
   onRemoveCause: (id: string) => void;
 }) {
+  const t = useTranslations("SummaryPanel");
+
+  const stepLabels: Record<string, string> = {
+    greeting: t("stepGreeting"),
+    symptom_collection: t("stepSymptomCollection"),
+    cause_collection: t("stepCauseCollection"),
+    analysis: t("stepAnalysis"),
+    results: t("stepResults"),
+    email_sent: t("stepEmailSent"),
+  };
+
   return (
-    <div className="flex h-full flex-col gap-6 overflow-y-auto p-6">
+    <div className="flex h-full flex-col gap-6 overflow-y-auto bg-paper p-6">
       <div>
-        <p className="text-xs uppercase tracking-wide text-stone-500">Current step</p>
-        <p className="text-lg font-semibold text-stone-800">{STEP_LABELS[step] ?? step}</p>
+        <p className="text-xs uppercase tracking-wider text-brand-600">{t("currentStep")}</p>
+        <p className="font-serif text-xl font-semibold text-brand-900">{stepLabels[step] ?? step}</p>
       </div>
 
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-        This app is informational only and not a substitute for professional medical advice.
-        Nothing here is stored beyond this session unless you choose to email it to yourself.
+      <div className="rounded-xl border border-gold-200 bg-gold-50 p-3 text-xs text-gold-700">
+        {t("disclaimer")}
       </div>
 
       <div>
-        <p className="mb-2 text-sm font-medium text-stone-700">Symptoms ({symptoms.length})</p>
+        <p className="mb-2 text-sm font-medium text-stone-700">
+          {t("symptoms")} ({symptoms.length})
+        </p>
         <div className="flex flex-wrap gap-2">
-          {symptoms.length === 0 && <p className="text-sm text-stone-400">Nothing added yet.</p>}
+          {symptoms.length === 0 && <p className="text-sm text-stone-400">{t("nothingAddedYet")}</p>}
           {symptoms.map((s) => (
             <ItemChip key={s.id} item={s} onRemove={() => onRemoveSymptom(s.id)} />
           ))}
@@ -64,9 +74,11 @@ export default function SummaryPanel({
       </div>
 
       <div>
-        <p className="mb-2 text-sm font-medium text-stone-700">Possible causes ({causes.length})</p>
+        <p className="mb-2 text-sm font-medium text-stone-700">
+          {t("possibleCauses")} ({causes.length})
+        </p>
         <div className="flex flex-wrap gap-2">
-          {causes.length === 0 && <p className="text-sm text-stone-400">Nothing added yet.</p>}
+          {causes.length === 0 && <p className="text-sm text-stone-400">{t("nothingAddedYet")}</p>}
           {causes.map((c) => (
             <ItemChip key={c.id} item={c} onRemove={() => onRemoveCause(c.id)} />
           ))}
@@ -75,18 +87,24 @@ export default function SummaryPanel({
 
       {recommendations.length > 0 && (
         <div>
-          <p className="mb-2 text-sm font-medium text-stone-700">Top recommendations</p>
+          <p className="mb-2 text-sm font-medium text-stone-700">{t("topRecommendations")}</p>
           <ol className="space-y-3">
             {recommendations.map((r) => (
-              <li key={r.herb_id} className="rounded-lg border border-stone-200 bg-white p-3">
+              <li key={r.herb_id} className="rounded-xl border border-brand-100 bg-white p-4 shadow-card">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-stone-800">{r.herb_name}</span>
-                  <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-600">
-                    {r.confidence_band} confidence
+                  <span className="font-serif text-base font-semibold text-brand-900">{r.herb_name}</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                      CONFIDENCE_BADGE[r.confidence_band] ?? "bg-stone-100 text-stone-600"
+                    }`}
+                  >
+                    {t("confidenceLabel", { band: r.confidence_band })}
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-stone-600">{r.reason}</p>
-                <p className="mt-1 text-xs text-stone-400">Evidence level: {r.evidence_level}</p>
+                <p className="mt-1 text-xs text-stone-400">
+                  {t("evidenceLevel")}: {r.evidence_level}
+                </p>
                 {r.safety_note && <p className="mt-1 text-xs text-rose-700">⚠ {r.safety_note}</p>}
               </li>
             ))}
