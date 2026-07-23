@@ -158,6 +158,23 @@ singular/plural tolerance instead of the whole phrase.
       trigger point for that decision, worth a beat of thought (and
       possibly an accountant check on how donation income is treated)
       before this goes live, not after.
+      **Compliance guardrails (Stripe/app-store Restricted Businesses
+      policy for health-adjacent apps, researched 2026-07-23) — checked
+      the app against these directly, not just noted them:** medical
+      disclaimer must be prominent (**already true** — persistent in
+      `SummaryPanel` every session + on the About page, standard
+      "informational only, not a substitute for professional medical
+      advice, diagnosis, or treatment" phrasing); must never claim an
+      herb "cures/treats/prevents" a specific disease (**already true,
+      verified by grepping the full codebase** — the seed dataset only
+      uses hedged terms like "support"/"comfort," and both
+      `agent-mapping`'s and `agent-explanation`'s system prompts already
+      forbid diagnosing or claiming guaranteed efficacy, on purpose, from
+      the original design). **The one real to-do**: when the actual
+      donation button/copy gets built, frame it explicitly as
+      "support the project" / "help cover server + API costs" — never
+      anything implying payment grants better advice or faster/special
+      treatment.
 
 ## How to verify it still works
 
