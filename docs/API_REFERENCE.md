@@ -211,28 +211,33 @@ Specifically designed so "email me this" can't become an open relay:
   someone from using this endpoint to spam-verify (and thus spam) an
   address that isn't theirs, even without ever completing a send.
 
-### 4d. A real finding: unescaped user text in the emailed HTML report
+### 4d. Fixed finding: unescaped user text in the emailed HTML report
 
-`services/agents/reporting/main.py`'s `compile_report()` builds the HTML
-export by directly f-string-interpolating symptom labels, cause labels,
-and chat message text into HTML tags — e.g.
-`f"<li>{s.get('label')}</li>"` and
+The original `services/agents/reporting/main.py` (now deleted — this
+service is Java, see `docs/ARCHITECTURE.md` §7) built the HTML export by
+directly f-string-interpolating symptom labels, cause labels, and chat
+message text into HTML tags — e.g. `f"<li>{s.get('label')}</li>"` and
 `f"<p>...{msg['text']}</p>"` — **with no HTML-escaping.** Cause labels and
 chat text are free-form user input (typed directly, or matched/echoed by
-the LLM in real mode). This is the same category as OWASP's injection
-class applied to HTML context (`mit-lincoln-lab-technical-qa.md` Q42): if
-a user's message contains `<script>` or an `<img onerror=...>` payload, it
-is written verbatim into the HTML email body that gets sent to whatever
-mail client renders it. The realistic blast radius is limited (it only
-ever affects the recipient's own inbox rendering their own submitted
-data — there's no cross-user exposure since Tier 2 data is
-per-session-private), but it's a genuine gap, not a hypothetical one, and
-the fix is small: HTML-escape every interpolated field
-(`html.escape(...)` in Python, or a templating engine that escapes by
-default instead of raw f-strings) before building `html_parts`. Flagging
-this now rather than silently leaving it, per the instruction to surface
-security issues as soon as they're found — happy to fix it in a follow-up
-if you want it done now instead of just documented.
+the LLM in real mode), so this was the same category as OWASP's injection
+class applied to HTML context (`mit-lincoln-lab-technical-qa.md` Q42): a
+`<script>` or `<img onerror=...>` payload in a user's message would have
+been written verbatim into the HTML email body. The realistic blast radius
+was always limited (only ever affects the recipient's own inbox rendering
+their own submitted data — no cross-user exposure, since Tier 2 data is
+per-session-private), but it was a genuine gap, not a hypothetical one.
+
+**Fixed during the Java rewrite.** `services/agents/reporting/src/main/java/app/rootwell/reporting/ReportingService.java`
+runs every interpolated field (symptom/cause labels, herb names, safety
+notes, chat text) through `HtmlUtils.htmlEscape()` before it reaches the
+`html` output — the class's own doc comment references this exact finding
+and confirms it's resolved there. The plain-`text` export needs no
+escaping (not markup). Worth naming in an interview as a real "found a
+security gap, then closed it as part of an unrelated migration" story,
+including the honest coda: this doc and `CLAUDE.md` briefly described the
+finding as still-open after the fix had already landed, until that
+inconsistency was caught by reading `ReportingService.java` directly
+rather than trusting the doc.
 
 ### 4e. Secrets handling
 
@@ -250,11 +255,16 @@ if you want it done now instead of just documented.
 ## 5. Summary: the honest one-paragraph version
 
 Every external dependency is optional and fails soft when *absent*
-(mock mode), but not yet when *present-and-failing* (no retry/backoff
-around Anthropic or Resend once a key is configured) — that asymmetry is
-the single most valuable resiliency gap to describe if asked "what would
-you harden first." Security today is perimeter-only (gateway CORS + rate
-limit + email verification gate), nothing internal — appropriate for a
-single-host local system, and the concrete triggers to close each gap
-(mTLS/Istio, JWT, Redis auth, HTML-escaping the report, retry/backoff on
-the two external calls) are each named above rather than left implicit.
+(mock mode); the Anthropic path now also fails soft when *present-and-failing*
+(`shared/shared/llm.py` added a timeout plus a try/except-to-mock-template
+fallback on runtime failure). The same asymmetry still exists on the Resend
+side — no retry/backoff or fallback if a configured key starts failing at
+send time — and that's now the single most valuable resiliency gap to
+describe if asked "what would you harden first," precisely because it fires
+at the exact moment a user is trying to save their session, right before
+purge. Security today is perimeter-only (gateway CORS + rate limit + email
+verification gate), nothing internal — appropriate for a single-host local
+system, and the concrete triggers to close each remaining gap (mTLS/Istio,
+JWT, Redis auth, retry/backoff on the Resend call) are each named above
+rather than left implicit. The report's HTML-escaping gap (§4d) has since
+been fixed, during the Java rewrite of `agent-reporting`.

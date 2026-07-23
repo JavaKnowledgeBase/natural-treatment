@@ -20,7 +20,7 @@ Newer reference docs (added for the Java migration / interview-prep pass):
 - `docs/ARCHITECTURE.md` — as-built system architecture, request flow, migration status table
 - `docs/DEVELOPER_GUIDE.md` — how to run it, repo layout, how to migrate the next service to Java
 - `docs/TECHNICAL_GUIDE.md` — detailed stack/dependency rationale (why FastAPI, why Redis-only, why Spring Boot for the Java side, etc.) — written to double as MIT Lincoln Lab interview prep material, cross-referenced to `mit-lincoln-lab-technical-qa.md` in the user's `Desktop/resume/` prep folder
-- `docs/API_REFERENCE.md` — every internal + external API call, resiliency posture (timeouts/retries/idempotency, honestly gapped where true), and a boundary-by-boundary security review. Flags one real unfixed finding: unescaped user text interpolated into the emailed HTML report in `services/agents/reporting/main.py` (XSS-shaped, low blast radius since it only affects the recipient's own inbox rendering their own submitted data) — not yet fixed, only documented; offer to fix on request
+- `docs/API_REFERENCE.md` — every internal + external API call, resiliency posture (timeouts/retries/idempotency, honestly gapped where true), and a boundary-by-boundary security review. Documents one real finding, now fixed: unescaped user text interpolated into the emailed HTML report (XSS-shaped, low blast radius since it only affects the recipient's own inbox rendering their own submitted data) — was present in the original Python `services/agents/reporting/main.py`, fixed during the Java rewrite (`ReportingService.java` HTML-escapes every interpolated field)
 
 ## Why a Python→Java migration is happening (session context)
 
