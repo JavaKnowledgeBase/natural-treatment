@@ -103,20 +103,20 @@ why that's a deliberate architecture property, not just a nice-to-have.
   messages=[{"role":"user","content":...}])` — one-shot completion, no
   streaming, no conversation history sent to Anthropic (each call is
   stateless; the actual chat history lives only in Tier 2 Redis)
-- **Timeout:** none explicitly set — falls back to the Anthropic SDK's own
-  default. **Gap, honestly noted:** worth an explicit timeout so a slow
-  Anthropic response can't hold a `symptom-turn`/`analyze` request open
-  indefinitely; the fix is a one-line `timeout=` kwarg on the client.
+- **Timeout:** `ANTHROPIC_TIMEOUT_SECONDS` (default 20s), passed to
+  `AsyncAnthropic(timeout=...)` — **fixed**; previously fell back to the
+  SDK's own default with no explicit bound, which meant a slow Anthropic
+  response could hold a `symptom-turn`/`analyze` request open
+  indefinitely.
 - **Fallback on absence/failure:** `complete_or_none()` returns `None` if
-  `ANTHROPIC_API_KEY` is unset (mock mode) — but if the key **is** set and
-  the call itself throws (network error, rate limit, malformed response),
-  that exception is **not caught** and propagates up as an unhandled
-  500 today. This is the one real gap in the mock-mode safety net: mock
-  mode covers "no key configured," not "key configured but the call
-  failed at runtime." A production hardening pass would wrap the call in
-  a try/except that falls back to the same deterministic template used
-  in mock mode, turning "Anthropic is down" into a graceful degradation
-  instead of a 500.
+  `ANTHROPIC_API_KEY` is unset (mock mode) — and, **as of this hardening
+  pass**, also returns `None` if the key is set but the call itself throws
+  (network error, rate limit, malformed response, or a timeout): the call
+  is wrapped in a try/except that logs a warning and falls back to the
+  same deterministic template mock mode already uses. Mock mode used to
+  only cover "no key configured," not "key configured but the call failed
+  at runtime" — that asymmetry is now closed on this path. The equivalent
+  gap still exists on the Resend side (§2b).
 
 ### 2b. Resend (transactional email) — `services/email/main.py`
 
@@ -144,8 +144,8 @@ why that's a deliberate architecture property, not just a nice-to-have.
 
 | Concern | Current state | Gap / trigger to add it |
 |---|---|---|
-| **Timeouts** | Every internal call has an explicit `httpx` timeout (10s for agent↔knowledge/agent calls, 30s for gateway↔orchestrator and orchestrator↔agent, since those wrap the *whole* multi-hop analyze chain). Anthropic SDK call has none. | Add an explicit Anthropic timeout — see §2a |
-| **Retries / backoff** | **None, anywhere.** Every failed call (`resp.raise_for_status()`) propagates as an exception immediately. | This is the biggest real gap. The natural fix, and the honest interview answer: exponential backoff with a small retry budget (2-3 attempts) specifically around the Resend send call (§2b) and the Anthropic call, both of which have transient-failure-prone third-party dependencies — **not** around internal agent-to-agent calls, where a failure usually means a real bug (bad request shape), and retrying a broken request 3 times just triples the useless load |
+| **Timeouts** | Every internal call has an explicit `httpx` timeout (10s for agent↔knowledge/agent calls, 30s for gateway↔orchestrator and orchestrator↔agent, since those wrap the *whole* multi-hop analyze chain). Anthropic SDK call now has one too (`ANTHROPIC_TIMEOUT_SECONDS`, default 20s — see §2a). | Closed |
+| **Retries / backoff** | Still none, anywhere — every failed internal call (`resp.raise_for_status()`) propagates as an exception immediately. The Anthropic call gained a *fallback*, not a *retry* (§2a): one failed attempt degrades straight to the mock template rather than retrying. | Add real retry/backoff (2-3 attempts, exponential) specifically around the Resend send call (§2b), which is the one external call left with neither a retry nor a fallback — **not** around internal agent-to-agent calls, where a failure usually means a real bug (bad request shape), and retrying a broken request 3 times just triples the useless load |
 | **Circuit breaking** | None | Not yet justified at this scale (7 agents, one call chain, no cascading-failure history) — would become worth it once/if any one knowledge service starts seeing real latency variance under load; premature today |
 | **Idempotency** | `GET` calls are naturally idempotent (safe to retry blindly). `POST /sessions` creates a new session each call — not idempotent by design (every retry should start fresh, there's no "resume" semantics). `POST /email/send` **is** effectively idempotent against double-charge-style bugs: the verification token is deleted (`await r.delete(_verify_key(...))`) on first successful use, so a retried send with the same token+code fails cleanly with "token expired or not found" rather than sending twice. | The one place idempotency actually matters most (email send) already has it, structurally, via single-use token deletion — worth being able to explain *why* that pattern works even without a dedicated idempotency-key header (`mit-lincoln-lab-technical-qa.md` Q36) |
 | **Backpressure / overload protection** | Only the gateway's per-IP rate limiter (§4) — a blunt, request-count-based limit, not a true backpressure mechanism (no queue depth signal, no load-shedding based on downstream latency) | Fine for a single-instance local system; would need a real signal (e.g., orchestrator call latency, or a queue if one existed) once this runs multi-instance |

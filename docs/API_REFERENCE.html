@@ -225,8 +225,8 @@ architecture property, not just a nice-to-have.</p>
 <li><strong>Called from:</strong> <code>agent-intake</code> (symptom/cause turn NLU), <code>agent-mapping</code> (reasoning summary), <code>agent-explanation</code> (per-herb recommendation text)</li>
 <li><strong>Auth:</strong> <code>ANTHROPIC_API_KEY</code> bearer token, read once at process start via <code>os.environ["ANTHROPIC_API_KEY"]</code> inside <code>_get_client()</code> — never logged, never echoed in any response body</li>
 <li><strong>Call shape:</strong> <code>AsyncAnthropic().messages.create(model=..., system=..., messages=[{"role":"user","content":...}])</code> — one-shot completion, no streaming, no conversation history sent to Anthropic (each call is stateless; the actual chat history lives only in Tier 2 Redis)</li>
-<li><strong>Timeout:</strong> none explicitly set — falls back to the Anthropic SDK's own default. <strong>Gap, honestly noted:</strong> worth an explicit timeout so a slow Anthropic response can't hold a <code>symptom-turn</code>/<code>analyze</code> request open indefinitely; the fix is a one-line <code>timeout=</code> kwarg on the client.</li>
-<li><strong>Fallback on absence/failure:</strong> <code>complete_or_none()</code> returns <code>None</code> if <code>ANTHROPIC_API_KEY</code> is unset (mock mode) — but if the key <strong>is</strong> set and the call itself throws (network error, rate limit, malformed response), that exception is <strong>not caught</strong> and propagates up as an unhandled 500 today. This is the one real gap in the mock-mode safety net: mock mode covers "no key configured," not "key configured but the call failed at runtime." A production hardening pass would wrap the call in a try/except that falls back to the same deterministic template used in mock mode, turning "Anthropic is down" into a graceful degradation instead of a 500.</li>
+<li><strong>Timeout:</strong> <code>ANTHROPIC_TIMEOUT_SECONDS</code> (default 20s), passed to <code>AsyncAnthropic(timeout=...)</code> — <strong>fixed</strong>; previously fell back to the SDK's own default with no explicit bound, which meant a slow Anthropic response could hold a <code>symptom-turn</code>/<code>analyze</code> request open indefinitely.</li>
+<li><strong>Fallback on absence/failure:</strong> <code>complete_or_none()</code> returns <code>None</code> if <code>ANTHROPIC_API_KEY</code> is unset (mock mode) — and, <strong>as of this hardening pass</strong>, also returns <code>None</code> if the key is set but the call itself throws (network error, rate limit, malformed response, or a timeout): the call is wrapped in a try/except that logs a warning and falls back to the same deterministic template mock mode already uses. Mock mode used to only cover "no key configured," not "key configured but the call failed at runtime" — that asymmetry is now closed on this path. The equivalent gap still exists on the Resend side (§2b).</li>
 </ul>
 
 <h3>2b. Resend (transactional email) — <code>services/email/main.py</code></h3>
@@ -246,8 +246,8 @@ architecture property, not just a nice-to-have.</p>
 <table>
 <thead><tr><th>Concern</th><th>Current state</th><th>Gap / trigger to add it</th></tr></thead>
 <tbody>
-<tr><td><strong>Timeouts</strong></td><td>Every internal call has an explicit <code>httpx</code> timeout (10s for agent↔knowledge/agent calls, 30s for gateway↔orchestrator and orchestrator↔agent, since those wrap the <em>whole</em> multi-hop analyze chain). Anthropic SDK call has none.</td><td>Add an explicit Anthropic timeout — see §2a</td></tr>
-<tr><td><strong>Retries / backoff</strong></td><td><strong>None, anywhere.</strong> Every failed call (<code>resp.raise_for_status()</code>) propagates as an exception immediately.</td><td>This is the biggest real gap. The natural fix, and the honest interview answer: exponential backoff with a small retry budget (2-3 attempts) specifically around the Resend send call (§2b) and the Anthropic call, both of which have transient-failure-prone third-party dependencies — <strong>not</strong> around internal agent-to-agent calls, where a failure usually means a real bug (bad request shape), and retrying a broken request 3 times just triples the useless load</td></tr>
+<tr><td><strong>Timeouts</strong></td><td>Every internal call has an explicit <code>httpx</code> timeout (10s for agent↔knowledge/agent calls, 30s for gateway↔orchestrator and orchestrator↔agent, since those wrap the <em>whole</em> multi-hop analyze chain). Anthropic SDK call now has one too (<code>ANTHROPIC_TIMEOUT_SECONDS</code>, default 20s — see §2a).</td><td>Closed</td></tr>
+<tr><td><strong>Retries / backoff</strong></td><td>Still none, anywhere — every failed internal call (<code>resp.raise_for_status()</code>) propagates as an exception immediately. The Anthropic call gained a <em>fallback</em>, not a <em>retry</em> (§2a): one failed attempt degrades straight to the mock template rather than retrying.</td><td>Add real retry/backoff (2-3 attempts, exponential) specifically around the Resend send call (§2b), which is the one external call left with neither a retry nor a fallback — <strong>not</strong> around internal agent-to-agent calls, where a failure usually means a real bug (bad request shape), and retrying a broken request 3 times just triples the useless load</td></tr>
 <tr><td><strong>Circuit breaking</strong></td><td>None</td><td>Not yet justified at this scale (7 agents, one call chain, no cascading-failure history) — would become worth it once/if any one knowledge service starts seeing real latency variance under load; premature today</td></tr>
 <tr><td><strong>Idempotency</strong></td><td><code>GET</code> calls are naturally idempotent (safe to retry blindly). <code>POST /sessions</code> creates a new session each call — not idempotent by design (every retry should start fresh, there's no "resume" semantics). <code>POST /email/send</code> <strong>is</strong> effectively idempotent against double-charge-style bugs: the verification token is deleted (<code>await r.delete(_verify_key(...))</code>) on first successful use, so a retried send with the same token+code fails cleanly with "token expired or not found" rather than sending twice.</td><td>The one place idempotency actually matters most (email send) already has it, structurally, via single-use token deletion — worth being able to explain <em>why</em> that pattern works even without a dedicated idempotency-key header (<code>mit-lincoln-lab-technical-qa.md</code> Q36)</td></tr>
 <tr><td><strong>Backpressure / overload protection</strong></td><td>Only the gateway's per-IP rate limiter (§4) — a blunt, request-count-based limit, not a true backpressure mechanism (no queue depth signal, no load-shedding based on downstream latency)</td><td>Fine for a single-instance local system; would need a real signal (e.g., orchestrator call latency, or a queue if one existed) once this runs multi-instance</td></tr>
@@ -282,25 +282,30 @@ architecture property, not just a nice-to-have.</p>
 <li><strong>Per-recipient rate limit</strong>: max 3 verification requests per address per hour (<code>RATE_LIMIT_MAX_PER_WINDOW</code> / <code>_WINDOW_SECONDS</code>) — stops someone from using this endpoint to spam-verify (and thus spam) an address that isn't theirs, even without ever completing a send.</li>
 </ul>
 
-<h3>4d. A real finding: unescaped user text in the emailed HTML report</h3>
+<h3>4d. Fixed finding: unescaped user text in the emailed HTML report</h3>
 <div class="callout">
-<p><code>services/agents/reporting/main.py</code>'s <code>compile_report()</code> builds the HTML
-export by directly f-string-interpolating symptom labels, cause labels, and chat message text
-into HTML tags — e.g. <code>f"&lt;li&gt;{s.get('label')}&lt;/li&gt;"</code> and
+<p>The original <code>services/agents/reporting/main.py</code> (now deleted — this service is
+Java, see <code>docs/ARCHITECTURE.md</code> §7) built the HTML export by directly
+f-string-interpolating symptom labels, cause labels, and chat message text into HTML tags —
+e.g. <code>f"&lt;li&gt;{s.get('label')}&lt;/li&gt;"</code> and
 <code>f"&lt;p&gt;...{msg['text']}&lt;/p&gt;"</code> — <strong>with no HTML-escaping.</strong>
 Cause labels and chat text are free-form user input (typed directly, or matched/echoed by the
-LLM in real mode). This is the same category as OWASP's injection class applied to HTML context
-(<code>mit-lincoln-lab-technical-qa.md</code> Q42): if a user's message contains
-<code>&lt;script&gt;</code> or an <code>&lt;img onerror=...&gt;</code> payload, it is written
-verbatim into the HTML email body that gets sent to whatever mail client renders it. The
-realistic blast radius is limited (it only ever affects the recipient's own inbox rendering
-their own submitted data — there's no cross-user exposure since Tier 2 data is
-per-session-private), but it's a genuine gap, not a hypothetical one, and the fix is small:
-HTML-escape every interpolated field (<code>html.escape(...)</code> in Python, or a templating
-engine that escapes by default instead of raw f-strings) before building <code>html_parts</code>.
-Flagging this now rather than silently leaving it, per the instruction to surface security
-issues as soon as they're found — happy to fix it in a follow-up if you want it done now
-instead of just documented.</p>
+LLM in real mode), so this was the same category as OWASP's injection class applied to HTML
+context (<code>mit-lincoln-lab-technical-qa.md</code> Q42): a <code>&lt;script&gt;</code> or
+<code>&lt;img onerror=...&gt;</code> payload in a user's message would have been written
+verbatim into the HTML email body. The realistic blast radius was always limited (only ever
+affects the recipient's own inbox rendering their own submitted data — no cross-user exposure,
+since Tier 2 data is per-session-private), but it was a genuine gap, not a hypothetical one.</p>
+<p><strong>Fixed during the Java rewrite.</strong>
+<code>services/agents/reporting/src/main/java/app/rootwell/reporting/ReportingService.java</code>
+runs every interpolated field (symptom/cause labels, herb names, safety notes, chat text)
+through <code>HtmlUtils.htmlEscape()</code> before it reaches the <code>html</code> output — the
+class's own doc comment references this exact finding and confirms it's resolved there. The
+plain-<code>text</code> export needs no escaping (not markup). Worth naming in an interview as a
+real "found a security gap, then closed it as part of an unrelated migration" story, including
+the honest coda: this doc and <code>CLAUDE.md</code> briefly described the finding as
+still-open after the fix had already landed, until that inconsistency was caught by reading
+<code>ReportingService.java</code> directly rather than trusting the doc.</p>
 </div>
 
 <h3>4e. Secrets handling</h3>
@@ -313,14 +318,18 @@ instead of just documented.</p>
 
 <h2>5. Summary: the honest one-paragraph version</h2>
 
-<p>Every external dependency is optional and fails soft when <em>absent</em> (mock mode), but
-not yet when <em>present-and-failing</em> (no retry/backoff around Anthropic or Resend once a
-key is configured) — that asymmetry is the single most valuable resiliency gap to describe if
-asked "what would you harden first." Security today is perimeter-only (gateway CORS + rate
-limit + email verification gate), nothing internal — appropriate for a single-host local
-system, and the concrete triggers to close each gap (mTLS/Istio, JWT, Redis auth,
-HTML-escaping the report, retry/backoff on the two external calls) are each named above rather
-than left implicit.</p>
+<p>Every external dependency is optional and fails soft when <em>absent</em> (mock mode); the
+Anthropic path now also fails soft when <em>present-and-failing</em>
+(<code>shared/shared/llm.py</code> added a timeout plus a try/except-to-mock-template fallback
+on runtime failure). The same asymmetry still exists on the Resend side — no retry/backoff or
+fallback if a configured key starts failing at send time — and that's now the single most
+valuable resiliency gap to describe if asked "what would you harden first," precisely because
+it fires at the exact moment a user is trying to save their session, right before purge.
+Security today is perimeter-only (gateway CORS + rate limit + email verification gate), nothing
+internal — appropriate for a single-host local system, and the concrete triggers to close each
+remaining gap (mTLS/Istio, JWT, Redis auth, retry/backoff on the Resend call) are each named
+above rather than left implicit. The report's HTML-escaping gap (§4d) has since been fixed,
+during the Java rewrite of <code>agent-reporting</code>.</p>
 
 </div>
 </body>
