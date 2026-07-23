@@ -85,7 +85,7 @@ into two tiers with very different lifecycles:
 
 | Tier | Key pattern | Contents | Lifecycle |
 |---|---|---|---|
-| **Tier 1** (reference) | `ref:*` | Herb/compound/symptom/rule records, no PII | Loaded from `seed/data/*.json` at service startup, 6h TTL, shared across every session |
+| **Tier 1** (reference) | `ref:*` | Herb/compound/symptom/rule records, no PII | Loaded from `seed/data/*.json` by a dedicated one-shot `seed-loader` service on every stack startup, 6h TTL, shared across every session (see the 2026-07-23 fix note in `CLAUDE.md` — this used to be loaded implicitly by each Python knowledge service's own startup hook, which silently stopped happening once those services became Java and read-only; now it's an explicit step every service depends on) |
 | **Tier 2** (session) | `session:{sid}:*` | One user's chat, symptom/cause cache, recommendations | TTL'd (idle timeout, default 30 min), **hard-deleted** (`UNLINK`) the moment a session ends or the user emails themselves the results |
 
 All access goes through `shared/shared/cache.py` (Python side) — nothing

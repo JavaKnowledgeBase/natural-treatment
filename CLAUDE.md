@@ -200,6 +200,48 @@ prompts from the start). The one real remaining action: frame the
 eventual donation copy as "support the project," never as payment for
 advice.
 
+### A significant bug found and fixed: the Java migration silently dropped Tier 1 seeding
+
+Reported by the user as "no suggestions" after several turns that should
+have matched easily ("I have a headache" not matching `chronic_headaches`
+at all). Root cause, found by testing the exact failing conversation live
+and then checking the actual data, not by guessing at the prompt: **the
+entire Tier 1 reference cache (`ref:*` — every herb, compound, symptom,
+and rule) was empty in Redis.** `seed/load_seed.py`'s own docstring says
+it's "safe to call from every knowledge service's startup hook" — true
+when those services were Python. After the Java migration, the
+replacement `knowledge-*` services' `RefCacheService`s are read-only by
+design (`docs/TECHNICAL_GUIDE.md` §0/§5's deliberate choice) — nothing in
+the running stack ever called `load_seed()` again. Tier 1 has a 6-hour
+TTL (`REF_TTL_SECONDS` in `shared/shared/cache.py`) with no recurring
+refresh; it looked fine for hours on data seeded before the migration,
+then silently emptied out partway through this long session the moment
+that TTL finally expired — which is exactly why this wasn't caught
+earlier: everything "worked" until it very quietly didn't.
+
+**Fixed structurally, not patched around**: added a `seed-loader` service
+(`seed/Dockerfile`, new) to `infra/docker-compose.yml` that runs
+`load_seed()` once on every `docker compose up` and exits; the 4
+`knowledge-*` services now `depends_on: seed-loader:
+condition: service_completed_successfully`, guaranteeing Tier 1 is fresh
+every time the stack starts, regardless of language. This restores the
+"self-healing on restart" property `docs/ARCHITECTURE.md` §3 already
+claimed but which had actually been silently broken. Along the way, also
+tried (and reverted, keeping the improvement since it's real UX value
+independent of the actual bug) tightening `agent-intake`'s live-mode
+system prompt to match more generously — Claude was being appropriately
+literal about matching only what's clearly in the catalog, which read as
+overly conservative once real data was flowing again.
+
+**Verified live, full pipeline**: "I have a headache" → `chronic_headaches`;
+"i am feeling sad and depressed" → `low_mood`; a full session through
+`/analyze` produced 5 correctly ranked herb recommendations. This is a
+strong story on its own — a real bug that only manifests hours after a
+migration, traced to a responsibility (background data refresh) that
+existed implicitly in a service lifecycle that no longer exists post-migration,
+found via live symptoms rather than assumed from a prompt review, and
+fixed at the architecture level instead of papering over the symptom.
+
 ## Open items / where to pick up next
 
 - [ ] **Scope idea, not decided (raised 2026-07-23):** recommendations

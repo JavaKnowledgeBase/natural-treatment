@@ -18,6 +18,25 @@ services:
       timeout: 3s
       retries: 10
 
+  # Runs once, loads seed/data/*.json into the Tier 1 Redis cache, exits.
+  # This used to happen implicitly on every Python knowledge service's own
+  # FastAPI startup (see seed/load_seed.py's docstring) -- when those
+  # services were migrated to Java, that startup hook had nowhere to live
+  # (the Java RefCacheServices are read-only by design, see
+  # docs/TECHNICAL_GUIDE.md §0/§5), so nothing was left calling load_seed()
+  # at all. Tier 1 data has a 6h TTL (shared/shared/cache.py's
+  # REF_TTL_SECONDS) and nothing was refreshing it -- it silently emptied
+  # out the first time a long-running stack outlived that TTL, which is
+  # a real bug found live (see CLAUDE.md). This service restores the
+  # "reseed on every stack startup" property, just as its own explicit
+  # step instead of buried in a service that no longer owns it.
+  seed-loader:
+    <<: *backend-service
+    build:
+      context: ..
+      dockerfile: seed/Dockerfile
+    restart: "no"
+
   knowledge-botanical:
     <<: *backend-service
     build:
@@ -25,6 +44,11 @@ services:
       dockerfile: services/knowledge/botanical/Dockerfile
     ports:
       - "8090:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      seed-loader:
+        condition: service_completed_successfully
 
   knowledge-compound:
     <<: *backend-service
@@ -33,6 +57,11 @@ services:
       dockerfile: services/knowledge/compound/Dockerfile
     ports:
       - "8091:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      seed-loader:
+        condition: service_completed_successfully
 
   knowledge-toxicology:
     <<: *backend-service
@@ -41,6 +70,11 @@ services:
       dockerfile: services/knowledge/toxicology/Dockerfile
     ports:
       - "8092:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      seed-loader:
+        condition: service_completed_successfully
 
   knowledge-rules:
     <<: *backend-service
@@ -49,6 +83,11 @@ services:
       dockerfile: services/knowledge/rules/Dockerfile
     ports:
       - "8093:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      seed-loader:
+        condition: service_completed_successfully
 
   agent-intake:
     <<: *backend-service
