@@ -241,7 +241,139 @@ personal project most of the time. This is the actual test the
 production-readiness doc called for -- resize with real numbers if it
 OOMs, not by guessing upfront.
 
----
+## 11. Two real build bugs found on first deploy attempt
 
-*(This log is appended to as the remaining steps -- docker compose up,
-memory measurement, DNS -- are completed.)*
+Both only surfaced building fresh on the VM, never locally -- exactly
+the value of testing a real deploy instead of assuming local-works
+means prod-works.
+
+**a) Dead `COPY` of an always-empty directory in 4 Python Dockerfiles.**
+`gateway`, `agent-intake`, `agent-mapping`, `agent-explanation` each had
+`COPY services/x/app ./app`, but every one of them runs `main:app`
+directly via uvicorn -- nothing ever used a package under `app/`, and
+the directories were empty on disk locally. Git doesn't track empty
+directories, so `git archive` correctly omitted them, and the build
+failed with "not found" on the VM even though it built fine locally
+(where the empty directories still physically existed from old
+scaffolding). Fixed by deleting the dead `COPY` lines -- this would have
+broken any fresh `git clone` of the repo too, not just this deploy
+method.
+
+**b) Parallel Java builds get rate-limited/reset by Maven Central.**
+`docker compose ... --build` builds all services BuildKit can
+parallelize at once. Running 8 Maven builds concurrently against
+`repo.maven.apache.org` (fronted by Cloudflare) caused most of them to
+fail with `SSL peer shut down incorrectly` / `Remote host terminated
+the handshake`. Ruled out several wrong hypotheses first by testing
+directly rather than guessing:
+  - Not the Docker/GCP MTU mismatch (host `ens4` is MTU 1460, Docker's
+    default bridge assumes 1500) -- set `{"mtu": 1460}` in
+    `/etc/docker/daemon.json` and restarted Docker; identical failure
+    persisted, so this wasn't it (left the fix in place anyway, it's
+    correct regardless).
+  - Not a general TLS/network problem -- `curl` to the exact failing
+    Maven Central URL from inside the same build image succeeded fine.
+  - Not IPv6 -- this VM has no IPv6 route at all (`Network is
+    unreachable`), so it wasn't a happy-eyeballs issue either.
+  - A single, isolated `mvn dependency:go-offline` run (no other builds
+    running concurrently) succeeded in ~28s with zero errors --
+    confirming the failures only happen when many Maven processes hit
+    Maven Central from this VM's IP at once.
+  - `COMPOSE_PARALLEL_LIMIT=1` did **not** fix it -- current Compose's
+    BuildKit-based `build` submits one combined solve graph and
+    parallelizes internally regardless of that legacy env var.
+
+**Fix**: build each service individually in a shell loop instead of one
+combined `docker compose build` call, forcing genuinely sequential
+builds:
+
+```
+for svc in knowledge-botanical knowledge-compound knowledge-toxicology knowledge-rules \
+           agent-retrieval agent-safety agent-scoring agent-reporting email orchestrator; do
+  sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml build "$svc"
+done
+```
+
+All 10 built clean. Slower (sequential instead of parallel) but correct
+-- this is a one-time-per-deploy cost, not a runtime cost.
+
+## 12. e2-small confirmed too small -- resized to e2-medium
+
+Deployed clean on `e2-small` (all 17 containers "Up", Redis healthy),
+but measuring immediately after showed only ~93MB available out of
+1.9GB, and a follow-up `uptime` over a brand-new SSH connection timed
+out after 90s -- not just the app under pressure, the whole VM was
+critically overloaded, even at idle with zero real user traffic yet.
+This is exactly the answer the "deploy and measure" plan was designed
+to produce.
+
+Got a real (not estimated) `e2-medium` price before resizing, since the
+budget tradeoff matters: pulled the actual Compute Engine SKU catalog
+via `cloudbilling.googleapis.com` (`E2 Instance Core running in
+Americas` = $0.0218116/vCPU-hr, `E2 Instance Ram running in Americas` =
+$0.0029235/GiB-hr -- `us-east1` isn't priced as its own city SKU, it
+falls under this broader "Americas" tier). GCP's shared-core E2 types
+(`micro`/`small`/`medium`) bill a *fraction* of a vCPU despite the API
+reporting `guestCpus: 2` for all of them -- reverse-engineered the
+exact fraction from the already-confirmed `e2-small` price ($12.23/mo
+implies exactly 0.5 vCPU-equivalent billed), then applied the same
+formula to `e2-medium` (1.0 vCPU-equivalent + 4GiB): **$24.46/month**,
+matching to the penny what `PRODUCTION_READINESS.md` guessed when it
+flagged the $80.64 figure as unreliable.
+
+Resized in place (no data loss, same disk):
+
+```
+gcloud compute instances stop app-vm --project=natural-remedy-research --zone=us-east1-b
+gcloud compute instances set-machine-type app-vm --project=natural-remedy-research --zone=us-east1-b --machine-type=e2-medium
+gcloud compute instances start app-vm --project=natural-remedy-research --zone=us-east1-b
+```
+
+**External IP changed** (`35.231.127.22` -> `34.148.15.113`) since no
+static IP was reserved -- worth reserving one before final DNS setup so
+this doesn't happen again on a future stop/start.
+
+## 13. Restarted on e2-medium, re-measured, DNS + TLS finalized
+
+Stack restarted on the resized VM (images already built, no rebuild
+needed). Memory this time: **1.3GB used, 2.3GB available** out of
+3.8GB -- a real, comfortable margin, versus ~93MB available (and SSH
+itself timing out) on `e2-small`. All 17 containers up, `nginx` and
+`gateway` health-checked directly and confirmed routing correctly by
+Host header for both hostnames.
+
+**Reserved the ephemeral IP as static** before final DNS setup --
+stopping/starting the VM had already changed the external IP once
+(`35.231.127.22` -> `34.148.15.113`), and DNS should never have to chase
+that again:
+
+```
+gcloud compute addresses create app-vm-ip --project=natural-remedy-research --region=us-east1 --addresses=34.148.15.113
+```
+
+**Cloudflare DNS**: two proxied A records, both -> `34.148.15.113`:
+`naturalremedyresearch.com` (root) and `api.naturalremedyresearch.com`.
+**SSL/TLS mode**: set to **Full (Strict)** (validates the origin
+certificate against Cloudflare's own CA -- works because §9's cert is a
+real Cloudflare Origin Certificate, not self-signed).
+
+**Verified fully live, from outside the VM entirely** (public DNS
+resolution -> real HTTPS -> real backend, not a localhost/internal
+check):
+- `https://naturalremedyresearch.com/` -> 200, correct page
+- `https://naturalremedyresearch.com/about` -> 200
+- `https://api.naturalremedyresearch.com/healthz` -> `{"status":"ok"}`
+- Frontend's shipped JS bundle confirmed to contain
+  `api.naturalremedyresearch.com` (the build-arg wiring from earlier
+  actually took effect in what's served)
+- **Full session pipeline end-to-end against the live domain**: create
+  session -> send symptom message -> advance to causes -> analyze ->
+  5 correctly-scored herb recommendations returned, all over real
+  HTTPS through Cloudflare -> nginx -> the Java/Python backend
+
+This is the first time this app has run as real infrastructure instead
+of `docker-compose` on a laptop. Remaining open items (not blocking,
+tracked in `CLAUDE.md`/`PRODUCTION_READINESS.md`): legal review of
+Privacy/Terms drafts, uptime monitoring, and fixing the GitHub push
+credential issue (§9) so future deploys can go back to `git pull`
+instead of the archive+scp workaround.
