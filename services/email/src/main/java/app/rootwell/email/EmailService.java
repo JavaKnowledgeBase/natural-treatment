@@ -74,8 +74,9 @@ public class EmailService {
             resendClient.send(Map.of(
                     "from", fromAddress,
                     "to", java.util.List.of(req.to()),
-                    "subject", "Your verification code",
-                    "text", "Your verification code is " + code + ". It expires in 10 minutes."));
+                    "subject", verificationSubject(req.language()),
+                    "html", verificationHtml(req.language(), code),
+                    "text", verificationText(req.language(), code)));
         }
 
         return new VerifyResponse(token, mockMode);
@@ -109,6 +110,60 @@ public class EmailService {
                 "text", req.text()));
         Object messageId = result.get("id");
         return new SendResponse("sent", messageId == null ? null : String.valueOf(messageId));
+    }
+
+    private String verificationSubject(String language) {
+        return switch (normalizeLanguage(language)) {
+            case "es" -> "Tu código de verificación";
+            case "fr" -> "Votre code de vérification";
+            case "zh" -> "您的验证码";
+            case "hi" -> "आपका सत्यापन कोड";
+            default -> "Your verification code";
+        };
+    }
+
+    private String verificationText(String language, String code) {
+        return switch (normalizeLanguage(language)) {
+            case "es" -> "Tu código de verificación es " + code + ". Caduca en 10 minutos.";
+            case "fr" -> "Votre code de vérification est " + code + ". Il expire dans 10 minutes.";
+            case "zh" -> "您的验证码是 " + code + "。10 分钟后失效。";
+            case "hi" -> "आपका सत्यापन कोड " + code + " है। यह 10 मिनट में समाप्त हो जाएगा।";
+            default -> "Your verification code is " + code + ". It expires in 10 minutes.";
+        };
+    }
+
+    private String verificationHtml(String language, String code) {
+        String intro =
+                switch (normalizeLanguage(language)) {
+                    case "es" -> "Usa este código para confirmar tu correo:";
+                    case "fr" -> "Utilisez ce code pour confirmer votre e-mail :";
+                    case "zh" -> "请使用此验证码确认您的邮箱：";
+                    case "hi" -> "अपना ईमेल पुष्ट करने के लिए इस कोड का उपयोग करें:";
+                    default -> "Use this code to confirm your email:";
+                };
+        String expiry =
+                switch (normalizeLanguage(language)) {
+                    case "es" -> "Caduca en 10 minutos.";
+                    case "fr" -> "Il expire dans 10 minutes.";
+                    case "zh" -> "10 分钟后失效。";
+                    case "hi" -> "यह 10 मिनट में समाप्त हो जाएगा।";
+                    default -> "It expires in 10 minutes.";
+                };
+        return "<div style=\"font-family:Georgia,serif;color:#1c2b22;padding:16px;\">"
+                + "<h2 style=\"color:#2f4f3d;margin-bottom:4px;\">Natural Remedy Research</h2>"
+                + "<p style=\"font-family:Arial,sans-serif;color:#44544a;\">" + intro + "</p>"
+                + "<p style=\"font-family:Arial,sans-serif;font-size:28px;font-weight:bold;"
+                + "letter-spacing:4px;color:#2f4f3d;\">" + code + "</p>"
+                + "<p style=\"font-family:Arial,sans-serif;color:#8a8a8a;font-size:13px;\">" + expiry + "</p>"
+                + "</div>";
+    }
+
+    private String normalizeLanguage(String language) {
+        if (language == null) return "en";
+        return switch (language) {
+            case "es", "fr", "zh", "hi" -> language;
+            default -> "en";
+        };
     }
 
     private String verifyKey(String token) {

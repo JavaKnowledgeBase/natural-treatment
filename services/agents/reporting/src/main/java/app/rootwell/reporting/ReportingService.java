@@ -31,7 +31,7 @@ public class ReportingService {
                     + "clinician before making any changes to your care.";
 
     public CompileResponse compile(CompileRequest req) {
-        String subject = "Your natural treatment session summary";
+        String subject = "Your Natural Remedy Research session summary";
 
         StringBuilder text = new StringBuilder("YOUR SESSION SUMMARY\n").append("=".repeat(21)).append("\n\n");
         StringBuilder htmlBuilder = new StringBuilder("<h1>Your session summary</h1>");

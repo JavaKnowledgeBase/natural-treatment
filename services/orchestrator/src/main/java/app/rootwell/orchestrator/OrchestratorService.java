@@ -236,8 +236,9 @@ public class OrchestratorService {
     }
 
     public Map<String, Object> emailRequest(String sid, EmailRequestBody req) {
-        requireSession(sid);
-        return agents.email.post("/email/verify", Map.of("to", req.to()));
+        Map<String, Object> meta = requireSession(sid);
+        String language = normalizeLanguage((String) meta.get("language"));
+        return agents.email.post("/email/verify", Map.of("to", req.to(), "language", language));
     }
 
     public Map<String, Object> emailConfirm(String sid, EmailConfirmBody req) {
