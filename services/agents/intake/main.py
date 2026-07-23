@@ -90,9 +90,45 @@ MOCK_CAUSE_NO_SUGGESTIONS = {
     "es": "Gracias por compartir eso. Cuando quieras, no dudes en añadir cualquier otra cosa que pueda haber influido.",
 }
 
+# Display-only translations of each catalog symptom's name. The catalog
+# "id" (e.g. "chronic_headaches") is what actually drives matching,
+# related-symptom lookups, and every downstream service call -- it never
+# changes. Only the human-facing "label" shown in chat bubbles/suggestion
+# chips/the summary panel needs to match the selected language; without
+# this, matched/suggested symptoms showed up in English even mid-conversation
+# in another language, which reads as broken. Falls back to the catalog's
+# own English "name" for any id/language not listed here (e.g. if the seed
+# dataset grows before this table does).
+SYMPTOM_LABEL_TRANSLATIONS = {
+    "fatigue": {"hi": "थकान", "zh": "疲劳", "fr": "Fatigue", "es": "Fatiga"},
+    "chronic_headaches": {"hi": "पुराना सिरदर्द", "zh": "慢性头痛", "fr": "Maux de tête chroniques", "es": "Dolores de cabeza crónicos"},
+    "skin_rash": {"hi": "त्वचा पर चकत्ते", "zh": "皮疹", "fr": "Éruption cutanée", "es": "Erupción cutánea"},
+    "low_mood": {"hi": "उदास मन", "zh": "情绪低落", "fr": "Baisse de moral", "es": "Ánimo bajo"},
+    "stress": {"hi": "तनाव", "zh": "压力", "fr": "Stress", "es": "Estrés"},
+    "poor_digestion": {"hi": "खराब पाचन", "zh": "消化不良", "fr": "Digestion difficile", "es": "Digestión deficiente"},
+    "insomnia": {"hi": "नींद न आना", "zh": "睡眠困难", "fr": "Troubles du sommeil", "es": "Dificultad para dormir"},
+    "joint_pain": {"hi": "जोड़ों का दर्द", "zh": "关节疼痛", "fr": "Douleurs articulaires", "es": "Dolor articular"},
+    "bloating": {"hi": "पेट फूलना", "zh": "腹胀", "fr": "Ballonnements", "es": "Hinchazón abdominal"},
+    "anxiety": {"hi": "चिंता", "zh": "焦虑", "fr": "Anxiété", "es": "Ansiedad"},
+    "brain_fog": {"hi": "दिमागी थकावट (ब्रेन फॉग)", "zh": "脑雾", "fr": "Brouillard mental", "es": "Niebla mental"},
+    "muscle_tension": {"hi": "मांसपेशियों में जकड़न", "zh": "肌肉紧张", "fr": "Tensions musculaires", "es": "Tensión muscular"},
+    "nausea": {"hi": "जी मिचलाना", "zh": "恶心", "fr": "Nausées", "es": "Náuseas"},
+    "seasonal_allergy_symptoms": {"hi": "मौसमी एलर्जी के लक्षण", "zh": "季节性过敏症状", "fr": "Symptômes d'allergie saisonnière", "es": "Síntomas de alergia estacional"},
+    "sore_throat": {"hi": "गले में खराश", "zh": "喉咙痛", "fr": "Mal de gorge", "es": "Dolor de garganta"},
+    "cough": {"hi": "खांसी", "zh": "咳嗽", "fr": "Toux", "es": "Tos"},
+    "menstrual_discomfort": {"hi": "मासिक धर्म में असुविधा", "zh": "经期不适", "fr": "Inconfort menstruel", "es": "Molestias menstruales"},
+    "poor_circulation": {"hi": "खराब रक्त संचार", "zh": "血液循环不良", "fr": "Mauvaise circulation", "es": "Mala circulación"},
+    "cold_hands_feet": {"hi": "हाथ-पैर ठंडे रहना", "zh": "手脚冰凉", "fr": "Mains et pieds froids", "es": "Manos y pies fríos"},
+    "occasional_constipation": {"hi": "कभी-कभी कब्ज़", "zh": "偶发性便秘", "fr": "Constipation occasionnelle", "es": "Estreñimiento ocasional"},
+}
+
 
 def _normalize_language(language: str | None) -> str:
     return language if language in LANGUAGE_NAMES else DEFAULT_LANGUAGE
+
+
+def _symptom_label(symptom_id: str, english_name: str, language: str) -> str:
+    return SYMPTOM_LABEL_TRANSLATIONS.get(symptom_id, {}).get(language, english_name)
 
 
 # Many users don't have a native-script keyboard and will type their
@@ -254,7 +290,7 @@ def _mock_symptom_turn(text: str, catalog: list[dict], known_ids: list[str], lan
                 related_ids.append(related_id)
 
     suggestions = [
-        {"id": s["id"], "label": s["name"]}
+        {"id": s["id"], "label": _symptom_label(s["id"], s["name"], language)}
         for s in catalog if s["id"] in related_ids
     ][:MAX_SUGGESTIONS]
 
@@ -265,7 +301,7 @@ def _mock_symptom_turn(text: str, catalog: list[dict], known_ids: list[str], lan
     else:
         message = MOCK_SYMPTOM_NO_MATCH[language]
 
-    matched_out = [{"id": s["id"], "label": s["name"]} for s in matched]
+    matched_out = [{"id": s["id"], "label": _symptom_label(s["id"], s["name"], language)} for s in matched]
     return TurnResponse(
         assistant_message=message,
         matched=matched_out,
@@ -342,12 +378,12 @@ async def symptom_turn(req: SymptomTurnRequest):
 
     id_to_name = {s["id"]: s["name"] for s in catalog}
     matched = [
-        {"id": sid, "label": id_to_name[sid]}
+        {"id": sid, "label": _symptom_label(sid, id_to_name[sid], language)}
         for sid in parsed.get("matched", [])
         if sid in id_to_name
     ]
     suggestions = [
-        {"id": sid, "label": id_to_name[sid]}
+        {"id": sid, "label": _symptom_label(sid, id_to_name[sid], language)}
         for sid in parsed.get("suggestions", [])
         if sid in id_to_name and sid not in req.known_symptom_ids
     ][:MAX_SUGGESTIONS]
