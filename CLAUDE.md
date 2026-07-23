@@ -126,8 +126,10 @@ singular/plural tolerance instead of the whole phrase.
 - [ ] Register `rootwell.app` (or whatever domain) and set up real email
       forwarding for `hello@rootwell.app`, then swap `RESEND_FROM_ADDRESS`
       in `.env` to match
-- [ ] Get real `ANTHROPIC_API_KEY` / `RESEND_API_KEY` into `.env` when ready
-      to leave mock mode
+- [x] `ANTHROPIC_API_KEY` is real and live in `.env` (set 2026-07-22) — all
+      three LLM agents confirmed running with `mock_mode: false`
+- [ ] `RESEND_API_KEY` is still unset — email export runs in mock mode
+      (logs the rendered email instead of sending it)
 - [ ] Replace/expand the starter seed dataset (`seed/data/*.json`, ~18
       herbs) with real curated data — every record is currently tagged
       `curation_status: starter_dataset_unreviewed` and that flag is
@@ -140,6 +142,21 @@ singular/plural tolerance instead of the whole phrase.
 - [ ] Consider whether "Ravi Kafley" as sole named founder should later move
       under a business entity for liability separation once this is more
       than a dev build (flagged, not decided)
+- [ ] Donations — user wants a way for visitors to voluntarily support
+      ongoing Claude API / hosting / Resend costs (and some of the labor),
+      with a small, low-pressure "if this is useful, consider a small
+      donation" note (e.g. Footer + About page), not a paywall or anything
+      gating features. Recommended: **Ko-fi** (0% platform fee on one-time
+      tips, no business entity required, simple embeddable button) over
+      Buy Me a Coffee (~5% fee, nicer brand recognition) as the close
+      second. **Blocked on the user creating the actual Ko-fi/BMC account**
+      (needs their real identity + bank details, not something to do on
+      their behalf) — once a link exists, wiring up the on-site copy/
+      placement is quick. Also connects directly to the business-entity
+      item right above this one: accepting real money is the natural
+      trigger point for that decision, worth a beat of thought (and
+      possibly an accountant check on how donation income is treated)
+      before this goes live, not after.
 
 ## How to verify it still works
 
