@@ -8,7 +8,6 @@ COPY services/agents/explanation/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY services/agents/explanation/main.py .
-COPY services/agents/explanation/app ./app
 
 EXPOSE 8000
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
