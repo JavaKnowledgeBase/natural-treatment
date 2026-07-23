@@ -222,6 +222,11 @@ services:
     build:
       context: ../frontend
       dockerfile: Dockerfile
+      args:
+        # NEXT_PUBLIC_* vars are inlined at build time -- this must be a
+        # build arg, not just the runtime `environment:` below, or a real
+        # `next build` would silently bake in nothing.
+        NEXT_PUBLIC_GATEWAY_URL: http://localhost:8082
     ports:
       - "3000:3000"
     environment:

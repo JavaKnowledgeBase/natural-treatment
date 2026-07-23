@@ -1,14 +1,14 @@
 {
   "Metadata": {
-    "title": "Rootwell",
-    "description": "Rootwell traces symptoms back to their likely biochemical root cause and suggests evidence-aware herbal support."
+    "title": "Natural Remedy Research",
+    "description": "Natural Remedy Research traces symptoms back to their likely biochemical root cause and suggests evidence-aware herbal support."
   },
   "Header": {
     "aboutContact": "About & Contact",
     "language": "Language"
   },
   "Footer": {
-    "tagline": "Rootwell. Informational only — not medical advice.",
+    "tagline": "Natural Remedy Research. Informational only — not medical advice.",
     "aboutContact": "About & Contact",
     "privacy": "Privacy",
     "terms": "Terms"
@@ -67,8 +67,8 @@
   },
   "About": {
     "heading": "Tracing symptoms back to their likely root cause",
-    "intro": "Rootwell is a conversational, evidence-aware assistant that helps you explore how everyday symptoms may connect to underlying biochemical patterns — and which herbs have historical or clinical evidence for supporting them. Everything you share lives only in this session's cache and is deleted the moment the session ends, whether that's because you asked for an email summary or simply closed the tab.",
-    "disclaimer": "Rootwell is informational only and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a licensed clinician about symptoms that are severe, persistent, or concerning.",
+    "intro": "Natural Remedy Research is a conversational, evidence-aware assistant that helps you explore how everyday symptoms may connect to underlying biochemical patterns — and which herbs have historical or clinical evidence for supporting them. Everything you share lives only in this session's cache and is deleted the moment the session ends, whether that's because you asked for an email summary or simply closed the tab.",
+    "disclaimer": "Natural Remedy Research is informational only and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a licensed clinician about symptoms that are severe, persistent, or concerning.",
     "whoTitle": "Who's behind this",
     "whoBody": "Ravi Kafley, Founder",
     "contactTitle": "Contact",
@@ -78,9 +78,9 @@
     "title": "Privacy Policy",
     "draftNote": "Draft — reflects the current implementation. Have this reviewed by counsel before launch.",
     "whatWeStoreTitle": "What we store",
-    "whatWeStoreBody": "Rootwell has no database. Everything about your session — the conversation, the symptoms and possible causes you share, and the resulting recommendations — is kept only in an in-memory cache for the duration of that session.",
+    "whatWeStoreBody": "Natural Remedy Research has no database. Everything about your session — the conversation, the symptoms and possible causes you share, and the resulting recommendations — is kept only in an in-memory cache for the duration of that session.",
     "whatWeNeverAskTitle": "What we never ask for",
-    "whatWeNeverAskBody": "Rootwell never proactively asks for your age, pregnancy status, medications, allergies, or medical conditions. If you volunteer any of that in your own words, it's used only to apply relevant safety checks for that session and is deleted along with everything else when the session ends.",
+    "whatWeNeverAskBody": "Natural Remedy Research never proactively asks for your age, pregnancy status, medications, allergies, or medical conditions. If you volunteer any of that in your own words, it's used only to apply relevant safety checks for that session and is deleted along with everything else when the session ends.",
     "whenDeletedTitle": "When your data is deleted",
     "whenDeletedBody": "Your session is deleted automatically after a period of inactivity, or immediately when you end it, or immediately after an email summary is sent if you choose that option.",
     "emailSummariesTitle": "Email summaries",
@@ -92,9 +92,9 @@
     "title": "Terms of Use",
     "draftNote": "Draft — have this reviewed by counsel before launch.",
     "notMedicalAdviceTitle": "Not medical advice",
-    "notMedicalAdviceBody": "Rootwell provides general, informational content about herbs and traditional or researched associations with symptoms. It does not diagnose conditions, prescribe treatment, or replace consultation with a licensed clinician. Always seek professional medical advice for symptoms that are severe, persistent, or concerning, and before starting, stopping, or combining any herb or supplement — especially if you are pregnant, nursing, managing a chronic condition, or taking medication.",
+    "notMedicalAdviceBody": "Natural Remedy Research provides general, informational content about herbs and traditional or researched associations with symptoms. It does not diagnose conditions, prescribe treatment, or replace consultation with a licensed clinician. Always seek professional medical advice for symptoms that are severe, persistent, or concerning, and before starting, stopping, or combining any herb or supplement — especially if you are pregnant, nursing, managing a chronic condition, or taking medication.",
     "starterDatasetTitle": "Starter dataset",
-    "starterDatasetBody": "The herb, compound, and symptom data currently used by Rootwell is an unreviewed starter dataset assembled for development purposes. It has not been through an expert curation or clinical review process.",
+    "starterDatasetBody": "The herb, compound, and symptom data currently used by Natural Remedy Research is an unreviewed starter dataset assembled for development purposes. It has not been through an expert curation or clinical review process.",
     "noGuaranteeTitle": "No guarantee of outcome",
     "noGuaranteeBody": "Recommendations are scored estimates based on available evidence and are not a guarantee of safety or effectiveness for any individual.",
     "contactTitle": "Contact",

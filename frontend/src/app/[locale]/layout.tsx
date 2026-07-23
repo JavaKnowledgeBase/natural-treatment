@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server";
+import { getMessages, getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import "../globals.css";
 import Header from "@/components/Header";
@@ -27,6 +27,7 @@ export async function generateMetadata({
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
+  unstable_setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "Metadata" });
   return {
     title: t("title"),
@@ -42,6 +43,7 @@ export default async function LocaleLayout({
   params: { locale: string };
 }) {
   if (!locales.includes(locale as Locale)) notFound();
+  unstable_setRequestLocale(locale);
 
   const messages = await getMessages();
 

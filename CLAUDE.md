@@ -1,16 +1,25 @@
-# Rootwell — Project Reference
+# Natural Remedy Research — Project Reference
 
 Read this first when picking this project back up. It captures decisions and
 state that aren't obvious from the code alone.
 
 ## What this is
 
-**Rootwell** (formerly called "Natural Treatment Recommendation Engine" in
-the early research docs — same product, renamed). A conversational,
-agentic, microservice web app that traces user-reported symptoms back to a
-likely biochemical root cause and suggests herbs with some evidence backing
-them. Founder: **Ravi Kafley**. Contact: `hello@rootwell.app` (placeholder —
-domain not registered yet).
+**Natural Remedy Research** (formerly called "Natural Treatment Recommendation
+Engine" in the early research docs, then **Rootwell** — same product, renamed
+again 2026-07-23 when picking a production domain: `rootwell.app` and every
+close variant turned out to already be registered by unrelated parties, so
+the product name changed along with the domain search rather than settling
+for a distant variant). A conversational, agentic, microservice web app that
+traces user-reported symptoms back to a likely biochemical root cause and
+suggests herbs with some evidence backing them. Founder: **Ravi Kafley**.
+Contact: `hello@naturalremedyresearch.com` (domain confirmed available via
+RDAP lookup 2026-07-23, not yet registered).
+
+Frontend UI note: the full name is used in page titles/metadata and the
+About page; the compact header/nav wordmark shows "Remedy Research"
+(`frontend/src/components/Logo.tsx`'s `wordmark` prop, default `"short"`,
+`"full"` on the About page).
 
 Design docs (still accurate for architecture/product decisions):
 - `research docs/application_design.md` — v1, product vision, UX flow, scoring formula
@@ -31,15 +40,19 @@ materials — `mit-lincoln-lab-interview-prep.md` and
 `mit-lincoln-lab-technical-qa.md`). Per that prep guide's gap map, the
 user's Java/Spring/Docker/AWS skills are already strong; real gaps are
 Kafka/NiFi/Istio/Terraform/Ansible, a live Python exercise, and having
-concrete stories ready. Decision: keep migrating Rootwell's non-LLM
+concrete stories ready. Decision: keep migrating this app's non-LLM
 backend services from Python/FastAPI to Java/Spring Boot as hands-on
 practice reps (reinforces the strong column, gives a second "built the
 platform" story alongside PolicyMind), while separately drilling the
 actual gap topics via mock Q&A / STAR rehearsal / Python warm-ups —
-**don't let the Rootwell rewrite crowd out that gap-drilling time**, per
+**don't let the rewrite crowd out that gap-drilling time**, per
 the user's own prioritization. See `docs/TECHNICAL_GUIDE.md` §7 for how
-each Rootwell architecture choice ties back to a specific interview-guide
+each architecture choice ties back to a specific interview-guide
 question.
+
+Note: the Java backend's package namespace (`app.rootwell.*` across all 8
+Java services) still reflects the old product name. This is a deliberate,
+known gap, not an oversight — see the "Open items" list below.
 
 **Migration scope** (re-derived from the code, not assumed): only
 `agent-intake`, `agent-mapping`, `agent-explanation` import `shared.llm`
@@ -120,9 +133,15 @@ symptom descriptions by meaning, not just keyword matching, in any of the
 ## Branding (established in an earlier session, some details updated 2026-07-23)
 
 - Logo: `frontend/src/components/Logo.tsx` — minimal botanical line-art
-  (leaf + root SVG) + "Root**well**" wordmark. **Updated 2026-07-23**: now
-  the brand/gold palette + serif wordmark from the design refresh, not the
-  original stone/emerald two-tone.
+  (leaf + root SVG) + wordmark. **Updated 2026-07-23 (design refresh)**:
+  brand/gold palette + serif wordmark, not the original stone/emerald
+  two-tone. **Updated again 2026-07-23 (product rename)**: wordmark text
+  changed from "Root**well**" to a `wordmark` prop — `"short"` (default,
+  renders "Remedy Research", used in the compact header) or `"full"`
+  (renders "Natural Remedy Research", used on the About page). No more
+  two-tone color split on the wordmark text itself — that treatment was
+  specific to the "Root"/"well" compound word and didn't map onto the new
+  three-word name.
 - `frontend/src/components/Header.tsx` — site header, wraps every page via
   `[locale]/layout.tsx`. Now also hosts the language dropdown
   (`LanguageSwitcher`).
@@ -278,9 +297,20 @@ fixed at the architecture level instead of papering over the symptom.
       TTL now that seeding is reliable again) before this runs unattended
       on the production VM planned in `docs/PRODUCTION_READINESS.md`.
 - [ ] Add phone number (Google Voice) once the user has it
-- [ ] Register `rootwell.app` (or whatever domain) and set up real email
-      forwarding for `hello@rootwell.app`, then swap `RESEND_FROM_ADDRESS`
-      in `.env` to match
+- [ ] **Domain decided but not yet registered (2026-07-23): `naturalremedyresearch.com`.**
+      Checked live via RDAP — available. This replaced the original
+      `rootwell.app` plan after checking it and finding it (and every close
+      variant: `rootwell.com`, `rootwellhealth.com`, `tryrootwell.com`,
+      `rootcause.app`, `taproot.app`, `wildroot.app`, `sagewell.com`,
+      `herbroot.com`, `rootlore.com`, `verdantroot.com`) already registered
+      by unrelated parties — no evidence found of an actual competing
+      "Rootwell" product, this reads as generic brandable-name squatting.
+      Recommended registrar: **Cloudflare Registrar** (at-cost pricing, and
+      routing DNS through Cloudflare gets free TLS termination for the
+      `e2-small` VM, which also solves `docs/PRODUCTION_READINESS.md`'s
+      TLS/HTTPS blocker for free). Once registered: set up real email
+      forwarding for `hello@naturalremedyresearch.com`, then swap
+      `RESEND_FROM_ADDRESS` in `.env` to match
 - [x] `ANTHROPIC_API_KEY` is real and live in `.env` (set 2026-07-22) — all
       three LLM agents confirmed running with `mock_mode: false`
 - [ ] `RESEND_API_KEY` is still unset — email export runs in mock mode
@@ -334,7 +364,7 @@ fixed at the architecture level instead of papering over the symptom.
       generally require donations to go through their official In-App
       Purchase system (15-30% cut) rather than a third-party processor
       like Stripe/Ko-fi for anything they classify as a native app, on
-      risk of rejection. **This does not currently apply** — Rootwell is
+      risk of rejection. **This does not currently apply** — this app is
       a website (Next.js), not distributed through either app store, so
       the Ko-fi/Stripe external-link recommendation above stands as-is.
       Only becomes relevant if the app is later wrapped for native

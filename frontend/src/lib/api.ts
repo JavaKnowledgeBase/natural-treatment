@@ -58,10 +58,13 @@ export const api = {
   getState: (sid: string) => request<SessionState>(`/session/${sid}`),
 
   sendMessage: (sid: string, text: string) =>
-    request<{ assistant_message: string; current_step: string; symptoms: CachedItem[]; causes: CachedItem[] }>(
-      `/session/${sid}/message`,
-      { method: "POST", body: JSON.stringify({ text }) }
-    ),
+    request<{
+      assistant_message: string;
+      current_step: string;
+      symptoms: CachedItem[];
+      causes: CachedItem[];
+      suggestions: Suggestion[];
+    }>(`/session/${sid}/message`, { method: "POST", body: JSON.stringify({ text }) }),
 
   addItem: (sid: string, kind: "symptom" | "cause", label: string, id?: string, category?: string) =>
     request<{ status: string; id: string }>(`/session/${sid}/add-item`, {

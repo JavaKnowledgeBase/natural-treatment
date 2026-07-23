@@ -1,14 +1,14 @@
 {
   "Metadata": {
-    "title": "Rootwell",
-    "description": "Rootwell rastrea tus síntomas hasta su probable causa bioquímica y sugiere apoyo herbal respaldado por evidencia."
+    "title": "Natural Remedy Research",
+    "description": "Natural Remedy Research rastrea tus síntomas hasta su probable causa bioquímica y sugiere apoyo herbal respaldado por evidencia."
   },
   "Header": {
     "aboutContact": "Acerca de y contacto",
     "language": "Idioma"
   },
   "Footer": {
-    "tagline": "Rootwell. Solo con fines informativos — no sustituye el consejo médico.",
+    "tagline": "Natural Remedy Research. Solo con fines informativos — no sustituye el consejo médico.",
     "aboutContact": "Acerca de y contacto",
     "privacy": "Privacidad",
     "terms": "Términos"
@@ -67,8 +67,8 @@
   },
   "About": {
     "heading": "Rastreando tus síntomas hasta su probable causa raíz",
-    "intro": "Rootwell es un asistente conversacional basado en evidencia que te ayuda a explorar cómo los síntomas cotidianos pueden estar relacionados con patrones bioquímicos subyacentes — y qué hierbas cuentan con evidencia histórica o clínica que las respalde. Todo lo que compartes vive únicamente en la memoria de esta sesión y se elimina en el momento en que termina, ya sea porque solicitaste un resumen por correo o simplemente cerraste la pestaña.",
-    "disclaimer": "Rootwell tiene fines exclusivamente informativos y no sustituye el consejo médico profesional, el diagnóstico ni el tratamiento. Consulta siempre a un profesional de la salud con licencia ante síntomas graves, persistentes o preocupantes.",
+    "intro": "Natural Remedy Research es un asistente conversacional basado en evidencia que te ayuda a explorar cómo los síntomas cotidianos pueden estar relacionados con patrones bioquímicos subyacentes — y qué hierbas cuentan con evidencia histórica o clínica que las respalde. Todo lo que compartes vive únicamente en la memoria de esta sesión y se elimina en el momento en que termina, ya sea porque solicitaste un resumen por correo o simplemente cerraste la pestaña.",
+    "disclaimer": "Natural Remedy Research tiene fines exclusivamente informativos y no sustituye el consejo médico profesional, el diagnóstico ni el tratamiento. Consulta siempre a un profesional de la salud con licencia ante síntomas graves, persistentes o preocupantes.",
     "whoTitle": "Quién está detrás de esto",
     "whoBody": "Ravi Kafley, Fundador",
     "contactTitle": "Contacto",
@@ -78,9 +78,9 @@
     "title": "Política de privacidad",
     "draftNote": "Borrador — refleja la implementación actual. Debe ser revisado por un asesor legal antes del lanzamiento.",
     "whatWeStoreTitle": "Qué almacenamos",
-    "whatWeStoreBody": "Rootwell no tiene base de datos. Todo lo relacionado con tu sesión — la conversación, los síntomas y posibles causas que compartes, y las recomendaciones resultantes — se mantiene únicamente en una caché en memoria durante la duración de esa sesión.",
+    "whatWeStoreBody": "Natural Remedy Research no tiene base de datos. Todo lo relacionado con tu sesión — la conversación, los síntomas y posibles causas que compartes, y las recomendaciones resultantes — se mantiene únicamente en una caché en memoria durante la duración de esa sesión.",
     "whatWeNeverAskTitle": "Lo que nunca pedimos",
-    "whatWeNeverAskBody": "Rootwell nunca pregunta proactivamente por tu edad, estado de embarazo, medicamentos, alergias o condiciones médicas. Si compartes voluntariamente esa información con tus propias palabras, se usa únicamente para aplicar las verificaciones de seguridad relevantes durante esa sesión y se elimina junto con todo lo demás cuando esta termina.",
+    "whatWeNeverAskBody": "Natural Remedy Research nunca pregunta proactivamente por tu edad, estado de embarazo, medicamentos, alergias o condiciones médicas. Si compartes voluntariamente esa información con tus propias palabras, se usa únicamente para aplicar las verificaciones de seguridad relevantes durante esa sesión y se elimina junto con todo lo demás cuando esta termina.",
     "whenDeletedTitle": "Cuándo se eliminan tus datos",
     "whenDeletedBody": "Tu sesión se elimina automáticamente tras un período de inactividad, de inmediato cuando la finalizas, o de inmediato tras el envío de un resumen por correo si eliges esa opción.",
     "emailSummariesTitle": "Resúmenes por correo electrónico",
@@ -92,9 +92,9 @@
     "title": "Términos de uso",
     "draftNote": "Borrador — debe ser revisado por un asesor legal antes del lanzamiento.",
     "notMedicalAdviceTitle": "Esto no es un consejo médico",
-    "notMedicalAdviceBody": "Rootwell ofrece contenido general e informativo sobre hierbas y sus asociaciones tradicionales o estudiadas con ciertos síntomas. No diagnostica afecciones, no prescribe tratamientos ni reemplaza la consulta con un profesional de la salud con licencia. Busca siempre asesoramiento médico profesional ante síntomas graves, persistentes o preocupantes, y antes de comenzar, suspender o combinar cualquier hierba o suplemento — especialmente si estás embarazada, en período de lactancia, manejando una condición crónica o tomando medicamentos.",
+    "notMedicalAdviceBody": "Natural Remedy Research ofrece contenido general e informativo sobre hierbas y sus asociaciones tradicionales o estudiadas con ciertos síntomas. No diagnostica afecciones, no prescribe tratamientos ni reemplaza la consulta con un profesional de la salud con licencia. Busca siempre asesoramiento médico profesional ante síntomas graves, persistentes o preocupantes, y antes de comenzar, suspender o combinar cualquier hierba o suplemento — especialmente si estás embarazada, en período de lactancia, manejando una condición crónica o tomando medicamentos.",
     "starterDatasetTitle": "Conjunto de datos inicial",
-    "starterDatasetBody": "Los datos de hierbas, compuestos y síntomas que utiliza actualmente Rootwell son un conjunto de datos inicial sin revisar, reunido con fines de desarrollo. No ha pasado por un proceso de curación experta ni de revisión clínica.",
+    "starterDatasetBody": "Los datos de hierbas, compuestos y síntomas que utiliza actualmente Natural Remedy Research son un conjunto de datos inicial sin revisar, reunido con fines de desarrollo. No ha pasado por un proceso de curación experta ni de revisión clínica.",
     "noGuaranteeTitle": "Sin garantía de resultados",
     "noGuaranteeBody": "Las recomendaciones son estimaciones puntuadas basadas en la evidencia disponible y no constituyen una garantía de seguridad ni de eficacia para ningún individuo.",
     "contactTitle": "Contacto",

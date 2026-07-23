@@ -22,9 +22,11 @@ export function LogoMark({ className = "h-6 w-6" }: { className?: string }) {
 export default function Logo({
   size = "md",
   showWordmark = true,
+  wordmark = "short",
 }: {
   size?: "sm" | "md" | "lg";
   showWordmark?: boolean;
+  wordmark?: "short" | "full";
 }) {
   const iconSize = { sm: "h-5 w-5", md: "h-7 w-7", lg: "h-12 w-12" }[size];
   const textSize = { sm: "text-base", md: "text-xl", lg: "text-4xl" }[size];
@@ -34,7 +36,7 @@ export default function Logo({
       <LogoMark className={`${iconSize} text-brand-700`} />
       {showWordmark && (
         <span className={`${textSize} font-serif font-semibold tracking-tight text-brand-900`}>
-          Root<span className="text-gold-600">well</span>
+          {wordmark === "full" ? "Natural Remedy Research" : "Remedy Research"}
         </span>
       )}
     </div>

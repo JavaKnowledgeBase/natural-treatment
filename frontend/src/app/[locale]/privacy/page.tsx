@@ -1,12 +1,14 @@
-import { getTranslations } from "next-intl/server";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import Footer from "@/components/Footer";
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: string } }) {
+  unstable_setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "Privacy" });
   return { title: `${t("title")} — Rootwell` };
 }
 
-export default async function PrivacyPage() {
+export default async function PrivacyPage({ params: { locale } }: { params: { locale: string } }) {
+  unstable_setRequestLocale(locale);
   const t = await getTranslations("Privacy");
 
   return (
@@ -30,8 +32,8 @@ export default async function PrivacyPage() {
         <h2 className="mt-8 font-serif text-xl font-semibold text-brand-900">{t("contactTitle")}</h2>
         <p className="mt-2 text-stone-600">
           {t("contactBody")}{" "}
-          <a href="mailto:hello@rootwell.app" className="text-brand-700 underline hover:text-brand-800">
-            hello@rootwell.app
+          <a href="mailto:hello@naturalremedyresearch.com" className="text-brand-700 underline hover:text-brand-800">
+            hello@naturalremedyresearch.com
           </a>
         </p>
       </div>

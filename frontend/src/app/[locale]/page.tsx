@@ -41,7 +41,7 @@ export default function Home() {
       setStep(res.current_step);
       setSymptoms(res.symptoms);
       setCauses(res.causes);
-      setSuggestions(res.suggestions as Suggestion[]);
+      setSuggestions(res.suggestions);
       setMessages((prev) => [...prev, { role: "assistant", text: res.assistant_message, ts: Date.now() / 1000 }]);
     } finally {
       setSending(false);

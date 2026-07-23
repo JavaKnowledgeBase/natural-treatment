@@ -11,7 +11,7 @@ export default async function Header() {
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-brand-100 bg-paper px-6 shadow-[0_1px_0_rgba(21,44,32,0.04)]">
-      <Link href={prefix || "/"} aria-label="Rootwell home">
+      <Link href={prefix || "/"} aria-label="Natural Remedy Research home">
         <Logo size="sm" />
       </Link>
       <div className="flex items-center gap-4">

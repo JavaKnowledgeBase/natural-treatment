@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocaleSwitch } from "@/hooks/useLocaleSwitch";
 import { locales, localeLabels, defaultLocale, Locale } from "@/locales";
 
-const STORAGE_KEY = "rootwell-language-chosen";
+const STORAGE_KEY = "nrr-language-chosen";
 
 // Shown once, right under the greeting, so a non-English speaker who might
 // miss the small header dropdown has an obvious way to switch before
