@@ -1,30 +1,12 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
-import { locales, localeLabels, defaultLocale, Locale } from "@/locales";
+import { useTranslations } from "next-intl";
+import { useLocaleSwitch } from "@/hooks/useLocaleSwitch";
+import { locales, localeLabels, Locale } from "@/locales";
 
-// Manual locale-prefix handling rather than next-intl's navigation helpers,
-// since `localePrefix: "as-needed"` means English has no prefix (per user
-// request: English stays the default, unprefixed locale) while the other
-// four languages are prefixed (e.g. /hi, /fr).
 export default function LanguageSwitcher() {
-  const locale = useLocale();
-  const pathname = usePathname();
-  const router = useRouter();
+  const { locale, switchTo } = useLocaleSwitch();
   const t = useTranslations("Header");
-
-  const switchTo = (nextLocale: Locale) => {
-    const segments = pathname.split("/");
-    const pathHasCurrentLocalePrefix = locale !== defaultLocale && segments[1] === locale;
-    const unprefixedPath = pathHasCurrentLocalePrefix ? "/" + segments.slice(2).join("/") : pathname;
-    const cleanPath = unprefixedPath === "//" ? "/" : unprefixedPath;
-
-    const nextPath =
-      nextLocale === defaultLocale ? cleanPath : `/${nextLocale}${cleanPath === "/" ? "" : cleanPath}`;
-
-    router.push(nextPath || "/");
-  };
 
   return (
     <label className="flex items-center gap-1.5 text-sm text-stone-500">

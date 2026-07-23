@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { ChatMessage, Suggestion } from "@/lib/api";
 import EmailExport from "./EmailExport";
+import LanguagePicker from "./LanguagePicker";
 
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
@@ -117,7 +118,10 @@ export default function ChatPanel({
     <div className="flex h-full flex-col bg-paper-100">
       <div className="flex-1 space-y-3 overflow-y-auto p-6">
         {messages.map((m, i) => (
-          <MessageBubble key={i} message={m} />
+          <div key={i}>
+            <MessageBubble message={m} />
+            {i === 0 && <LanguagePicker />}
+          </div>
         ))}
 
         {suggestions.length > 0 && canChat && (
