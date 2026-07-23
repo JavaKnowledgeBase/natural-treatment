@@ -34,16 +34,39 @@ SYSTEM_PROMPT = (
     "Include exactly one entry per herb id given to you, in any order."
 )
 
-# UI + LLM-conversation language support only (see docs/ARCHITECTURE.md) --
-# the per-herb "reason" sentence is the only user-visible text this agent
-# produces; herb *names* come from the (always-English) starter dataset and
-# stay as-is (see main.py's module docstring / the conversation with the
-# user about why -- botanical/traditional names carry real accuracy risk to
-# mistranslate). Evidence level is different: it's an internal enum
-# (EVIDENCE_LEVEL_SCORES in agent-scoring), not a proper noun, so it gets a
-# real translated phrase below rather than being embedded raw -- a raw
-# "human_observational" token showing up mid-sentence in a Hindi/Chinese/
-# French/Spanish response reads as broken, not just anglicized.
+# UI + LLM-conversation language support only (see docs/ARCHITECTURE.md).
+# Herb names are shown as "<local name> (<English name>)" per the user's
+# explicit preference (e.g. "अश्वगंधा (Ashwagandha)") -- pairing rather than
+# replacing the English name keeps the botanical/scientific identity
+# unambiguous (still traceable to the English-keyed starter dataset) while
+# giving the local name for readability. Local names below favor
+# well-established traditional/pharmacopoeia names where one genuinely
+# exists (e.g. तुलसी for holy basil, 甘草 for licorice root, which are the
+# real native names, not inventions) and fall back to plain phonetic
+# transliteration for herbs with no established local name, rather than
+# guessing at one -- a wrong invented "traditional" name would be worse
+# than an honest transliteration in a health-adjacent app.
+HERB_NAME_TRANSLATIONS = {
+    "ashwagandha": {"hi": "अश्वगंधा", "zh": "南非醉茄", "fr": "Ashwagandha", "es": "Ashwagandha"},
+    "turmeric": {"hi": "हल्दी", "zh": "姜黄", "fr": "Curcuma", "es": "Cúrcuma"},
+    "ginger": {"hi": "अदरक", "zh": "生姜", "fr": "Gingembre", "es": "Jengibre"},
+    "chamomile": {"hi": "कैमोमाइल", "zh": "洋甘菊", "fr": "Camomille", "es": "Manzanilla"},
+    "valerian": {"hi": "वेलेरियन", "zh": "缬草", "fr": "Valériane", "es": "Valeriana"},
+    "peppermint": {"hi": "पुदीना", "zh": "薄荷", "fr": "Menthe poivrée", "es": "Menta piperita"},
+    "milk_thistle": {"hi": "मिल्क थिस्ल", "zh": "水飞蓟", "fr": "Chardon-Marie", "es": "Cardo mariano"},
+    "elderberry": {"hi": "एल्डरबेरी", "zh": "接骨木果", "fr": "Sureau", "es": "Saúco"},
+    "echinacea": {"hi": "इचिनेशिया", "zh": "紫锥菊", "fr": "Échinacée", "es": "Equinácea"},
+    "ginkgo": {"hi": "जिंकगो", "zh": "银杏", "fr": "Ginkgo", "es": "Ginkgo"},
+    "holy_basil": {"hi": "तुलसी", "zh": "圣罗勒", "fr": "Basilic sacré", "es": "Albahaca sagrada"},
+    "licorice_root": {"hi": "मुलेठी", "zh": "甘草", "fr": "Réglisse", "es": "Regaliz"},
+    "nettle": {"hi": "बिच्छू बूटी", "zh": "荨麻", "fr": "Ortie", "es": "Ortiga"},
+    "dandelion": {"hi": "डैंडिलियन", "zh": "蒲公英", "fr": "Pissenlit", "es": "Diente de león"},
+    "hawthorn": {"hi": "हॉथॉर्न", "zh": "山楂", "fr": "Aubépine", "es": "Espino blanco"},
+    "maca": {"hi": "माका", "zh": "玛卡", "fr": "Maca", "es": "Maca"},
+    "rhodiola": {"hi": "रोडियोला", "zh": "红景天", "fr": "Rhodiole", "es": "Rodiola"},
+    "passionflower": {"hi": "पैशनफ्लावर", "zh": "西番莲", "fr": "Passiflore", "es": "Pasiflora"},
+}
+
 LANGUAGE_NAMES = {
     "en": "English",
     "hi": "Hindi",
@@ -107,15 +130,23 @@ def _evidence_level_phrase(level: str | None, language: str) -> str:
     return EVIDENCE_LEVEL_PHRASES.get(level or "", {}).get(language, level or "unreviewed")
 
 
+def _display_herb_name(herb_id: str, english_name: str, language: str) -> str:
+    if language == DEFAULT_LANGUAGE:
+        return english_name
+    local_name = HERB_NAME_TRANSLATIONS.get(herb_id, {}).get(language)
+    return f"{local_name} ({english_name})" if local_name else english_name
+
+
 def _localized_system_prompt(language: str) -> str:
     if language == DEFAULT_LANGUAGE:
         return SYSTEM_PROMPT
     return (
         SYSTEM_PROMPT
-        + f"\n\nWrite every sentence entirely in {LANGUAGE_NAMES[language]}, even though the herb "
-        f"name given to you is in English -- weave it into the sentence naturally rather than "
-        f"leaving the rest of the sentence in English. The evidence level phrase given to you is "
-        f"already translated into {LANGUAGE_NAMES[language]}; use it verbatim."
+        + f"\n\nWrite every sentence entirely in {LANGUAGE_NAMES[language]}. Both the herb name and "
+        f"the evidence level phrase given to you are already in the format to use verbatim -- the "
+        f"herb name is formatted as \"<local name> (<English name>)\" and the evidence level is "
+        f"already translated into {LANGUAGE_NAMES[language]}. Use both exactly as given; do not "
+        f"re-translate or alter either one."
     )
 
 
@@ -130,14 +161,15 @@ class GenerateResponse(BaseModel):
     recommendations: list[dict]
 
 
-def _template_reason(herb: dict) -> str:
+def _template_reason(herb: dict, language: str) -> str:
     mechanisms = [
         link.get("mechanism_summary")
         for link in herb.get("compounds", [])
         if link.get("mechanism_summary")
     ]
     mechanism_text = " ".join(mechanisms[:1]) or "supportive traditional use"
-    return f"{herb['name']} contains compounds associated with {mechanism_text.rstrip('.').lower()}."
+    display_name = _display_herb_name(herb["id"], herb["name"], language)
+    return f"{display_name} contains compounds associated with {mechanism_text.rstrip('.').lower()}."
 
 
 def _parse_llm_json(raw: str) -> dict | None:
@@ -165,11 +197,11 @@ async def _batched_reasons(qualifying: list[tuple[dict, dict]], language: str) -
     for herb, entry in qualifying:
         mechanisms = [l.get("mechanism_summary") for l in herb.get("compounds", [])]
         evidence_phrase = _evidence_level_phrase(herb.get("evidence_level"), language)
+        display_name = _display_herb_name(herb["id"], herb["name"], language)
         herb_lines.append(
-            f"- id: {herb['id']}, name: {herb['name']}, evidence level: \"{evidence_phrase}\" "
-            f"(use this exact phrase, already translated -- do not translate it yourself or leave "
-            f"an English/internal token in its place), mechanism notes: {mechanisms}, "
-            f"confidence band: {entry['confidence_band']}"
+            f"- id: {herb['id']}, name: \"{display_name}\" (use this exact name verbatim), "
+            f"evidence level: \"{evidence_phrase}\" (use this exact phrase verbatim), "
+            f"mechanism notes: {mechanisms}, confidence band: {entry['confidence_band']}"
         )
     raw = await llm.complete_or_none(
         _localized_system_prompt(language),
@@ -211,14 +243,14 @@ async def generate(req: GenerateRequest):
 
     recommendations: list[dict] = []
     for herb, entry in qualifying:
-        reason = reasons_by_id.get(herb["id"]) or _template_reason(herb)
+        reason = reasons_by_id.get(herb["id"]) or _template_reason(herb, language)
         verdict = verdicts_by_id.get(herb["id"], {})
         safety_note = "; ".join(verdict.get("notes", [])) or None
 
         recommendations.append(
             {
                 "herb_id": herb["id"],
-                "herb_name": herb["name"],
+                "herb_name": _display_herb_name(herb["id"], herb["name"], language),
                 "score": entry["adjusted_score"],
                 "confidence_band": entry["confidence_band"],
                 "reason": reason,
