@@ -315,11 +315,32 @@ fixed at the architecture level instead of papering over the symptom.
       three LLM agents confirmed running with `mock_mode: false`
 - [ ] `RESEND_API_KEY` is still unset — email export runs in mock mode
       (logs the rendered email instead of sending it)
-- [ ] Replace/expand the starter seed dataset (`seed/data/*.json`, ~18
-      herbs) with real curated data — every record is currently tagged
-      `curation_status: starter_dataset_unreviewed` and that flag is
-      threaded through to the UI and email export on purpose; don't remove
-      the flag without an actual curation pass
+- [ ] Replace/expand the starter seed dataset (`seed/data/*.json`, **23
+      herbs as of 2026-07-23**, up from 18 — added feverfew, cramp bark,
+      chasteberry, psyllium, boswellia to fill the 4 symptom categories
+      that had only one herb each: `chronic_headaches`,
+      `muscle_tension`, `menstrual_discomfort`, `occasional_constipation`.
+      Each new entry researched via web search for real evidence-level/
+      contraindication accuracy before adding, and the 4 new safety rules
+      — feverfew+chasteberry pregnancy, chasteberry hormone-sensitive,
+      cramp_bark pregnancy, boswellia pregnancy — verified to actually
+      fire against `agent-safety` directly, not just decoratively listed)
+      with real curated data — every record, including the new ones, is
+      still tagged `curation_status: starter_dataset_unreviewed` and that
+      flag is threaded through to the UI and email export on purpose;
+      don't remove the flag without an actual curation pass
+- [ ] **Scoring quirk noticed 2026-07-23, not yet investigated**: the
+      same top-5 herbs/scores (elderberry, maca, psyllium, passionflower,
+      nettle) showed up across two different symptom combinations tested
+      live (chronic headaches + menstrual discomfort, vs. menstrual
+      discomfort + muscle tension), even though feverfew/chasteberry/
+      cramp_bark — herbs directly linked to those exact symptoms — were
+      confirmed present in the retrieval candidate pool. Looks like
+      `agent-scoring`'s ranking formula may be weighting something
+      (evidence_level tier? a fixed prior?) more heavily than symptom-
+      match strength, but this wasn't confirmed, just observed — flagged
+      as a pre-existing characteristic unrelated to the herb-data
+      addition above, not chased down this session.
 - [ ] Phase 2 items deferred by design (see v2 doc §9 and README): Cloud
       Run/K8s deployment manifests, live fallback to IMPPAT/ChEBI/PubChem/CTD
       on cache miss, multi-symptom conflict resolution, personalized history

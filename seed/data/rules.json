@@ -23,5 +23,11 @@
   {"id": "rule_hawthorn_cardiac", "herb_id": "hawthorn", "condition": "cardiac_medication", "severity": "high", "note": "Can interact with heart medications; requires clinician oversight."},
   {"id": "rule_maca_hormone", "herb_id": "maca", "condition": "hormone_sensitive_condition", "severity": "moderate", "note": "Possible hormonal activity; use caution with hormone-sensitive conditions."},
   {"id": "rule_rhodiola_bipolar", "herb_id": "rhodiola", "condition": "bipolar_disorder", "severity": "moderate", "note": "Stimulating adaptogen effect may not suit bipolar disorder; clinician input advised."},
-  {"id": "rule_passionflower_sedative", "herb_id": "passionflower", "condition": "sedative_medication", "severity": "moderate", "note": "May compound drowsiness with sedative medications."}
+  {"id": "rule_passionflower_sedative", "herb_id": "passionflower", "condition": "sedative_medication", "severity": "moderate", "note": "May compound drowsiness with sedative medications."},
+  {"id": "rule_feverfew_pregnancy", "herb_id": "feverfew", "condition": "pregnancy", "severity": "high", "note": "Traditionally associated with uterine stimulant activity; avoid in pregnancy."},
+  {"id": "rule_feverfew_anticoag", "herb_id": "feverfew", "condition": "anticoagulant_medication", "severity": "moderate", "note": "May inhibit platelet aggregation; caution with blood thinners."},
+  {"id": "rule_cramp_bark_pregnancy", "herb_id": "cramp_bark", "condition": "pregnancy", "severity": "moderate", "note": "Traditional use affecting uterine smooth muscle; avoid without clinician guidance in pregnancy."},
+  {"id": "rule_chasteberry_pregnancy", "herb_id": "chasteberry", "condition": "pregnancy", "severity": "high", "note": "Hormonal activity means insufficient safety data in pregnancy."},
+  {"id": "rule_chasteberry_hormone", "herb_id": "chasteberry", "condition": "hormone_sensitive_condition", "severity": "high", "note": "Affects prolactin and estrogen/progesterone balance; avoid with hormone-sensitive conditions or hormonal medication, including birth control."},
+  {"id": "rule_boswellia_pregnancy", "herb_id": "boswellia", "condition": "pregnancy", "severity": "moderate", "note": "Insufficient safety data in pregnancy and breastfeeding."}
 ]
