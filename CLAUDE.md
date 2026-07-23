@@ -259,6 +259,24 @@ fixed at the architecture level instead of papering over the symptom.
       research assumed the current herb-only, hedged-language posture).
       Needs real product/legal thought before any implementation, not
       just a dataset expansion.
+- [ ] **Hybrid deterministic-first symptom matching** (explicit follow-up
+      to the 2026-07-23 `agent-explanation` batching work, agreed but not
+      started): try the deterministic mock-mode matcher first even in
+      live mode, fall back to Claude only when nothing matches, to cut
+      `agent-intake`'s Claude call volume further. Needs a bigger, richer
+      symptom dataset (more synonyms per catalog entry) to actually pay
+      off — the current mock matcher is too literal to be a good first
+      pass as-is; this is real, separate work, not a quick toggle.
+- [ ] **Tier 1 has no recurring refresh, only on-startup** (surfaced by
+      the 2026-07-23 seed-loader fix): the new `seed-loader` service
+      correctly reseeds on every `docker compose up`, but if the stack
+      runs continuously without a restart for longer than the 6h
+      `REF_TTL_SECONDS`, Tier 1 will go empty again exactly the same way
+      it just did — the fix restored "self-heals on restart," not "never
+      goes stale while running." Fine for local dev (restarts often);
+      worth a real answer (periodic background refresh, or a much longer
+      TTL now that seeding is reliable again) before this runs unattended
+      on the production VM planned in `docs/PRODUCTION_READINESS.md`.
 - [ ] Add phone number (Google Voice) once the user has it
 - [ ] Register `rootwell.app` (or whatever domain) and set up real email
       forwarding for `hello@rootwell.app`, then swap `RESEND_FROM_ADDRESS`
