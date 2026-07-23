@@ -28,6 +28,7 @@
     "topRecommendations": "मुख्य सुझाव",
     "confidenceLabel": "{band, select, high {उच्च विश्वास स्तर} moderate {मध्यम विश्वास स्तर} low {कम विश्वास स्तर} other {विश्वास स्तर: {band}}}",
     "evidenceLevel": "प्रमाण का स्तर",
+    "evidenceLevelValue": "{level, select, clinical_trial {नैदानिक परीक्षण प्रमाण} human_observational {मानव अवलोकन आधारित प्रमाण} animal_model {पशु अध्ययन आधारित प्रमाण} in_vitro_cellular {इन-विट्रो/कोशिकीय प्रमाण} traditional_and_limited_clinical {पारंपरिक उपयोग, सीमित नैदानिक प्रमाण के साथ} anecdotal_traditional {पारंपरिक/किस्सागत प्रमाण} other {{level}}}",
     "stepGreeting": "शुरुआत",
     "stepSymptomCollection": "लक्षण साझा करना",
     "stepCauseCollection": "संभावित कारण साझा करना",

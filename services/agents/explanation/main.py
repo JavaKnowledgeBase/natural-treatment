@@ -36,8 +36,14 @@ SYSTEM_PROMPT = (
 
 # UI + LLM-conversation language support only (see docs/ARCHITECTURE.md) --
 # the per-herb "reason" sentence is the only user-visible text this agent
-# produces; herb names/evidence levels come from the (always-English)
-# starter dataset and stay as-is.
+# produces; herb *names* come from the (always-English) starter dataset and
+# stay as-is (see main.py's module docstring / the conversation with the
+# user about why -- botanical/traditional names carry real accuracy risk to
+# mistranslate). Evidence level is different: it's an internal enum
+# (EVIDENCE_LEVEL_SCORES in agent-scoring), not a proper noun, so it gets a
+# real translated phrase below rather than being embedded raw -- a raw
+# "human_observational" token showing up mid-sentence in a Hindi/Chinese/
+# French/Spanish response reads as broken, not just anglicized.
 LANGUAGE_NAMES = {
     "en": "English",
     "hi": "Hindi",
@@ -47,9 +53,58 @@ LANGUAGE_NAMES = {
 }
 DEFAULT_LANGUAGE = "en"
 
+EVIDENCE_LEVEL_PHRASES = {
+    "clinical_trial": {
+        "en": "clinical trial evidence",
+        "hi": "नैदानिक परीक्षण प्रमाण",
+        "zh": "临床试验证据",
+        "fr": "preuves d'essais cliniques",
+        "es": "evidencia de ensayos clínicos",
+    },
+    "human_observational": {
+        "en": "human observational evidence",
+        "hi": "मानव अवलोकन आधारित प्रमाण",
+        "zh": "人体观察性证据",
+        "fr": "preuves observationnelles chez l'humain",
+        "es": "evidencia observacional en humanos",
+    },
+    "animal_model": {
+        "en": "animal model evidence",
+        "hi": "पशु अध्ययन आधारित प्रमाण",
+        "zh": "动物模型证据",
+        "fr": "preuves issues de modèles animaux",
+        "es": "evidencia de modelos animales",
+    },
+    "in_vitro_cellular": {
+        "en": "in-vitro/cellular evidence",
+        "hi": "इन-विट्रो/कोशिकीय प्रमाण",
+        "zh": "体外/细胞实验证据",
+        "fr": "preuves in vitro/cellulaires",
+        "es": "evidencia in vitro/celular",
+    },
+    "traditional_and_limited_clinical": {
+        "en": "traditional use with limited clinical evidence",
+        "hi": "पारंपरिक उपयोग, सीमित नैदानिक प्रमाण के साथ",
+        "zh": "传统用法及有限的临床证据",
+        "fr": "usage traditionnel avec des preuves cliniques limitées",
+        "es": "uso tradicional con evidencia clínica limitada",
+    },
+    "anecdotal_traditional": {
+        "en": "anecdotal/traditional evidence",
+        "hi": "पारंपरिक/किस्सागत प्रमाण",
+        "zh": "传统经验性证据",
+        "fr": "preuves anecdotiques/traditionnelles",
+        "es": "evidencia anecdótica/tradicional",
+    },
+}
+
 
 def _normalize_language(language: str | None) -> str:
     return language if language in LANGUAGE_NAMES else DEFAULT_LANGUAGE
+
+
+def _evidence_level_phrase(level: str | None, language: str) -> str:
+    return EVIDENCE_LEVEL_PHRASES.get(level or "", {}).get(language, level or "unreviewed")
 
 
 def _localized_system_prompt(language: str) -> str:
@@ -58,8 +113,9 @@ def _localized_system_prompt(language: str) -> str:
     return (
         SYSTEM_PROMPT
         + f"\n\nWrite every sentence entirely in {LANGUAGE_NAMES[language]}, even though the herb "
-        "names and evidence levels given to you are in English -- weave them into each sentence "
-        "naturally rather than leaving the sentence itself in English."
+        f"name given to you is in English -- weave it into the sentence naturally rather than "
+        f"leaving the rest of the sentence in English. The evidence level phrase given to you is "
+        f"already translated into {LANGUAGE_NAMES[language]}; use it verbatim."
     )
 
 
@@ -108,9 +164,12 @@ async def _batched_reasons(qualifying: list[tuple[dict, dict]], language: str) -
     herb_lines = []
     for herb, entry in qualifying:
         mechanisms = [l.get("mechanism_summary") for l in herb.get("compounds", [])]
+        evidence_phrase = _evidence_level_phrase(herb.get("evidence_level"), language)
         herb_lines.append(
-            f"- id: {herb['id']}, name: {herb['name']}, evidence level: {herb.get('evidence_level')}, "
-            f"mechanism notes: {mechanisms}, confidence band: {entry['confidence_band']}"
+            f"- id: {herb['id']}, name: {herb['name']}, evidence level: \"{evidence_phrase}\" "
+            f"(use this exact phrase, already translated -- do not translate it yourself or leave "
+            f"an English/internal token in its place), mechanism notes: {mechanisms}, "
+            f"confidence band: {entry['confidence_band']}"
         )
     raw = await llm.complete_or_none(
         _localized_system_prompt(language),

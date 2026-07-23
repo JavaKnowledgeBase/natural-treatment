@@ -103,7 +103,7 @@ export default function SummaryPanel({
                 </div>
                 <p className="mt-1 text-sm text-stone-600">{r.reason}</p>
                 <p className="mt-1 text-xs text-stone-400">
-                  {t("evidenceLevel")}: {r.evidence_level}
+                  {t("evidenceLevel")}: {t("evidenceLevelValue", { level: r.evidence_level })}
                 </p>
                 {r.safety_note && <p className="mt-1 text-xs text-rose-700">⚠ {r.safety_note}</p>}
               </li>

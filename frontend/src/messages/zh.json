@@ -28,6 +28,7 @@
     "topRecommendations": "重点推荐",
     "confidenceLabel": "{band, select, high {高置信度} moderate {中等置信度} low {低置信度} other {置信度：{band}}}",
     "evidenceLevel": "证据等级",
+    "evidenceLevelValue": "{level, select, clinical_trial {临床试验证据} human_observational {人体观察性证据} animal_model {动物模型证据} in_vitro_cellular {体外/细胞实验证据} traditional_and_limited_clinical {传统用法及有限的临床证据} anecdotal_traditional {传统经验性证据} other {{level}}}",
     "stepGreeting": "开始对话",
     "stepSymptomCollection": "了解症状",
     "stepCauseCollection": "了解可能的原因",

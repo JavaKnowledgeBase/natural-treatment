@@ -28,6 +28,7 @@
     "topRecommendations": "Top recommendations",
     "confidenceLabel": "{band, select, high {high confidence} moderate {moderate confidence} low {low confidence} other {{band} confidence}}",
     "evidenceLevel": "Evidence level",
+    "evidenceLevelValue": "{level, select, clinical_trial {clinical trial evidence} human_observational {human observational evidence} animal_model {animal model evidence} in_vitro_cellular {in-vitro/cellular evidence} traditional_and_limited_clinical {traditional use with limited clinical evidence} anecdotal_traditional {anecdotal/traditional evidence} other {{level}}}",
     "stepGreeting": "Getting started",
     "stepSymptomCollection": "Sharing symptoms",
     "stepCauseCollection": "Sharing possible causes",
