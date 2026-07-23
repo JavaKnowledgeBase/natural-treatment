@@ -15,10 +15,12 @@ traces them to plausible biochemical root causes, and recommends herbs with
 some evidence behind them. It is built as ~13 independently deployable
 backend services plus a Next.js frontend, all coordinated by one
 orchestrator, with **Redis as the only stateful component in the entire
-system** — there is no SQL/NoSQL database anywhere. The backend is
-mid-migration from all-Python to a polyglot split: services that call an
-LLM stay in Python (FastAPI); every other service is being rewritten in
-Java (Spring Boot). See §7 for migration status.
+system** — there is no SQL/NoSQL database anywhere. The backend is a
+deliberate, permanent Python/Java polyglot split: services that call an
+LLM stay in Python (FastAPI); every other service is Java (Spring Boot) —
+see §7 for the full split and migration history. The UI and every
+LLM-generated response also support 5 languages (English default, Hindi,
+Chinese, French, Spanish) — see §8.
 
 ## 2. Service map
 
@@ -265,3 +267,124 @@ See `docs/TECHNICAL_GUIDE.md` for why each Java-side dependency choice was
 made, and `docs/DEVELOPER_GUIDE.md` for the concrete steps to migrate a
 service following the same pattern (kept accurate for reference even
 though the migration itself is complete).
+
+## 8. Multi-language support (English, Hindi, Chinese, French, Spanish)
+
+Added 2026-07-23. Deliberately scoped to **UI chrome and LLM-generated
+conversation only** — the backend catalog matcher (mock-mode's English
+keyword matching against `seed/data/*.json`) stays English-keyed
+regardless of session language. That scope boundary was a real, explicit
+decision, not an oversight: translating a ~20-symptom/18-herb starter
+dataset that's already flagged for a future real curation pass wasn't
+worth doing twice.
+
+### Frontend: locale routing
+
+`next-intl`, App Router `[locale]` segment, `localePrefix: "as-needed"` —
+English is the default and unprefixed (`/`, `/about`), the other four are
+prefixed (`/hi`, `/zh/privacy`, `/fr`, `/es`). Every visible string across
+every component and the About/Privacy/Terms pages is translated
+(`frontend/src/messages/{en,hi,zh,fr,es}.json`). Two ways to switch:
+a small dropdown in the header (`LanguageSwitcher`), and a first-visit
+picker of 4 buttons (English needs none — it's already the default)
+shown once under the greeting message, self-hiding permanently via
+`localStorage` the moment any language is chosen (`LanguagePicker`).
+Both share one `useLocaleSwitch` hook for the locale-prefix path
+rewriting, so the logic exists in exactly one place.
+
+Small but real detail: `confidence_band` and `evidence_level` are enums
+returned by the backend (`high`/`moderate`/`low`;
+`human_observational`/`clinical_trial`/etc.), not free text — these are
+translated on the frontend via ICU `select` message syntax
+(`next-intl`'s underlying `intl-messageformat`), not string concatenation,
+specifically because word order for "high confidence" differs by language
+(French puts the adjective after the noun, for example) in a way that
+concatenating two separately-translated words can't handle correctly.
+
+### Backend: session-scoped language, threaded through the pipeline
+
+Language is chosen once, at `POST /session` (frontend passes the current
+locale), normalized against a 5-value allowlist (invalid/missing → `en`),
+and stored in the orchestrator's Tier-2 session meta hash alongside
+`current_step`. Every subsequent orchestrator call that touches an
+LLM-backed agent — `agent-intake`'s symptom/cause turns, `agent-mapping`'s
+reasoning summary, `agent-explanation`'s per-herb text — reads the
+session's language from that meta and forwards it, so the frontend only
+ever specifies language once, not on every request.
+
+Two real gaps found and fixed via live testing across languages, not
+caught by review alone — both worth naming as examples of "verify against
+the running system, don't just trust the code":
+- **Mock mode's fallback templates were English-only regardless of
+  selected language** — a Hindi session got a correctly-Hindi greeting
+  and correctly-Hindi *live-mode* replies, but mock mode's "nothing
+  matched" fallback stayed hardcoded English. Fixed by translating all
+  five mock-mode templates (matched / suggestions-only / no-match, plus
+  two cause-turn variants) into all 5 languages, so mock mode's own
+  phrasing now matches the selected language even without a live Claude
+  call.
+- **Two strings the orchestrator generates directly** (the
+  "what events/stressors contributed" cause-collection prompt, and the
+  fallback reasoning summary if mapping's reasoning is ever null) were
+  hardcoded English and **completely bypassed the agent-level
+  localization work**, because they're not routed through any LLM
+  agent at all — the Java orchestrator builds them itself. Found because
+  a live Hindi session had one message still in English after every
+  agent-level fix landed; the bug was one layer up from where the fix
+  had been applied.
+
+### Symptom/herb display labels vs. internal ids
+
+Catalog ids (`chronic_headaches`, `ashwagandha`, ...) never change — every
+internal lookup (matching, `related_symptom_ids`, safety-rule lookups,
+scoring) keys off the English id, and the *live-mode* system prompts
+explicitly instruct Claude to return ids unchanged for exactly this
+reason. Only the **displayed label** is localized:
+- **Symptoms**: a translation table (`SYMPTOM_LABEL_TRANSLATIONS` in
+  `agent-intake`) maps each of the ~20 catalog ids to a translated label
+  per language, used for both matched-symptom chips and suggestion
+  chips, in both mock and live mode.
+- **Herb names**: shown as `"<local name> (<English name>)"` — e.g.
+  "अश्वगंधा (Ashwagandha)" — per an explicit user preference, favoring
+  genuine established traditional/pharmacopoeia names where one exists
+  (तुलसी for holy basil, 甘草 for licorice root — the real native names)
+  and falling back to plain phonetic transliteration rather than
+  inventing a name for herbs with no established local one. Applied
+  consistently in `agent-explanation`: the recommendation card title, the
+  mock-mode template fallback, *and* the context handed to Claude for the
+  generated reason sentence, so the same paired name shows up everywhere
+  instead of just the title.
+- **Evidence level** (`human_observational`, etc.) is translated the same
+  way symptom labels are, but for a different reason than herb names:
+  it's an internal enum, not a proper noun, so a raw untranslated token
+  showing up mid-sentence in a Hindi/Chinese/French/Spanish response
+  reads as an actual bug (found via live testing — a fluent Hindi
+  sentence with a literal English snake_case token sitting in the middle
+  of it), not just an anglicism worth preserving.
+
+### Handling users without a native-script keyboard
+
+Many Hindi and Chinese speakers don't have a Devanagari or Chinese input
+method available and type phonetically in the Latin alphabet instead
+(Hinglish for Hindi, Pinyin for Chinese) — even with that language
+selected in the UI. `agent-intake`'s live-mode system prompt explicitly
+instructs Claude to treat Romanized input like `"mujhe sar dard hai"` or
+`"tou teng"` as ordinary input in that language, not English and not a
+mix, and to still reply in the proper native script. Verified live: the
+exact phrase `"mujhe nid bhi kam aati hai aur thakan bhi jyada hai"`
+(Hinglish, no Devanagari at all) correctly matched both `fatigue` and
+`insomnia`, with a natural Hindi reply referencing both.
+
+### Cost note: `agent-explanation`'s Claude-call batching
+
+Unrelated to language, but landed in the same session: `agent-explanation`
+used to call Claude once per recommended herb (up to 5 separate calls per
+single `/analyze` request) — the single most Claude-call-heavy agent in
+the pipeline. It now makes one batched call covering every qualifying
+herb at once, cutting `/analyze`'s total Claude calls from 6 (1 mapping +
+5 explanation) to 2 (1 mapping + 1 batched explanation), with no change in
+output quality — same prompt content and per-herb constraints, verified
+live producing 5 distinct, correctly hedged, evidence-level-referencing
+explanations from a single call. If the batched call fails or returns
+incomplete JSON, each missing herb falls back independently to the
+deterministic template rather than failing the whole batch.

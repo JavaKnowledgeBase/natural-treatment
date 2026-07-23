@@ -134,7 +134,7 @@ anywhere yet — see §3 for what that costs).</p>
 <table>
 <thead><tr><th>Method &amp; path</th><th>Purpose</th></tr></thead>
 <tbody>
-<tr><td><code>POST /session</code></td><td>Start a session</td></tr>
+<tr><td><code>POST /session</code></td><td>Start a session. Optional <code>{language}</code> body (<code>en</code>/<code>hi</code>/<code>zh</code>/<code>fr</code>/<code>es</code>, default <code>en</code>) — chosen once, stored in the session, threaded into every later LLM-agent call. See §1c and <code>docs/ARCHITECTURE.md</code> §8.</td></tr>
 <tr><td><code>GET /session/{sid}</code></td><td>Full state (chat, symptoms, causes, recommendations)</td></tr>
 <tr><td><code>POST /session/{sid}/message</code></td><td>Send a chat turn</td></tr>
 <tr><td><code>POST /session/{sid}/add-item</code> / <code>/remove-item</code></td><td>Accept/reject a suggested symptom or cause</td></tr>
@@ -163,21 +163,25 @@ request/response bodies — the gateway adds no transformation, only CORS and ra
 <h3>1c. Orchestrator → the 7 agents + email (the fan-out, one call per pipeline stage)</h3>
 
 <p>Triggered only by <code>POST /sessions/{sid}/analyze</code>, in this exact sequence
-(<code>services/orchestrator/main.py</code>'s <code>analyze()</code>), each a blocking await —
-the next call doesn't start until the previous one returns:</p>
+(<code>OrchestratorService.analyze()</code> — Java, see <code>docs/ARCHITECTURE.md</code> §7),
+each a blocking call — the next call doesn't start until the previous one returns:</p>
 
 <ol>
-<li><code>POST agent-mapping:/mapping/analyze</code> — <code>{symptom_ids}</code> → <code>{imbalances, reasoning}</code></li>
+<li><code>POST agent-mapping:/mapping/analyze</code> — <code>{symptom_ids, language}</code> → <code>{imbalances, reasoning}</code></li>
 <li><code>POST agent-retrieval:/retrieval/candidates</code> — <code>{symptom_ids, imbalances}</code> → <code>{candidates}</code></li>
 <li><code>POST agent-safety:/safety/evaluate</code> — <code>{candidates, profile}</code> → <code>{verdicts}</code></li>
 <li><code>POST agent-scoring:/scoring/rank</code> — <code>{symptom_ids, candidates, verdicts}</code> → <code>{ranked}</code></li>
-<li><code>POST agent-explanation:/explanation/generate</code> — <code>{candidates, ranked, verdicts}</code> → <code>{recommendations}</code></li>
+<li><code>POST agent-explanation:/explanation/generate</code> — <code>{candidates, ranked, verdicts, language}</code> → <code>{recommendations}</code></li>
 </ol>
+
+<p><code>language</code> is the session's chosen language (§1a), read from Tier-2 session meta and
+forwarded automatically — the frontend never sends it on these calls directly. Retrieval/safety/
+scoring don't take it: none of the three touch an LLM or produce user-facing text.</p>
 
 <p>Plus, outside <code>/analyze</code>:</p>
 <ul>
-<li><code>GET agent-intake:/intake/greeting</code> — once, at <code>POST /sessions</code></li>
-<li><code>POST agent-intake:/intake/symptom-turn</code> / <code>/intake/cause-turn</code> — every chat message during collection</li>
+<li><code>GET agent-intake:/intake/greeting?language=...</code> — once, at <code>POST /sessions</code></li>
+<li><code>POST agent-intake:/intake/symptom-turn</code> / <code>/intake/cause-turn</code> — every chat message during collection, <code>{..., language}</code></li>
 <li><code>POST email:/email/verify</code> — at <code>/email/request</code></li>
 <li><code>POST agent-reporting:/reporting/compile</code> then <code>POST email:/email/send</code> — at <code>/email/confirm</code>, in that order (report must be compiled before it can be sent)</li>
 </ul>
@@ -186,6 +190,18 @@ the next call doesn't start until the previous one returns:</p>
 output (retrieval needs mapping's imbalances; safety needs retrieval's candidate list; scoring
 needs safety's verdicts; explanation needs scoring's ranks) — this is a genuine data-dependency
 chain, not an arbitrary choice. There's no parallelizable fan-out to exploit here today.</p>
+
+<div class="callout">
+<p><strong>Cost note, added 2026-07-23:</strong> step 5 (<code>agent-explanation</code>) used to
+make <em>one Claude call per recommended herb</em> internally — up to 5 separate calls hidden
+behind that single <code>POST</code> from the orchestrator's point of view, making this the most
+Claude-call-heavy step in the whole chain. It now makes one batched call covering every qualifying
+herb at once (same prompt content, same per-herb constraints, one request instead of five), cutting
+a full <code>/analyze</code>'s total Claude calls from 6 (1 mapping + 5 explanation) to 2. If the
+batch fails or returns incomplete JSON, each missing herb falls back independently to a
+deterministic template rather than failing the whole batch — the orchestrator-level API contract
+above didn't change at all; this was purely internal to <code>agent-explanation</code>.</p>
+</div>
 
 <h3>1d. Agents → Knowledge services (Tier 1 reads)</h3>
 

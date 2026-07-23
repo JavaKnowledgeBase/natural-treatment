@@ -14,7 +14,14 @@ architecture diagram is its own deployable app, communicating over HTTP,
 backed entirely by Redis (no persistent database anywhere). It runs fully
 locally with **zero external credentials** — every LLM call and every email
 send falls back to a clearly-labeled mock response when the corresponding
-API key is absent.
+API key is absent. The UI and every LLM-generated response also support 5
+languages (English default, Hindi, Chinese, French, Spanish).
+
+See `docs/` for deeper reference: `ARCHITECTURE.md` (as-built system
+design, request flow, multi-language support), `API_REFERENCE.md` (every
+API call + resiliency/security posture), `TECHNICAL_GUIDE.md` (stack
+choice rationale), and `PRODUCTION_READINESS.md` (the not-yet-executed
+production deployment plan).
 
 ## Running it locally
 
@@ -50,9 +57,10 @@ startup and switches mode automatically.
 ## Branding
 
 App name: **Rootwell**. Logo, About/Contact, Privacy, and Terms pages live in
-`frontend/src/app/{about,privacy,terms}` and `frontend/src/components/{Logo,Header,Footer}.tsx`.
-Contact email is `hello@rootwell.app` (placeholder pending domain registration).
-The Privacy and Terms pages are drafts reflecting the current architecture —
+`frontend/src/app/[locale]/{about,privacy,terms}` and
+`frontend/src/components/{Logo,Header,Footer}.tsx`. Contact email is
+`hello@rootwell.app` (placeholder pending domain registration). The
+Privacy and Terms pages are drafts reflecting the current architecture —
 have them reviewed by counsel before any real launch.
 
 ## What's in here
@@ -134,7 +142,9 @@ docker compose -f infra/docker-compose.yml exec redis redis-cli KEYS "session:$S
 
 ## Deferred to Phase 2
 
-- Cloud Run / Kubernetes deployment manifests (see the earlier conversation
-  for the recommended free-tier Cloud Run + Upstash Redis setup)
+- Real production deployment — see `docs/PRODUCTION_READINESS.md` for the
+  current plan (not yet executed): a single GCP `e2-small` VM running this
+  same `docker-compose.yml`, settled on after ruling out GCP's free tier
+  as too small for this app's 16 containers
 - Live fallback to IMPPAT/ChEBI/PubChem/CTD on a seed-bundle cache miss
 - Multi-symptom conflict resolution, personalized history, clinician review workflow

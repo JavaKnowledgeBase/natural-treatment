@@ -48,7 +48,7 @@ question.
 end-to-end before the next. Frontend stays Next.js. Full status table in
 `docs/ARCHITECTURE.md` §7.
 
-## Current status: Phase 1 built and verified end-to-end; Java migration complete
+## Current status: Phase 1 built and verified end-to-end; Java migration complete; design refresh + 5-language support shipped
 
 All 13 backend microservices + Next.js frontend exist, run via
 `docker compose -f infra/docker-compose.yml up -d --build`, and were
@@ -58,9 +58,19 @@ verification-code gate → session purge confirmed via `redis-cli`). Safety
 rule enforcement was verified too (volunteering "I am pregnant" correctly
 penalizes ashwagandha's score via the independent Safety Agent).
 
-Runs with **zero external credentials** by design — every LLM call
-(Anthropic) and every email send (Resend) falls back to a clearly-labeled
-mock response when the corresponding API key is absent from `.env`.
+As of 2026-07-23, also shipped and verified live (see "2026-07-23 session"
+below for the full rundown, and `docs/ARCHITECTURE.md` §8 for the technical
+detail): a premium design refresh (brand palette, typography, guided
+2-symptom intake flow), full UI + LLM-conversation support for English/
+Hindi/Chinese/French/Spanish, and a ~3x reduction in `agent-explanation`'s
+Claude API calls via batching.
+
+**`ANTHROPIC_API_KEY` is real and live** (set 2026-07-22) — all three LLM
+agents run in live mode on this machine, not mock mode, unless the key is
+later removed from `.env`. `RESEND_API_KEY` is still unset (email export
+mock mode). Every external dependency still falls back to a clearly-labeled
+mock response when its key is absent, by design — that property was
+preserved through both the migration and this session's changes.
 
 ### Architecture, in one paragraph
 
@@ -95,34 +105,118 @@ service.
 - These are host-port mappings only; internal container-to-container URLs
   are unaffected (still `:8000` on the docker network).
 
-### Bug fixed this session
+### Bug fixed in an earlier session
 
 Mock-mode intake agent originally required the *entire* catalog symptom
 phrase (e.g. "chronic headaches") to appear verbatim in the user's message,
 so "I have a headache" matched nothing. Fixed in
 `services/agents/intake/main.py` (`_symptom_matches` /
 `_word_matches_text`) to match on individual significant words with basic
-singular/plural tolerance instead of the whole phrase.
+singular/plural tolerance instead of the whole phrase. (Superseded in
+spirit by the 2026-07-23 language work below — live mode now understands
+symptom descriptions by meaning, not just keyword matching, in any of the
+5 supported languages; this fix is what mock mode still relies on.)
 
-## Branding (added this session)
+## Branding (established in an earlier session, some details updated 2026-07-23)
 
 - Logo: `frontend/src/components/Logo.tsx` — minimal botanical line-art
-  (leaf + root SVG) + "Root**well**" wordmark, two-tone (stone/emerald).
+  (leaf + root SVG) + "Root**well**" wordmark. **Updated 2026-07-23**: now
+  the brand/gold palette + serif wordmark from the design refresh, not the
+  original stone/emerald two-tone.
 - `frontend/src/components/Header.tsx` — site header, wraps every page via
-  `layout.tsx`.
+  `[locale]/layout.tsx`. Now also hosts the language dropdown
+  (`LanguageSwitcher`).
 - `frontend/src/components/Footer.tsx` — contact/legal links.
-- `frontend/src/app/about/page.tsx` — mission blurb, founder byline ("Ravi
-  Kafley, Founder"), contact email.
-- `frontend/src/app/privacy/page.tsx` and `.../terms/page.tsx` — **drafts**
-  that accurately reflect the current cache-only architecture, explicitly
-  marked as needing real legal review before any public launch.
+- `frontend/src/app/[locale]/about/page.tsx` — mission blurb, founder
+  byline ("Ravi Kafley, Founder"), contact email. **Path changed
+  2026-07-23**: moved under `[locale]/` for i18n routing — was
+  `frontend/src/app/about/page.tsx` before.
+- `frontend/src/app/[locale]/privacy/page.tsx` and `.../terms/page.tsx`
+  (same path change as above) — **drafts** that accurately reflect the
+  current cache-only architecture, explicitly marked as needing real legal
+  review before any public launch.
 - No phone number yet — user is getting a Google Voice number to forward;
   add it to the About page and Footer once provided. Don't add a personal
   number without checking first (flagged as a public-exposure tradeoff
   earlier in the conversation).
 
+## 2026-07-23 session: design refresh, guided intake, 5-language support, cost optimization
+
+Full technical detail lives in `docs/ARCHITECTURE.md` §8 (multi-language)
+and inline in the code; this is the "what shipped and where to look"
+summary for picking the thread back up.
+
+**Design refresh** — deep sage/forest-green `brand` palette + muted
+antique-gold `gold` accent (`frontend/tailwind.config.js`), replacing the
+original generic Tailwind emerald; serif display type (Fraunces, via
+`next/font/google`) for headings/wordmark paired with Inter for body/UI;
+warm ivory `paper` background; soft card shadows and rounder corners
+throughout Header/Footer/ChatPanel/SummaryPanel/EmailExport and the
+About/Privacy/Terms pages.
+
+**Guided intake flow** — the "I've said everything about my symptoms"
+advance link and the analyze button now require at least 2 matched
+symptoms before appearing (a quiet progress hint shows below that
+threshold), and both actions open an inline confirmation ("anything else
+you'd like to add?") before proceeding rather than committing immediately.
+Conversational copy across `agent-intake` and the frontend was rewritten
+(researched via web search — Woebot-style empathetic UX writing
+principles) to acknowledge what the user shared and avoid clinical
+phrasing.
+
+**Multi-language support** (English default, Hindi, Chinese, French,
+Spanish) — full detail in `docs/ARCHITECTURE.md` §8. Scoped to UI chrome
+and LLM-generated conversation only; backend catalog matching stays
+English-keyed. Frontend: `next-intl`, locale-prefixed routing, a header
+dropdown plus a first-visit picker under the greeting. Backend: session
+language chosen once at `POST /session`, threaded through the orchestrator
+to every LLM-backed agent. Live mode also explicitly handles
+Romanized/transliterated input (Hinglish, Pinyin) for users without a
+native-script keyboard — verified live matching symptoms correctly from
+pure Latin-script Hindi input. Herb names shown as
+`"<local name> (<English name>)"` per explicit preference (e.g.
+"अश्वगंधा (Ashwagandha)"), favoring genuine traditional names where one
+exists and phonetic transliteration otherwise, never an invented name.
+
+**Cost optimization** — `agent-explanation` batched from up to 5 Claude
+calls (one per recommended herb) into 1 per `/analyze`, cutting that
+endpoint's total Claude calls from 6 to 2. Verified live producing 5
+distinct, correctly hedged explanations from the single batched call.
+
+**`docs/PRODUCTION_READINESS.md`** — the production push plan, not yet
+acted on. Settled on a single GCP `e2-small` VM ($12.23/month, confirmed
+under a $15/month budget) after ruling out GCP's free tier as genuinely
+too small for this app's 16 containers — see that doc for the sourced
+free-tier research and the reasoning trail, not just the conclusion.
+
+**Donation compliance** — researched Stripe/app-store Restricted
+Businesses policy requirements for health-adjacent apps ahead of building
+the donation feature (still a `CLAUDE.md` todo, not built). Audited the
+app directly (grepped every herb record, every LLM system prompt, and the
+UI copy) rather than just noting the requirements — the medical disclaimer
+and no-disease-claims requirements were already satisfied by the original
+design (hedged language and no-diagnosis rules were already in the system
+prompts from the start). The one real remaining action: frame the
+eventual donation copy as "support the project," never as payment for
+advice.
+
 ## Open items / where to pick up next
 
+- [ ] **Scope idea, not decided (raised 2026-07-23):** recommendations
+      might not always be herbal — could span combinations of
+      conventional medicine, diet, and exercise, not just herbs.
+      Diet/exercise additions are a comparatively small lift (same
+      hedged-language pattern, same "informational not prescriptive"
+      posture already in place). **Actual medication recommendations are
+      a much bigger jump, flagged explicitly rather than scoped
+      casually**: real drug-drug interaction complexity beyond the
+      current herb-contraindication rules, and it pushes the app
+      meaningfully closer to practicing-medicine territory than
+      "informational herbal support" — directly changes the calculus on
+      the Stripe/app-store donation compliance research above (that
+      research assumed the current herb-only, hedged-language posture).
+      Needs real product/legal thought before any implementation, not
+      just a dataset expansion.
 - [ ] Add phone number (Google Voice) once the user has it
 - [ ] Register `rootwell.app` (or whatever domain) and set up real email
       forwarding for `hello@rootwell.app`, then swap `RESEND_FROM_ADDRESS`
@@ -175,6 +269,23 @@ singular/plural tolerance instead of the whole phrase.
       "support the project" / "help cover server + API costs" — never
       anything implying payment grants better advice or faster/special
       treatment.
+      **App Store / Play Store IAP rule (researched 2026-07-23, only
+      relevant if this ever becomes a native app):** Apple/Google
+      generally require donations to go through their official In-App
+      Purchase system (15-30% cut) rather than a third-party processor
+      like Stripe/Ko-fi for anything they classify as a native app, on
+      risk of rejection. **This does not currently apply** — Rootwell is
+      a website (Next.js), not distributed through either app store, so
+      the Ko-fi/Stripe external-link recommendation above stands as-is.
+      Only becomes relevant if the app is later wrapped for native
+      distribution (e.g. a WebView/Capacitor shell) — worth remembering
+      *then*, not something to design around now. Two open questions
+      surfaced by this research, not yet answered by the user: (1) is a
+      native App Store/Play Store release even planned, or web-only for
+      the foreseeable future? (2) does the user want help drafting a
+      more formal/standard medical disclaimer beyond the current one
+      (which is already solid, per the audit above, but a dedicated
+      pass was offered and not yet taken up)?
 
 ## How to verify it still works
 

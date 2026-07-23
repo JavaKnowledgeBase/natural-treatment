@@ -15,7 +15,7 @@ async/event-driven hop anywhere yet — see §3 for what that costs).
 
 | Method & path | Purpose |
 |---|---|
-| `POST /session` | Start a session |
+| `POST /session` | Start a session. Optional `{language}` body (`en`/`hi`/`zh`/`fr`/`es`, default `en`) — chosen once, stored in the session, threaded into every later LLM-agent call. See §1c and `docs/ARCHITECTURE.md` §8. |
 | `GET /session/{sid}` | Full state (chat, symptoms, causes, recommendations) |
 | `POST /session/{sid}/message` | Send a chat turn |
 | `POST /session/{sid}/add-item` / `/remove-item` | Accept/reject a suggested symptom or cause |
@@ -43,18 +43,24 @@ and rate limiting (see §4).
 ### 1c. Orchestrator → the 7 agents + email (the fan-out, one call per pipeline stage)
 
 Triggered only by `POST /sessions/{sid}/analyze`, in this exact sequence
-(`services/orchestrator/main.py`'s `analyze()`), each a blocking
-await — the next call doesn't start until the previous one returns:
+(`OrchestratorService.analyze()` — Java, see `docs/ARCHITECTURE.md` §7),
+each a blocking call — the next call doesn't start until the previous one
+returns:
 
-1. `POST agent-mapping:/mapping/analyze` — `{symptom_ids}` → `{imbalances, reasoning}`
+1. `POST agent-mapping:/mapping/analyze` — `{symptom_ids, language}` → `{imbalances, reasoning}`
 2. `POST agent-retrieval:/retrieval/candidates` — `{symptom_ids, imbalances}` → `{candidates}`
 3. `POST agent-safety:/safety/evaluate` — `{candidates, profile}` → `{verdicts}`
 4. `POST agent-scoring:/scoring/rank` — `{symptom_ids, candidates, verdicts}` → `{ranked}`
-5. `POST agent-explanation:/explanation/generate` — `{candidates, ranked, verdicts}` → `{recommendations}`
+5. `POST agent-explanation:/explanation/generate` — `{candidates, ranked, verdicts, language}` → `{recommendations}`
+
+`language` is the session's chosen language (§1a), read from Tier-2
+session meta and forwarded automatically — the frontend never sends it on
+these calls directly. Retrieval/safety/scoring don't take it: none of the
+three touch an LLM or produce user-facing text.
 
 Plus, outside `/analyze`:
-- `GET agent-intake:/intake/greeting` — once, at `POST /sessions`
-- `POST agent-intake:/intake/symptom-turn` / `/intake/cause-turn` — every chat message during collection
+- `GET agent-intake:/intake/greeting?language=...` — once, at `POST /sessions`
+- `POST agent-intake:/intake/symptom-turn` / `/intake/cause-turn` — every chat message during collection, `{..., language}`
 - `POST email:/email/verify` — at `/email/request`
 - `POST agent-reporting:/reporting/compile` then `POST email:/email/send` — at `/email/confirm`, in that order (report must be compiled before it can be sent)
 
@@ -63,6 +69,18 @@ stage's output (retrieval needs mapping's imbalances; safety needs
 retrieval's candidate list; scoring needs safety's verdicts; explanation
 needs scoring's ranks) — this is a genuine data-dependency chain, not an
 arbitrary choice. There's no parallelizable fan-out to exploit here today.
+
+**Cost note, added 2026-07-23:** step 5 (`agent-explanation`) used to make
+*one Claude call per recommended herb* internally — up to 5 separate calls
+hidden behind that single `POST` from the orchestrator's point of view,
+making this the most Claude-call-heavy step in the whole chain. It now
+makes one batched call covering every qualifying herb at once (same
+prompt content, same per-herb constraints, one request instead of five),
+cutting a full `/analyze`'s total Claude calls from 6 (1 mapping + 5
+explanation) to 2. If the batch fails or returns incomplete JSON, each
+missing herb falls back independently to a deterministic template rather
+than failing the whole batch — the orchestrator-level API contract above
+didn't change at all; this was purely internal to `agent-explanation`.
 
 ### 1d. Agents → Knowledge services (Tier 1 reads)
 

@@ -8,27 +8,30 @@ pick.
 
 ## 0. Full service inventory
 
+Java migration is complete (`ARCHITECTURE.md` §7) — this table reflects
+the final, permanent split, not an in-progress state.
+
 | Service | Language / Framework | Key dependencies | Calls out to | Talks to Redis? |
 |---|---|---|---|---|
-| `frontend` | Next.js 14 (App Router) / React 18 / TypeScript | Tailwind CSS | `gateway` only | No |
+| `frontend` | Next.js 14 (App Router) / React 18 / TypeScript | Tailwind CSS, `next-intl` | `gateway` only | No |
 | `gateway` | Python / FastAPI + Uvicorn | `httpx` | `orchestrator` | Yes (rate-limit counters only) |
-| `orchestrator` | Python / FastAPI + Uvicorn | `httpx`, `shared` (cache, models) | all 7 agents + `email` | Yes (Tier 2, exclusively) |
+| `orchestrator` | **Java 21 / Spring Boot 3** | `spring-boot-starter-web`, `spring-boot-starter-data-redis` | all 7 agents + `email` | Yes (Tier 2, exclusively) |
 | `agent-intake` | Python / FastAPI + Uvicorn | `httpx`, `shared.llm` (Anthropic) | `knowledge-toxicology` | No |
 | `agent-mapping` | Python / FastAPI + Uvicorn | `httpx`, `shared.llm` (Anthropic) | `knowledge-toxicology` | No |
-| `agent-retrieval` | *migrating to Java* | `httpx` (today) | `knowledge-botanical`, `knowledge-compound` | No |
-| `agent-safety` | *migrating to Java* | `httpx` (today) | `knowledge-rules` | No |
-| `agent-scoring` | *migrating to Java* | none — pure function | none | No |
+| `agent-retrieval` | **Java 21 / Spring Boot 3** | `spring-boot-starter-web` | `knowledge-botanical`, `knowledge-compound` | No |
+| `agent-safety` | **Java 21 / Spring Boot 3** | `spring-boot-starter-web` | `knowledge-rules` | No |
+| `agent-scoring` | **Java 21 / Spring Boot 3** | none — pure function | none | No |
 | `agent-explanation` | Python / FastAPI + Uvicorn | `shared.llm` (Anthropic) | none | No |
-| `agent-reporting` | *migrating to Java* | none — pure templating | none | No |
-| `email` | *migrating to Java* | `httpx` (Resend REST API) today | Resend API | Yes (verification codes + rate limit) |
-| `knowledge-botanical` | **Java 21 / Spring Boot 3** (migrated) | `spring-boot-starter-web`, `spring-boot-starter-data-redis` | none | Yes (Tier 1, read-only) |
-| `knowledge-compound`, `-toxicology`, `-rules` | *migrating to Java* | `shared.cache` (today) | none | Yes (Tier 1, read-only) |
+| `agent-reporting` | **Java 21 / Spring Boot 3** | `spring-boot-starter-web` (HTML-escaping via `HtmlUtils`) | none | No |
+| `email` | **Java 21 / Spring Boot 3** | `spring-boot-starter-web` (Resend REST API) | Resend API | Yes (verification codes + rate limit) |
+| `knowledge-botanical`, `-compound`, `-toxicology`, `-rules` | **Java 21 / Spring Boot 3** | `spring-boot-starter-web`, `spring-boot-starter-data-redis` | none | Yes (Tier 1, read-only) |
 | `shared` (Python library, not a service) | Python package | `pydantic`, `redis`, `httpx`, `anthropic` | — | — |
 
 The three agents that stay Python (`intake`, `mapping`, `explanation`) are
 exactly the three that `import shared.llm` — verified by grepping the repo
-for that import, not assumed from memory. Everything else is either
-already migrated or on the migration list (`ARCHITECTURE.md` §7).
+for that import, not assumed from memory. `gateway` also stays Python, by
+explicit choice rather than an LLM dependency (`ARCHITECTURE.md` §7).
+Everything else is Java.
 
 ---
 
@@ -200,6 +203,30 @@ chosen specifically because a few pages (About/Privacy/Terms) benefit from
 server rendering (simple content, good for the eventual public-launch SEO
 need) while the chat itself is a normal client-rendered app — Next.js lets
 both live in one project without maintaining two frontend build pipelines.
+
+**`next-intl` (i18n, added 2026-07-23):** chosen over hand-rolling a
+translation dictionary + manual locale-prefix routing for three concrete
+reasons that mattered here specifically, not just "it's the standard
+choice": (1) native App Router support for the `[locale]` dynamic-segment
+routing pattern this app uses, rather than the older `pages/`-router-era
+i18n approaches; (2) ICU `MessageFormat` support out of the box — used for
+exactly one real problem, not speculatively: `confidence_band` and
+`evidence_level` are enums, and "high confidence" vs. French's
+"confiance élevée" (adjective *after* the noun) can't be built correctly
+by concatenating two independently-translated words, so those two labels
+are ICU `select` messages (`{band, select, high {...} moderate {...} ...}`),
+not string concatenation; (3) both server components (`getTranslations`
+from `next-intl/server`) and client components (`useTranslations`) are
+first-class, matching this app's existing mix of server-rendered static
+pages and a client-rendered chat panel — a library that only supported one
+or the other would have forced a worse fit.
+
+**Rejected: `react-i18next` / `i18next`.** Mature, framework-agnostic, and
+would have worked — but it predates the App Router and needs more manual
+wiring (a custom provider, manual locale detection/routing) to get the
+same `[locale]`-segment behavior `next-intl` provides natively. Would be
+the more defensible choice for a non-Next.js React app; here it would have
+been solving a routing problem `next-intl` already solves.
 
 ---
 
