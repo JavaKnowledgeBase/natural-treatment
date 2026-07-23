@@ -40,6 +40,30 @@ public class OrchestratorService {
         return language != null && SUPPORTED_LANGUAGES.contains(language) ? language : DEFAULT_LANGUAGE;
     }
 
+    /** UI-visible text generated directly by the orchestrator itself,
+     * rather than by an LLM agent -- easy to miss when adding language
+     * support since it doesn't flow through any of the Python agents'
+     * localization paths. */
+    private String advanceToCausesMessage(String language) {
+        return switch (language) {
+            case "hi" -> "आपको क्या लगता है कि किन घटनाओं, तनावों या रोज़मर्रा की गतिविधियों ने इसमें योगदान दिया हो सकता है?";
+            case "zh" -> "您觉得可能是哪些事件、压力或日常活动导致了这种情况？";
+            case "fr" -> "Selon vous, quels événements, facteurs de stress ou activités quotidiennes pourraient y avoir contribué ?";
+            case "es" -> "¿Qué eventos, factores de estrés o actividades diarias crees que podrían haber contribuido a esto?";
+            default -> "What events, stressors, or daily activities do you think may have contributed?";
+        };
+    }
+
+    private String defaultReasoningSummary(String language) {
+        return switch (language) {
+            case "hi" -> "आपने जो साझा किया उसके आधार पर, यहाँ हमारे प्रारंभिक डेटासेट का सुझाव है।";
+            case "zh" -> "根据您分享的信息，以下是初始数据集给出的建议。";
+            case "fr" -> "Voici ce que suggère notre jeu de données de démarrage, d'après ce que vous avez partagé.";
+            case "es" -> "Esto es lo que sugiere nuestro conjunto de datos inicial, según lo que compartiste.";
+            default -> "Here's what the starter dataset suggests based on what you shared.";
+        };
+    }
+
     public Map<String, Object> createSession(String language) {
         String sid = newSessionId();
         String lang = normalizeLanguage(language);
@@ -149,7 +173,7 @@ public class OrchestratorService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can only advance to cause collection from symptom collection");
         }
         cache.setStep(sid, "cause_collection");
-        String message = "What events, stressors, or daily activities do you think may have contributed?";
+        String message = advanceToCausesMessage(normalizeLanguage((String) meta.get("language")));
         cache.appendChatMessage(sid, "assistant", message);
         return Map.of("current_step", "cause_collection", "assistant_message", message);
     }
@@ -201,7 +225,7 @@ public class OrchestratorService {
         Object reasoning = mappingResult.get("reasoning");
         String summary = reasoning != null
                 ? String.valueOf(reasoning)
-                : "Here's what the starter dataset suggests based on what you shared.";
+                : defaultReasoningSummary(language);
         cache.appendChatMessage(sid, "assistant", summary);
 
         Map<String, Object> result = new HashMap<>();
