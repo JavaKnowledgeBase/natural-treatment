@@ -315,20 +315,69 @@ fixed at the architecture level instead of papering over the symptom.
       three LLM agents confirmed running with `mock_mode: false`
 - [ ] `RESEND_API_KEY` is still unset — email export runs in mock mode
       (logs the rendered email instead of sending it)
-- [ ] Replace/expand the starter seed dataset (`seed/data/*.json`, **23
-      herbs as of 2026-07-23**, up from 18 — added feverfew, cramp bark,
-      chasteberry, psyllium, boswellia to fill the 4 symptom categories
-      that had only one herb each: `chronic_headaches`,
-      `muscle_tension`, `menstrual_discomfort`, `occasional_constipation`.
-      Each new entry researched via web search for real evidence-level/
-      contraindication accuracy before adding, and the 4 new safety rules
-      — feverfew+chasteberry pregnancy, chasteberry hormone-sensitive,
-      cramp_bark pregnancy, boswellia pregnancy — verified to actually
-      fire against `agent-safety` directly, not just decoratively listed)
-      with real curated data — every record, including the new ones, is
-      still tagged `curation_status: starter_dataset_unreviewed` and that
-      flag is threaded through to the UI and email export on purpose;
-      don't remove the flag without an actual curation pass
+- [ ] Replace/expand the starter seed dataset with real curated data —
+      every record, including everything added below, is still tagged
+      `curation_status: starter_dataset_unreviewed` and that flag is
+      threaded through to the UI and email export on purpose; don't
+      remove the flag without an actual expert (clinical herbalist/
+      pharmacist) review pass. **State as of 2026-07-23: 43 herbs (up
+      from 18), 32 symptoms (up from 20).** Two expansion rounds:
+      - Round 1 (+5 herbs): feverfew, cramp bark, chasteberry, psyllium,
+        boswellia — filled the 4 symptom categories that had only one
+        herb each (`chronic_headaches`, `muscle_tension`,
+        `menstrual_discomfort`, `occasional_constipation`).
+      - Round 2 (+12 symptoms, +20 herbs): user asked to make the app
+        genuinely resourceful/familiar to Indian and Chinese users, not
+        just pad numbers. Expanded the symptom taxonomy first (acid_reflux,
+        loss_of_appetite, diarrhea, acne, hair_loss, nasal_congestion,
+        low_libido, menopausal_symptoms, blood_sugar_imbalance,
+        memory_lapses, water_retention, frequent_urination — confirmed via
+        a research pass that both LLM agents fetch the catalog dynamically
+        per-request, so this needed no prompt/code changes), then added 10
+        Ayurvedic + 10 TCM herbs targeting the new + existing categories:
+        brahmi, guduchi, amla, neem, fenugreek, gotu_kola, shatavari,
+        guggul, arjuna, punarnava, astragalus, panax_ginseng, schisandra,
+        reishi, he_shou_wu, dong_quai, goji_berry, cordyceps, poria,
+        bupleurum. All 30 new herbs across both rounds researched via
+        PubMed/NCBI/clinical-trial-tier sources, not general blogs —
+        deliberately turned down a "hundreds from web blogs" ask in favor
+        of this slower, verifiable standard.
+      - **Added a `liver_disease` condition to `SafetyService.java`'s
+        fixed `CONDITION_KEYWORDS` vocabulary** (`services/agents/safety/
+        .../SafetyService.java`) — 3 of the new TCM/Ayurvedic herbs
+        (guduchi, he_shou_wu, bupleurum) have real, documented
+        hepatotoxicity case reports found during research, and the
+        existing vocabulary had no matching category; without this the
+        rules would have been silently non-functional (see below on why
+        that matters). He Shou Wu's liver rule is `disallowed` (factor
+        0.0, not just penalized) given documented fatal case reports.
+      - **Real gotcha found verifying this, worth remembering**:
+        `agent-intake` caches the symptom catalog in a module-level
+        Python variable (`_catalog_cache` in `services/agents/intake/
+        main.py`) fetched once per process lifetime, no TTL. Reseeding
+        Redis alone is not enough after adding symptoms/herbs —
+        `agent-intake` (and `agent-mapping`, same pattern) must be
+        *restarted* too, locally and in production, or it keeps
+        matching against the stale catalog it fetched at startup. Cost
+        one confusing "0 symptoms matched" debugging round before being
+        traced to this.
+      - **`SafetyService.CONDITION_KEYWORDS` is a hard-coded enum, not
+        free-text/semantic matching** — worth remembering before adding
+        any herb's contraindications: a condition tag only actually
+        does anything if it's in that fixed map (or is `pregnancy`/
+        `pediatric`, which are special-cased). An invented tag not in
+        that list creates a rule that looks real in `rules.json` but
+        silently never fires. Checked this for every new rule this
+        session rather than assuming.
+      - **Not yet done, explicitly deferred**: the user's original ask
+        was "hundreds" of herbs; this delivered 30 at real rigor instead.
+        Getting to genuine hundreds needs primary-literature access this
+        session doesn't have (WHO monographs, national pharmacopoeias,
+        Natural Medicines Database), likely a richer taxonomy than 32
+        Western-biochemical-styled categories to actually represent
+        Ayurvedic/TCM diagnostic logic, and eventually real expert
+        review — flagged to the user directly as a multi-session effort,
+        not something to compress into one sitting.
 - [ ] **Scoring quirk noticed 2026-07-23, not yet investigated**: the
       same top-5 herbs/scores (elderberry, maca, psyllium, passionflower,
       nettle) showed up across two different symptom combinations tested

@@ -28,6 +28,7 @@ public class SafetyService {
             Map.entry("hormone_sensitive_condition", List.of("hormone", "estrogen", "breast cancer", "endometriosis", "pcos")),
             Map.entry("autoimmune_condition", List.of("autoimmune", "lupus", "rheumatoid", "hashimoto", "crohn", "multiple sclerosis")),
             Map.entry("kidney_disease", List.of("kidney", "renal")),
+            Map.entry("liver_disease", List.of("liver", "hepatic", "hepatitis", "cirrhosis")),
             Map.entry("hypertension", List.of("hypertension", "high blood pressure")),
             Map.entry("gerd", List.of("gerd", "acid reflux", "heartburn")),
             Map.entry("gallstones", List.of("gallstone", "gallbladder")),
