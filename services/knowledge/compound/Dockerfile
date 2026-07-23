@@ -1,16 +1,15 @@
-FROM python:3.11-slim
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /build
+
+COPY services/knowledge/compound/pom.xml .
+RUN mvn -q -B dependency:go-offline
+
+COPY services/knowledge/compound/src ./src
+RUN mvn -q -B -DskipTests package
+
+FROM eclipse-temurin:21-jre
 WORKDIR /app
-
-COPY shared /app/shared
-RUN pip install --no-cache-dir -e /app/shared
-
-COPY seed /app/seed
-
-COPY services/knowledge/compound/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY services/knowledge/compound/main.py .
-COPY services/knowledge/compound/app ./app
+COPY --from=build /build/target/app.jar app.jar
 
 EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

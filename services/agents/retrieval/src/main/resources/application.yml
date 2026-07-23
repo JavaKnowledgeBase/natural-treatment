@@ -1,0 +1,15 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: agent-retrieval
+
+botanical-service:
+  url: ${BOTANICAL_SERVICE_URL:http://knowledge-botanical:8000}
+compound-service:
+  url: ${COMPOUND_SERVICE_URL:http://knowledge-compound:8000}
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%X{correlationId}] %-5level %logger{36} - %msg%n"

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>DEVELOPER_GUIDE.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="rootwell--developer-guide">Rootwell — Developer Guide</h1>
+<p>Practical, task-oriented reference for working in this repo. For <em>why</em> the
+system is shaped this way, see <code>docs/ARCHITECTURE.md</code>. For <em>why each
+dependency was chosen</em>, see <code>docs/TECHNICAL_GUIDE.md</code>.</p>
+<h2 id="1-prerequisites">1. Prerequisites</h2>
+<ul>
+<li>Docker + Docker Compose (v2 CLI — <code>docker compose</code>, not <code>docker-compose</code>).
+Everything runs in containers; you do <strong>not</strong> need a local JDK, Maven, or
+Python interpreter installed to build or run any service — every
+Dockerfile is a self-contained multi-stage build.</li>
+<li>Nothing else is required to run the app in mock mode. Real credentials
+(<code>ANTHROPIC_API_KEY</code>, <code>RESEND_API_KEY</code>) are optional — see §5.</li>
+</ul>
+<h2 id="2-running-it">2. Running it</h2>
+<pre class="hljs"><code><div>docker compose -f infra/docker-compose.yml up -d --build
+docker compose -f infra/docker-compose.yml ps        <span class="hljs-comment"># everything should be Up</span>
+</div></code></pre>
+<ul>
+<li>Frontend: http://localhost:3000</li>
+<li>Gateway (for curling the API directly): http://localhost:8082</li>
+<li>Redis (host-mapped, for <code>redis-cli</code> debugging): <code>redis-cli -p 6380</code></li>
+</ul>
+<p>Rebuild a single service after editing it:</p>
+<pre class="hljs"><code><div>docker compose -f infra/docker-compose.yml up -d --build knowledge-botanical
+</div></code></pre>
+<p>Tail logs for one service:</p>
+<pre class="hljs"><code><div>docker compose -f infra/docker-compose.yml logs -f agent-intake
+</div></code></pre>
+<h2 id="3-repo-layout">3. Repo layout</h2>
+<pre class="hljs"><code><div>frontend/                 Next.js chat UI — the only thing that talks to the gateway
+services/
+  gateway/                BFF: CORS, rate limiting, proxy to orchestrator
+  orchestrator/           Session state machine, Tier 2 cache owner, fan-out to agents
+  agents/                 intake, mapping, retrieval, safety, scoring, explanation, reporting
+  knowledge/              botanical, compound, toxicology, rules — Tier 1 lookups
+  email/                  Verification-gated export via Resend or mock
+shared/                   Python-only: Redis cache helpers + Pydantic models + LLM wrapper
+seed/                     Starter herb/compound/symptom/rule dataset + idempotent loader
+infra/docker-compose.yml  Local multi-service run
+docs/                     This guide, ARCHITECTURE.md, TECHNICAL_GUIDE.md
+research docs/            Original product/architecture design docs (still authoritative for product decisions)
+</div></code></pre>
+<p>Every service directory is independently buildable — its Dockerfile's
+build <code>context</code> is the repo root (see <code>infra/docker-compose.yml</code>), so it
+can <code>COPY shared /app/shared</code> etc., but nothing else about it depends on
+sibling services at build time.</p>
+<h2 id="4-two-backend-stacks-one-set-of-conventions">4. Two backend stacks, one set of conventions</h2>
+<p>The backend is mid-migration (see <code>ARCHITECTURE.md</code> §7): LLM-calling
+services stay Python/FastAPI, everything else is moving to Java/Spring
+Boot. Both stacks follow the same external contract so the rest of the
+system never needs to know which language a given service is written in:</p>
+<ul>
+<li>Every service listens on container port <strong>8000</strong> and exposes
+<code>GET /healthz</code> returning at least <code>{&quot;status&quot;: &quot;ok&quot;}</code>.</li>
+<li>Every service reads <code>REDIS_URL</code> from the environment
+(<code>redis://redis:6379/0</code> inside compose).</li>
+<li>Service-to-service calls always go through the plain HTTP JSON API, at
+the compose network alias (e.g. <code>http://knowledge-botanical:8000</code>) —
+never a shared library call across a service boundary, even between two
+Java services later on.</li>
+<li>Docker builds are multi-stage: a build-tool stage (<code>pip install</code>, or
+<code>mvn package</code>) producing an artifact, copied into a slim runtime stage.
+No build toolchain ships in the final image.</li>
+</ul>
+<h3 id="4a-addingchanging-a-python-fastapi-service">4a. Adding/changing a Python (FastAPI) service</h3>
+<ol>
+<li><code>main.py</code> at the service root, <code>app = FastAPI(...)</code>, at minimum a
+<code>GET /healthz</code>.</li>
+<li><code>requirements.txt</code> — only list what's <em>not</em> already pulled in
+transitively via the shared package (<code>shared/pyproject.toml</code> already
+provides <code>pydantic</code>, <code>redis</code>, <code>httpx</code>, <code>anthropic</code> — don't re-list
+them).</li>
+<li>Dockerfile pattern (copy this from any existing Python service, e.g.
+<code>services/knowledge/botanical</code> before its Java rewrite, or
+<code>services/agents/scoring/Dockerfile</code> today): <code>python:3.11-slim</code> base,
+<code>COPY shared</code> + <code>pip install -e /app/shared</code>, then the service's own
+requirements and source.</li>
+<li>Add the service to <code>infra/docker-compose.yml</code> under the
+<code>x-backend-service</code> anchor (env_file, <code>REDIS_URL</code>, depends on
+<code>redis: service_healthy</code>), pick an unused host port in the 808x/809x/
+810x range already established.</li>
+<li>If it needs Tier 1 data, call <code>await load_seed()</code> on startup (see any
+<code>knowledge/*</code> service) — it's idempotent, safe to call from multiple
+services' startup hooks.</li>
+</ol>
+<h3 id="4b-migrating-a-service-from-python-to-java-the-established-pattern">4b. Migrating a service from Python to Java (the established pattern)</h3>
+<p>Follow <code>services/knowledge/botanical</code>'s layout as the template:</p>
+<pre class="hljs"><code><div>services/&lt;name&gt;/
+  pom.xml                          Spring Boot 3 parent, spring-boot-starter-web
+                                    + spring-boot-starter-data-redis
+  Dockerfile                       multi-stage: maven:3.9-eclipse-temurin-21 build
+                                    -&gt; eclipse-temurin:21-jre runtime
+  src/main/java/app/rootwell/&lt;name&gt;/
+    &lt;Name&gt;Application.java         @SpringBootApplication entrypoint
+    &lt;Name&gt;Controller.java          REST endpoints, matching the old FastAPI
+                                    routes byte-for-byte (same paths, same
+                                    JSON shapes) so no caller needs to change
+    RefCacheService.java           Redis access, if the service reads Tier 1 data
+    CorrelationIdFilter.java       copy as-is; see §6 below
+  src/main/resources/
+    application.yml                server.port: 8000, spring.data.redis.url: ${REDIS_URL:...}
+</div></code></pre>
+<p>Steps:</p>
+<ol>
+<li>Read the existing <code>main.py</code> fully first — the FastAPI routes <em>are</em> the
+contract. Note the exact response shapes and status codes (including
+404 bodies) other services depend on — grep the rest of <code>services/</code> for
+the old service's URL env var and endpoint paths to find every caller.</li>
+<li>Prefer generic <code>Map&lt;String,Object&gt;</code>/Jackson <code>JsonNode</code> over a strict
+POJO for anything that's just Redis-JSON passed through — the Python
+side (<code>shared/shared/models.py</code>) owns the actual schema; a Java POJO
+that re-declares every field risks silently dropping one if the seed
+data changes later.</li>
+<li>Use cursor-based <code>SCAN</code> (via <code>RedisConnection.keyCommands().scan(...)</code>),
+not <code>KEYS</code>, to enumerate <code>ref:*</code> keys — matches the Python side's
+<code>scan_iter</code> and avoids a blocking full-keyspace walk.</li>
+<li>Update <code>infra/docker-compose.yml</code>'s block for that service to point at
+the new Dockerfile — nothing else in compose needs to change (port
+mapping, <code>depends_on</code>, env vars all stay put).</li>
+<li>Rebuild just that service and run the full manual walkthrough (§5)
+end-to-end to confirm every other (still-Python) service that talks to
+it is unaffected.</li>
+<li>Update <code>ARCHITECTURE.md</code> §7's status table and <code>CLAUDE.md</code>'s open items.</li>
+</ol>
+<h2 id="5-manual-verification-walkthrough">5. Manual verification walkthrough</h2>
+<pre class="hljs"><code><div><span class="hljs-comment"># Health check every service</span>
+curl -s http://localhost:8082/healthz              <span class="hljs-comment"># gateway</span>
+
+<span class="hljs-comment"># Full pipeline</span>
+SID=$(curl -s -X POST http://localhost:8082/session | jq -r .session_id)
+curl -s -X POST http://localhost:8082/session/<span class="hljs-variable">$SID</span>/message -d <span class="hljs-string">&#x27;{&quot;text&quot;:&quot;I have a headache and trouble sleeping&quot;}&#x27;</span> -H <span class="hljs-string">&#x27;Content-Type: application/json&#x27;</span>
+curl -s -X POST http://localhost:8082/session/<span class="hljs-variable">$SID</span>/advance-to-causes
+curl -s -X POST http://localhost:8082/session/<span class="hljs-variable">$SID</span>/message -d <span class="hljs-string">&#x27;{&quot;text&quot;:&quot;work has been stressful&quot;}&#x27;</span> -H <span class="hljs-string">&#x27;Content-Type: application/json&#x27;</span>
+curl -s -X POST http://localhost:8082/session/<span class="hljs-variable">$SID</span>/analyze | jq .
+
+<span class="hljs-comment"># Email export (mock mode — code is printed in the email service&#x27;s logs)</span>
+curl -s -X POST http://localhost:8082/session/<span class="hljs-variable">$SID</span>/email/request -d <span class="hljs-string">&#x27;{&quot;to&quot;:&quot;you@example.com&quot;}&#x27;</span> -H <span class="hljs-string">&#x27;Content-Type: application/json&#x27;</span>
+docker compose -f infra/docker-compose.yml logs email | <span class="hljs-built_in">tail</span> -5   <span class="hljs-comment"># grab the mock code</span>
+curl -s -X POST http://localhost:8082/session/<span class="hljs-variable">$SID</span>/email/confirm -d <span class="hljs-string">&#x27;{&quot;verification_token&quot;:&quot;&lt;token&gt;&quot;,&quot;code&quot;:&quot;&lt;code&gt;&quot;}&#x27;</span> -H <span class="hljs-string">&#x27;Content-Type: application/json&#x27;</span>
+
+<span class="hljs-comment"># Confirm hard purge</span>
+redis-cli -p 6380 keys <span class="hljs-string">&quot;session:<span class="hljs-variable">$SID</span>:*&quot;</span>             <span class="hljs-comment"># should return empty</span>
+</div></code></pre>
+<h2 id="6-observability-conventions-java-services">6. Observability conventions (Java services)</h2>
+<p>Every Java service registers <code>CorrelationIdFilter</code>: it reads (or mints) an
+<code>X-Correlation-Id</code> header, puts it in SLF4J's MDC for the duration of the
+request, and echoes it back in the response header. <code>application.yml</code>'s
+<code>logging.pattern.console</code> includes <code>%X{correlationId}</code> so every log line
+for a request chain — including across services, once the header is
+forwarded on outbound calls — carries the same id. This is the minimum
+viable version of the logs/metrics/traces observability model; there's no
+metrics/tracing backend wired up yet (no Prometheus/Grafana, no distributed
+tracing collector) — see <code>docs/TECHNICAL_GUIDE.md</code> for what a next step
+would look like and why it hasn't been added yet (would require an actual
+operational deployment to be worth the cost, per Phase 2 scope in
+<code>CLAUDE.md</code>).</p>
+<h2 id="7-common-pitfalls">7. Common pitfalls</h2>
+<ul>
+<li><strong>Port conflicts on this dev machine specifically</strong>: gateway is on host
+<strong>8082</strong> (not 8080), Redis is on host <strong>6380</strong> (not 6379) — see
+<code>CLAUDE.md</code>'s &quot;Known environment quirks.&quot; These are host-mapping-only;
+container-to-container calls are unaffected.</li>
+<li><strong>Mock mode isn't an error state.</strong> If <code>docker compose logs agent-intake</code>
+shows <code>mock_mode: true</code> in a <code>/healthz</code> response, that's expected without
+<code>ANTHROPIC_API_KEY</code> set — it's a deliberate runtime mode, not something
+to &quot;fix.&quot;</li>
+<li><strong>Don't add a database.</strong> If a new requirement seems to need one, revisit
+<code>ARCHITECTURE.md</code> §3 first — the no-DB constraint is a decision, not an
+oversight, and most &quot;I need a query&quot; instincts are solved by the
+existing Tier 1/Tier 2 Redis key patterns instead.</li>
+<li><strong>Seed data flag</strong>: every herb record carries
+<code>curation_status: &quot;starter_dataset_unreviewed&quot;</code>. Don't strip this
+anywhere in the pipeline — it's meant to reach the end user.</li>
+</ul>
+
+</body>
+</html>

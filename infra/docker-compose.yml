@@ -1,4 +1,4 @@
-x-python-service: &python-service
+x-backend-service: &backend-service
   env_file:
     - ../.env
   environment:
@@ -19,7 +19,7 @@ services:
       retries: 10
 
   knowledge-botanical:
-    <<: *python-service
+    <<: *backend-service
     build:
       context: ..
       dockerfile: services/knowledge/botanical/Dockerfile
@@ -27,7 +27,7 @@ services:
       - "8090:8000"
 
   knowledge-compound:
-    <<: *python-service
+    <<: *backend-service
     build:
       context: ..
       dockerfile: services/knowledge/compound/Dockerfile
@@ -35,7 +35,7 @@ services:
       - "8091:8000"
 
   knowledge-toxicology:
-    <<: *python-service
+    <<: *backend-service
     build:
       context: ..
       dockerfile: services/knowledge/toxicology/Dockerfile
@@ -43,7 +43,7 @@ services:
       - "8092:8000"
 
   knowledge-rules:
-    <<: *python-service
+    <<: *backend-service
     build:
       context: ..
       dockerfile: services/knowledge/rules/Dockerfile
@@ -51,7 +51,7 @@ services:
       - "8093:8000"
 
   agent-intake:
-    <<: *python-service
+    <<: *backend-service
     build:
       context: ..
       dockerfile: services/agents/intake/Dockerfile
@@ -64,7 +64,7 @@ services:
         condition: service_started
 
   agent-mapping:
-    <<: *python-service
+    <<: *backend-service
     build:
       context: ..
       dockerfile: services/agents/mapping/Dockerfile
@@ -77,7 +77,7 @@ services:
         condition: service_started
 
   agent-retrieval:
-    <<: *python-service
+    <<: *backend-service
     build:
       context: ..
       dockerfile: services/agents/retrieval/Dockerfile
@@ -92,7 +92,7 @@ services:
         condition: service_started
 
   agent-safety:
-    <<: *python-service
+    <<: *backend-service
     build:
       context: ..
       dockerfile: services/agents/safety/Dockerfile
@@ -105,7 +105,7 @@ services:
         condition: service_started
 
   agent-scoring:
-    <<: *python-service
+    <<: *backend-service
     build:
       context: ..
       dockerfile: services/agents/scoring/Dockerfile
@@ -113,7 +113,7 @@ services:
       - "8104:8000"
 
   agent-explanation:
-    <<: *python-service
+    <<: *backend-service
     build:
       context: ..
       dockerfile: services/agents/explanation/Dockerfile
@@ -121,7 +121,7 @@ services:
       - "8105:8000"
 
   agent-reporting:
-    <<: *python-service
+    <<: *backend-service
     build:
       context: ..
       dockerfile: services/agents/reporting/Dockerfile
@@ -129,7 +129,7 @@ services:
       - "8106:8000"
 
   email:
-    <<: *python-service
+    <<: *backend-service
     build:
       context: ..
       dockerfile: services/email/Dockerfile
@@ -137,7 +137,7 @@ services:
       - "8110:8000"
 
   orchestrator:
-    <<: *python-service
+    <<: *backend-service
     build:
       context: ..
       dockerfile: services/orchestrator/Dockerfile
@@ -164,7 +164,7 @@ services:
         condition: service_started
 
   gateway:
-    <<: *python-service
+    <<: *backend-service
     build:
       context: ..
       dockerfile: services/gateway/Dockerfile

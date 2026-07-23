@@ -1,14 +1,15 @@
-FROM python:3.11-slim
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /build
+
+COPY services/agents/safety/pom.xml .
+RUN mvn -q -B dependency:go-offline
+
+COPY services/agents/safety/src ./src
+RUN mvn -q -B -DskipTests package
+
+FROM eclipse-temurin:21-jre
 WORKDIR /app
-
-COPY shared /app/shared
-RUN pip install --no-cache-dir -e /app/shared
-
-COPY services/agents/safety/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY services/agents/safety/main.py .
-COPY services/agents/safety/app ./app
+COPY --from=build /build/target/app.jar app.jar
 
 EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

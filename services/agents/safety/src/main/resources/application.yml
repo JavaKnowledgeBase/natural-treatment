@@ -1,0 +1,13 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: agent-safety
+
+rules-service:
+  url: ${RULES_SERVICE_URL:http://knowledge-rules:8000}
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%X{correlationId}] %-5level %logger{36} - %msg%n"

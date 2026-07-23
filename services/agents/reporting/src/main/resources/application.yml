@@ -1,0 +1,10 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: agent-reporting
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%X{correlationId}] %-5level %logger{36} - %msg%n"

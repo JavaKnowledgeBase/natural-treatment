@@ -1,0 +1,17 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: email
+  data:
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379/0}
+
+resend:
+  api-key: ${RESEND_API_KEY:}
+  from-address: ${RESEND_FROM_ADDRESS:onboarding@resend.dev}
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%X{correlationId}] %-5level %logger{36} - %msg%n"

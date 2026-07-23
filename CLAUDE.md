@@ -16,7 +16,38 @@ Design docs (still accurate for architecture/product decisions):
 - `research docs/application_design.md` — v1, product vision, UX flow, scoring formula
 - `research docs/application_design_v2_microservices_agentic.md` — v2, current architecture (microservices, agentic, cache-only)
 
-## Current status: Phase 1 built and verified end-to-end
+Newer reference docs (added for the Java migration / interview-prep pass):
+- `docs/ARCHITECTURE.md` — as-built system architecture, request flow, migration status table
+- `docs/DEVELOPER_GUIDE.md` — how to run it, repo layout, how to migrate the next service to Java
+- `docs/TECHNICAL_GUIDE.md` — detailed stack/dependency rationale (why FastAPI, why Redis-only, why Spring Boot for the Java side, etc.) — written to double as MIT Lincoln Lab interview prep material, cross-referenced to `mit-lincoln-lab-technical-qa.md` in the user's `Desktop/resume/` prep folder
+- `docs/API_REFERENCE.md` — every internal + external API call, resiliency posture (timeouts/retries/idempotency, honestly gapped where true), and a boundary-by-boundary security review. Flags one real unfixed finding: unescaped user text interpolated into the emailed HTML report in `services/agents/reporting/main.py` (XSS-shaped, low blast radius since it only affects the recipient's own inbox rendering their own submitted data) — not yet fixed, only documented; offer to fix on request
+
+## Why a Python→Java migration is happening (session context)
+
+User has an MIT Lincoln Lab (Group 57, Cyber Ops) software engineer
+interview likely the week of 2026-07-27 (see `Desktop/resume/` prep
+materials — `mit-lincoln-lab-interview-prep.md` and
+`mit-lincoln-lab-technical-qa.md`). Per that prep guide's gap map, the
+user's Java/Spring/Docker/AWS skills are already strong; real gaps are
+Kafka/NiFi/Istio/Terraform/Ansible, a live Python exercise, and having
+concrete stories ready. Decision: keep migrating Rootwell's non-LLM
+backend services from Python/FastAPI to Java/Spring Boot as hands-on
+practice reps (reinforces the strong column, gives a second "built the
+platform" story alongside PolicyMind), while separately drilling the
+actual gap topics via mock Q&A / STAR rehearsal / Python warm-ups —
+**don't let the Rootwell rewrite crowd out that gap-drilling time**, per
+the user's own prioritization. See `docs/TECHNICAL_GUIDE.md` §7 for how
+each Rootwell architecture choice ties back to a specific interview-guide
+question.
+
+**Migration scope** (re-derived from the code, not assumed): only
+`agent-intake`, `agent-mapping`, `agent-explanation` import `shared.llm`
+(the Anthropic wrapper) — those three stay Python. Everything else in
+`services/` is moving to Java one service at a time, each verified
+end-to-end before the next. Frontend stays Next.js. Full status table in
+`docs/ARCHITECTURE.md` §7.
+
+## Current status: Phase 1 built and verified end-to-end; Java migration complete
 
 All 13 backend microservices + Next.js frontend exist, run via
 `docker compose -f infra/docker-compose.yml up -d --build`, and were
@@ -37,10 +68,22 @@ Tier 1 (`ref:*`, shared herb/compound/symptom/rule data, loaded from the
 hand-curated starter seed in `seed/data/*.json`) and Tier 2 (`session:*`,
 one user's chat/symptoms/causes/recommendations, TTL'd and hard-deleted on
 session end or email export). Every service in `services/` is a separate
-FastAPI container; the `orchestrator` sequences calls to the stateless
+container (FastAPI for the three LLM agents + gateway, Spring Boot for the
+rest — see below); the `orchestrator` sequences calls to the stateless
 agents; the `gateway` is the only thing the frontend talks to directly. See
 the v2 design doc for the full service map and the reasoning behind the
 two-tier cache split.
+
+The backend is now a deliberate, permanent Python/Java mix, not a rewrite
+in progress: `knowledge-botanical`, `knowledge-compound`,
+`knowledge-toxicology`, `knowledge-rules`, `agent-retrieval`,
+`agent-safety`, `agent-scoring`, `agent-reporting`, `email`, and
+`orchestrator` are Java/Spring Boot; `agent-intake`, `agent-mapping`,
+`agent-explanation`, and `gateway` stay Python (full rationale and status
+table in `docs/ARCHITECTURE.md` §7). Every service, regardless of
+language, keeps the same external contract — port 8000 internally,
+`GET /healthz`, `REDIS_URL` from env — so this is invisible to every other
+service.
 
 ### Known environment quirks (this machine specifically)
 

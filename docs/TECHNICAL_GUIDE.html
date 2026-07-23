@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TECHNICAL_GUIDE.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="rootwell--technical-guide-stack-dependencies-and-why">Rootwell — Technical Guide: Stack, Dependencies, and Why</h1>
+<p>This document justifies every non-trivial technology choice in the repo —
+what it is, what problem it solves here specifically, what was rejected
+instead and why. It's written to be defensible in a technical interview,
+not just a changelog: each section ends with the trade-off, not just the
+pick.</p>
+<h2 id="0-full-service-inventory">0. Full service inventory</h2>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Language / Framework</th>
+<th>Key dependencies</th>
+<th>Calls out to</th>
+<th>Talks to Redis?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frontend</code></td>
+<td>Next.js 14 (App Router) / React 18 / TypeScript</td>
+<td>Tailwind CSS</td>
+<td><code>gateway</code> only</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>gateway</code></td>
+<td>Python / FastAPI + Uvicorn</td>
+<td><code>httpx</code></td>
+<td><code>orchestrator</code></td>
+<td>Yes (rate-limit counters only)</td>
+</tr>
+<tr>
+<td><code>orchestrator</code></td>
+<td>Python / FastAPI + Uvicorn</td>
+<td><code>httpx</code>, <code>shared</code> (cache, models)</td>
+<td>all 7 agents + <code>email</code></td>
+<td>Yes (Tier 2, exclusively)</td>
+</tr>
+<tr>
+<td><code>agent-intake</code></td>
+<td>Python / FastAPI + Uvicorn</td>
+<td><code>httpx</code>, <code>shared.llm</code> (Anthropic)</td>
+<td><code>knowledge-toxicology</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>agent-mapping</code></td>
+<td>Python / FastAPI + Uvicorn</td>
+<td><code>httpx</code>, <code>shared.llm</code> (Anthropic)</td>
+<td><code>knowledge-toxicology</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>agent-retrieval</code></td>
+<td><em>migrating to Java</em></td>
+<td><code>httpx</code> (today)</td>
+<td><code>knowledge-botanical</code>, <code>knowledge-compound</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>agent-safety</code></td>
+<td><em>migrating to Java</em></td>
+<td><code>httpx</code> (today)</td>
+<td><code>knowledge-rules</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>agent-scoring</code></td>
+<td><em>migrating to Java</em></td>
+<td>none — pure function</td>
+<td>none</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>agent-explanation</code></td>
+<td>Python / FastAPI + Uvicorn</td>
+<td><code>shared.llm</code> (Anthropic)</td>
+<td>none</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>agent-reporting</code></td>
+<td><em>migrating to Java</em></td>
+<td>none — pure templating</td>
+<td>none</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>email</code></td>
+<td><em>migrating to Java</em></td>
+<td><code>httpx</code> (Resend REST API) today</td>
+<td>Resend API</td>
+<td>Yes (verification codes + rate limit)</td>
+</tr>
+<tr>
+<td><code>knowledge-botanical</code></td>
+<td><strong>Java 21 / Spring Boot 3</strong> (migrated)</td>
+<td><code>spring-boot-starter-web</code>, <code>spring-boot-starter-data-redis</code></td>
+<td>none</td>
+<td>Yes (Tier 1, read-only)</td>
+</tr>
+<tr>
+<td><code>knowledge-compound</code>, <code>-toxicology</code>, <code>-rules</code></td>
+<td><em>migrating to Java</em></td>
+<td><code>shared.cache</code> (today)</td>
+<td>none</td>
+<td>Yes (Tier 1, read-only)</td>
+</tr>
+<tr>
+<td><code>shared</code> (Python library, not a service)</td>
+<td>Python package</td>
+<td><code>pydantic</code>, <code>redis</code>, <code>httpx</code>, <code>anthropic</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>The three agents that stay Python (<code>intake</code>, <code>mapping</code>, <code>explanation</code>) are
+exactly the three that <code>import shared.llm</code> — verified by grepping the repo
+for that import, not assumed from memory. Everything else is either
+already migrated or on the migration list (<code>ARCHITECTURE.md</code> §7).</p>
+<hr>
+<h2 id="1-python-backend-stack">1. Python backend stack</h2>
+<h3 id="fastapi--uvicorn-asgi">FastAPI + Uvicorn (ASGI)</h3>
+<p><strong>What/why:</strong> FastAPI is a Python web framework built directly on ASGI
+(async), with request/response validation via Pydantic built in at the
+routing layer — a request body's shape is enforced before your handler
+code even runs, and the OpenAPI schema is generated for free from the same
+type annotations. Uvicorn is the ASGI server that actually runs it.</p>
+<p><strong>Why it fit this system specifically:</strong> every service in this pipeline
+spends almost all its time waiting on network I/O — an HTTP call to
+another service, a Redis round-trip, an Anthropic API call. That's the
+textbook case for <code>asyncio</code>: one thread can hold many in-flight requests
+open simultaneously because the GIL is released while waiting on I/O (see
+<code>mit-lincoln-lab-technical-qa.md</code> Q31/Q32 for the GIL/asyncio mechanics).
+A synchronous framework (Flask, classic Django) would need
+threads-per-request or a WSGI worker pool to get the same concurrency,
+burning more memory per in-flight request for no benefit, since none of
+this workload is CPU-bound.</p>
+<p><strong>Rejected alternative:</strong> Flask — simpler, more ubiquitous, but sync by
+default (would need <code>gevent</code>/threads bolted on to get comparable I/O
+concurrency) and no built-in request validation — every handler would
+hand-roll body parsing/validation that FastAPI gets from Pydantic for free.</p>
+<h3 id="pydantic-sharedsharedmodelspy">Pydantic (<code>shared/shared/models.py</code>)</h3>
+<p><strong>What/why:</strong> runtime data validation and serialization via Python type
+hints. Since there is no database (see §3), Pydantic models in
+<code>shared/shared/models.py</code> are, in the file's own words, &quot;the closest thing
+this project has to a schema&quot; — they're what a set of SQL <code>CREATE TABLE</code>
+statements would be in a conventional stack, except validated at the
+API boundary on every request instead of enforced by a database engine.</p>
+<p><strong>Trade-off acknowledged:</strong> this means schema consistency is a
+convention (every service that touches a <code>HerbRecord</code>-shaped dict agrees on
+its fields) rather than something a database enforces for you. That's
+acceptable at this scale (~13 services, one small team) and is exactly why
+the Java-side rewrite deliberately does <em>not</em> re-declare these as strict
+Java POJOs (see §5) — it avoids a second, Java-shaped copy of a schema
+that Python already owns, which would drift the moment one side changes.</p>
+<h3 id="httpx-async-http-client"><code>httpx</code> (async HTTP client)</h3>
+<p>Used for every service-to-service call. Chosen over <code>requests</code> specifically
+because <code>requests</code> is synchronous-only — using it inside an <code>async def</code>
+FastAPI handler would block the entire event loop for the duration of the
+call, defeating the point of using FastAPI at all. <code>httpx</code> has the same
+ergonomic API as <code>requests</code> but with a native <code>async</code> client.</p>
+<h3 id="redis-client-redis-redis-py-with-asyncio-support">Redis client: <code>redis</code> (redis-py) with <code>asyncio</code> support</h3>
+<p><code>redis.asyncio</code> gives non-blocking Redis calls for the same reason
+<code>httpx</code> was chosen over <code>requests</code> — one blocking call anywhere in an
+<code>async def</code> handler stalls every other concurrent request on that worker.
+<code>shared/shared/cache.py</code> uses <code>scan_iter</code> (cursor-based, non-blocking
+iteration) rather than <code>KEYS</code> for the same reason a large-scale system
+would avoid <code>KEYS</code> in production: <code>KEYS</code> walks the entire keyspace in one
+blocking operation, and while today's ~80-record seed dataset makes that
+difference invisible, the code is written the way it would need to be at
+real scale rather than the way that happens to work today. (This is the
+same instinct behind Kafka consumer-group partitioning and Kubernetes HPA
+custom metrics discussed in <code>mit-lincoln-lab-technical-qa.md</code> — design for
+the access pattern, not the current data volume.)</p>
+<h3 id="anthropic-sdk-behind-a-mock-mode-wrapper-sharedsharedllmpy">Anthropic SDK, behind a mock-mode wrapper (<code>shared/shared/llm.py</code>)</h3>
+<p><strong>What/why:</strong> <code>shared/shared/llm.py</code> is a two-function module:
+&quot;is a real API key configured?&quot; and &quot;make the call.&quot; Every LLM-backed
+agent calls <code>llm.complete_or_none(...)</code>, which returns <code>None</code> in mock mode
+instead of a placeholder string — this forces every caller to have an
+explicit, real fallback path (see <code>agent-intake</code>'s keyword-matching
+<code>_mock_symptom_turn</code>, <code>agent-mapping</code>'s templated reasoning) rather than
+silently shipping fake-looking LLM output when no key is present.</p>
+<p><strong>Why this matters architecturally:</strong> it means &quot;no external credentials
+configured&quot; is a supported, tested runtime mode — not a degraded/broken
+state — which is what let this whole system be verified end-to-end with
+zero API keys. The alternative (making the LLM call required, erroring
+without a key) would make local development and CI impossible without
+provisioning real credentials, which is a worse trade for a system whose
+LLM calls are all advisory (worded generation), never authoritative
+(safety/scoring are structurally LLM-free — see <code>ARCHITECTURE.md</code> §5).</p>
+<p><strong>Model choice:</strong> Claude Sonnet 5 (<code>claude-sonnet-5</code>), overridable via
+<code>ANTHROPIC_MODEL</code>. The three call sites (intake NLU, mapping reasoning,
+explanation generation) are all short, low-token, latency-sensitive calls
+in a synchronous request path (the user is waiting on a chat reply) — a
+mid-tier model is the right cost/latency point; nothing here needs
+extended reasoning depth.</p>
+<h3 id="why-the-llm-is-never-in-the-safetyscoring-path">Why the LLM is never in the safety/scoring path</h3>
+<p>This is a defensible, explainable design constraint, not an accident:
+<code>agent-safety</code> and <code>agent-scoring</code> do not import <code>shared.llm</code> at all — a
+<code>grep</code> for the import proves it structurally, not just &quot;we intended it
+that way.&quot; The reasoning: an LLM hallucinating &quot;this herb is safe for you&quot;
+is a real-harm failure mode in a way that a hallucinated explanation
+sentence isn't. This maps directly to the human-in-the-loop /
+responsible-AI framing already on the resume (<code>PolicyMind</code>'s validation
+layer) — the same instinct, applied here as &quot;keep the LLM downstream of
+every safety-relevant decision, never inside it.&quot;</p>
+<hr>
+<h2 id="2-data-layer-redis-only-no-database">2. Data layer: Redis-only, no database</h2>
+<p>Covered in depth in <code>ARCHITECTURE.md</code> §3 (the <em>what</em>); here's the <em>why</em>,
+stack-comparison style:</p>
+<p><strong>Rejected: PostgreSQL/any RDBMS.</strong> Would add schema migrations, a
+connection pool, and a second piece of local infrastructure for a dataset
+that's currently ~80 total records across 4 categories, entirely
+rebuildable from JSON in milliseconds, with zero relational query needs
+(every access is &quot;get by id&quot; or &quot;list all of kind X&quot;). The moment a real
+requirement needs relational querying (e.g., phase 2's live IMPPAT/ChEBI/
+PubChem/CTD fallback, or genuinely complex herb-interaction queries),
+that's the trigger to add Postgres — not before. Introducing it now would
+be solving a scale problem that doesn't exist yet at the cost of real
+operational complexity today.</p>
+<p><strong>Rejected: MongoDB/a document store.</strong> Would remove the two-tier TTL
+model's simplicity (Tier 1 shared cache vs. Tier 2 per-session, hard-purge
+semantics) for no real gain — Redis's native key-TTL and <code>HSET</code>/<code>XADD</code>
+primitives already model exactly what's needed (<code>shared/shared/cache.py</code>),
+and a document store wouldn't add anything except another service to
+run.</p>
+<p><strong>Consistency model chosen:</strong> the whole system is one Redis instance —
+there's no distributed consistency problem to solve today (no multi-region
+replication, no eventual-consistency window). But the design already
+reflects the right instinct for when it would matter: Tier 1 (reference
+data) is read-heavy and tolerant of a few-hundred-ms staleness after a
+seed reload (availability-leaning), while Tier 2 (session state) needs the
+orchestrator's view to be immediately consistent with what it just wrote,
+since the very next request in the same session depends on it — the
+classic CAP-theorem framing from <code>mit-lincoln-lab-technical-qa.md</code> Q35,
+just not yet under an actual network partition because there's only one
+node.</p>
+<hr>
+<h2 id="3-frontend-nextjs--react--typescript--tailwind">3. Frontend: Next.js / React / TypeScript / Tailwind</h2>
+<p><strong>Next.js (App Router) + React 18:</strong> server-rendered React with file-based
+routing — chosen for a chat-style app that's mostly one interactive page
+(<code>ChatPanel</code>) plus a handful of static content pages (About/Privacy/Terms).
+App Router's server components keep the static pages (which need no
+client-side interactivity) genuinely static, while <code>ChatPanel</code> opts into
+client-side rendering only where it needs state.</p>
+<p><strong>TypeScript:</strong> the frontend talks to the gateway over a JSON HTTP API with
+no shared-type-generation step (no OpenAPI-client codegen wired up yet) —
+TypeScript interfaces in <code>frontend/src/lib/api.ts</code> are hand-kept in sync
+with the Python/Java response shapes. This is a known manual-sync point;
+worth flagging honestly rather than presenting it as automatically safe.</p>
+<p><strong>Tailwind CSS:</strong> utility-first styling, chosen for iteration speed on a
+small number of components rather than a full design-system build-out —
+appropriate for a Phase 1 product, not a permanent architectural
+commitment.</p>
+<p><strong>Rejected: a separate SPA (Vite/CRA) + fully decoupled API.</strong> Next.js was
+chosen specifically because a few pages (About/Privacy/Terms) benefit from
+server rendering (simple content, good for the eventual public-launch SEO
+need) while the chat itself is a normal client-rendered app — Next.js lets
+both live in one project without maintaining two frontend build pipelines.</p>
+<hr>
+<h2 id="4-containerization-docker-multi-stage-builds-compose-not-kubernetes">4. Containerization: Docker, multi-stage builds, Compose (not Kubernetes)</h2>
+<p><strong>Docker, multi-stage builds:</strong> every service Dockerfile separates the
+build-time toolchain (pip installing from <code>requirements.txt</code>, or — on the
+Java side — <code>mvn package</code> against a full JDK+Maven image) from the
+runtime image (slim Python, or a JRE-only base for Java), so the final
+image that actually ships doesn't carry a build toolchain it never needs
+again. This is the direct analogue of the container-vs-VM reasoning in
+<code>mit-lincoln-lab-technical-qa.md</code> Q1 — containers share the host kernel and
+are only as heavy as what you actually put in the final layer, which
+multi-stage builds take advantage of deliberately.</p>
+<p><strong>Docker Compose, not Kubernetes, for local dev:</strong> this is a
+single-machine, single-environment local system — Compose gives per-service
+declarative config (env, ports, <code>depends_on</code> health-gating) with none of
+Kubernetes' operational surface (no cluster to run, no kubelet, no need for
+liveness/readiness <em>probes</em> as a Kubernetes primitive specifically — though
+see §5 for why the Java services still implement the readiness/liveness
+<em>concept</em> even without K8s to consume it). Compose is the right tool for
+&quot;one dev, one machine, thirteen-plus containers that need to talk to each
+other by name&quot; — Kubernetes would be solving problems (multi-node
+scheduling, rolling updates, horizontal autoscaling) this system doesn't
+have yet. <code>CLAUDE.md</code>/<code>ARCHITECTURE.md</code> §6 explicitly defers real
+cloud/Kubernetes deployment manifests to Phase 2, once there's an actual
+multi-instance, multi-environment need driving it — the same ECS vs. EKS
+judgment call from <code>mit-lincoln-lab-technical-qa.md</code> Q23 applies here:
+reach for the heavier tool only when its specific benefit (portability,
+existing K8s-ecosystem tooling like Istio) is actually needed, not by
+default.</p>
+<p><strong>No service mesh (Istio) here, and why that's the right call at this
+size:</strong> with ~13 services all inside one Compose network on one host,
+there's no multi-node traffic-routing problem, no need for canary traffic
+splitting, and mTLS between containers on one Docker bridge network isn't
+solving a real threat model the way it would across untrusted network
+boundaries. The gateway already does the one cross-cutting concern that
+matters at this scale (CORS + per-IP rate limiting) in application code.
+The honest scaling story: <em>if</em> this were deployed as genuinely
+multi-instance, multi-node services with a real internal trust boundary
+to enforce, Istio's sidecar-mTLS model (<code>mit-lincoln-lab-technical-qa.md</code>
+Q8–Q11) is exactly the next layer to reach for — pushing service-to-service
+identity/encryption out of application code and into infrastructure,
+uniformly, regardless of which of the two languages a given service is
+written in. That's a deliberate &quot;not yet, but here's precisely when&quot;
+rather than a gap.</p>
+<hr>
+<h2 id="5-java-backend-stack-migrated-services">5. Java backend stack (migrated services)</h2>
+<h3 id="spring-boot-3-java-21-spring-web-blocking-mvc-not-webflux">Spring Boot 3 (Java 21), Spring Web (blocking MVC, not WebFlux)</h3>
+<p><strong>Why Spring Boot:</strong> it's the standard, most idiomatic choice for a Java
+REST microservice — auto-configuration, embedded servlet container (no
+separate app-server deploy step), a REST controller model
+(<code>@RestController</code>) that maps directly onto the same &quot;one file, a handful
+of endpoints&quot; shape the FastAPI services already have, which keeps the
+migration a faithful port rather than a redesign.</p>
+<p><strong>Why blocking MVC over WebFlux (reactive):</strong> the Python side chose
+<code>async</code> specifically because those services are I/O-bound fan-out callers
+juggling many concurrent in-flight requests cheaply. The migrated Java
+services so far (<code>knowledge-botanical</code>) are low-throughput, single-hop
+Redis lookups — there's no comparable concurrency pressure that would
+justify Reactor's steeper learning curve and harder-to-debug stack traces.
+<strong>This decision should be revisited when <code>orchestrator</code> and <code>gateway</code>
+migrate</strong> — those two <em>do</em> fan out to many downstream calls concurrently
+today (<code>httpx.AsyncClient</code> in the Python version), which is exactly the
+shape WebFlux (or Java's virtual threads / <code>CompletableFuture</code> fan-out
+under plain Spring MVC) is built for. Noted here deliberately so it isn't
+decided by inertia when that migration slice comes up.</p>
+<h3 id="spring-boot-starter-data-redis-lettuce-client-over-jedis"><code>spring-boot-starter-data-redis</code> (Lettuce client) over Jedis</h3>
+<p>Spring Boot's default Redis client is Lettuce (async-capable, netty-based,
+thread-safe connection sharing) — used here through the synchronous
+<code>StringRedisTemplate</code> API for the same reason blocking MVC was chosen:
+these are simple, low-concurrency lookup services today. Lettuce was kept
+(rather than swapping in Jedis, historically the &quot;simple synchronous&quot;
+choice) purely because it's the Spring Boot default with zero extra
+configuration — no reason to introduce a second Redis client library into
+the stack for a service this simple.</p>
+<p><strong>Cursor-based <code>SCAN</code> over <code>KEYS</code>:</strong> implemented via
+<code>RedisConnection.keyCommands().scan(ScanOptions...)</code> rather than
+<code>StringRedisTemplate.keys(pattern)</code> (which issues a blocking <code>KEYS</code>
+command). Direct parity with the Python side's <code>scan_iter</code> choice (§1) —
+same reasoning: <code>KEYS</code> walks the whole keyspace in one atomic, blocking
+op; <code>SCAN</code> pages through incrementally. Invisible at ~18 herb records,
+correct at any scale.</p>
+<h3 id="jackson-mapstringobject-over-a-strict-herb-pojo">Jackson <code>Map&lt;String,Object&gt;</code> over a strict Herb POJO</h3>
+<p>Herb/compound/symptom/rule JSON is read as a generic <code>Map&lt;String,Object&gt;</code>
+rather than a hand-written Java class with declared fields. <strong>Why:</strong> the
+actual schema is owned by the Python side (<code>shared/shared/models.py</code>'s
+<code>HerbRecord</code>, etc.) and the seed loader (<code>seed/load_seed.py</code>) — a Java POJO
+here would be a second, independently-maintained copy of that schema that
+silently drops any field it doesn't know about the moment the Python side
+adds one. Since this service only ever filters (<code>linked_symptoms</code> contains
+X?) and passes records straight through, there's no correctness benefit to
+a strict type here, only a maintenance liability. <strong>This is a deliberate
+&quot;loose coupling over compile-time safety&quot; trade specific to a pass-through
+lookup service</strong> — it would be the wrong call in a service that actually
+constructs new domain objects or enforces invariants on herb data (there
+isn't one yet, but if one appears, that's where a real POJO earns its
+keep).</p>
+<h3 id="correlation-id-logging-correlationidfilter-mdc">Correlation-ID logging (<code>CorrelationIdFilter</code>, MDC)</h3>
+<p>A <code>OncePerRequestFilter</code> reads/mints an <code>X-Correlation-Id</code> header, puts it
+in SLF4J's MDC for the request's duration, and echoes it in the response.
+This is the minimal version of the observability pattern in
+<code>mit-lincoln-lab-technical-qa.md</code> Q38 — &quot;structured logging with a
+correlation/trace ID propagated across every service a request touches&quot; —
+implemented at the single-service log-line level since there's no
+distributed tracing collector (Jaeger/Zipkin/OpenTelemetry backend) or
+metrics stack (Prometheus/Grafana) deployed for this local system yet.
+Explicitly the floor of that pattern, not the ceiling — propagating the
+header on <em>outbound</em> calls between services (so one correlation id threads
+through the whole <code>orchestrator → agents</code> fan-out) is the natural next
+step once more services are migrated and there's a real multi-service
+chain to trace.</p>
+<h3 id="liveness-vs-readiness-even-without-kubernetes-to-consume-it">Liveness vs. readiness (even without Kubernetes to consume it)</h3>
+<p><code>GET /healthz</code> is kept as the existing contract (parity with every other
+service, checked by no automated prober today). The reasoning behind
+<em>also</em> separating liveness-style (&quot;is my process up&quot;) from readiness-style
+(&quot;can I actually serve a request right now,&quot; i.e., can I reach Redis)
+checks — per <code>mit-lincoln-lab-technical-qa.md</code> Q4 — is worth internalizing
+even before there's a Kubernetes prober to wire up to it: the common
+mistake the Q&amp;A guide calls out (one endpoint checking downstream health
+for <em>both</em> purposes) causes a transient Redis blip to make Kubernetes kill
+and restart every pod simultaneously the moment this <em>does</em> run on K8s.
+Building the distinction into the service now means the eventual
+Kubernetes migration is a manifest change (pointing <code>livenessProbe</code> and
+<code>readinessProbe</code> at two different existing endpoints), not a code change.</p>
+<hr>
+<h2 id="6-security-posture-current--whats-deliberately-deferred">6. Security posture (current + what's deliberately deferred)</h2>
+<ul>
+<li><strong>No authentication system.</strong> Session possession (<code>session_id</code>, a
+<code>uuid4().hex</code>) <em>is</em> the capability — there's no account/login to
+authenticate against (see <code>ARCHITECTURE.md</code> §4). This is a scope
+decision for a stateless, anonymous-by-design app, not an oversight.</li>
+<li><strong>CORS + per-IP rate limiting</strong> happen in the gateway's application
+code (<code>services/gateway/main.py</code>), not at an infrastructure layer —
+appropriate at this scale (§4's Istio discussion applies symmetrically
+here: push this into a mesh/API-gateway-as-infrastructure only once
+there's a real multi-instance deployment to protect).</li>
+<li><strong>No JWT/OAuth2 anywhere yet.</strong> If/when this system needs real user
+accounts (e.g., a &quot;save my history across sessions&quot; feature explicitly
+deferred in <code>CLAUDE.md</code>'s Phase 2 list), the gateway is the natural
+place for token validation to live first (<code>mit-lincoln-lab-technical-qa.md</code>
+Q39/Q40 on JWT structure and OAuth2's relationship to it) — with
+service-to-service calls behind it staying trust-the-network-boundary
+until/unless a real multi-tenant or zero-trust requirement (Q43)
+justifies mTLS between every internal hop.</li>
+<li><strong>OWASP-relevant choices already in place:</strong> Pydantic/Jackson validation
+at every service boundary (rejects malformed input before it reaches
+business logic — mitigates injection-adjacent risks), no string-built
+Redis keys from unsanitized input (<code>_ref_key</code>/<code>HERB_PREFIX</code> are always
+code-controlled prefixes, user input is only ever the trailing id), and
+the email verification-code gate (rate-limited, TTL'd) specifically to
+prevent the export feature being abused as a spam relay.</li>
+</ul>
+<hr>
+<h2 id="7-quick-cross-reference-to-interview-prep-material">7. Quick cross-reference to interview prep material</h2>
+<p>For rehearsing how to talk about these choices out loud, see
+<code>mit-lincoln-lab-technical-qa.md</code> in your interview prep folder
+(<code>Desktop/resume/</code>) — question numbers referenced inline above (Q1, Q4,
+Q8-11, Q23, Q31-32, Q35, Q38-40, Q43) map directly to sections of this
+guide. The pattern worth practicing: state the choice,
+state the one rejected alternative and why it lost, state the trade-off
+you're accepting today and the concrete trigger that would flip the
+decision later. That's the shape of a senior answer, not just &quot;we used X.&quot;</p>
+
+</body>
+</html>

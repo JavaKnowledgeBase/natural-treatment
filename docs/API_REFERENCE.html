@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rootwell — API Reference</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff;
+    --fg: #1c1c1e;
+    --muted: #5b5b62;
+    --border: #d9d9de;
+    --code-bg: #f2f2f5;
+    --table-head: #eceef2;
+    --accent: #1f6f5c;
+    --callout-bg: #fbf3e0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16171a;
+      --fg: #e8e8ec;
+      --muted: #a6a6ae;
+      --border: #34353a;
+      --code-bg: #232427;
+      --table-head: #232427;
+      --accent: #6fcbb0;
+      --callout-bg: #2a2410;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+  }
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    margin: 0 0 1rem;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0.75rem;
+  }
+  h2 {
+    font-size: 1.4rem;
+    margin: 2.5rem 0 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+  }
+  h2:first-of-type { border-top: none; }
+  h3 {
+    font-size: 1.12rem;
+    margin: 1.8rem 0 0.8rem;
+    color: var(--accent);
+  }
+  p, li { font-size: 0.98rem; }
+  p { margin: 0.8rem 0; }
+  ul, ol { padding-left: 1.4rem; }
+  li { margin: 0.35rem 0; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.86em;
+    background: var(--code-bg);
+    padding: 0.12em 0.4em;
+    border-radius: 4px;
+  }
+  strong { color: var(--fg); }
+  em { color: var(--muted); }
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2.5rem 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.9rem;
+  }
+  caption { text-align: left; }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.55rem 0.7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--table-head);
+    font-weight: 600;
+  }
+  tr:nth-child(even) td { background: color-mix(in srgb, var(--code-bg) 40%, transparent); }
+  .intro {
+    color: var(--muted);
+    font-size: 1rem;
+    border-left: 3px solid var(--accent);
+    padding-left: 1rem;
+    margin: 1.2rem 0 2rem;
+  }
+  .callout {
+    background: var(--callout-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin: 1.2rem 0;
+  }
+  a { color: var(--accent); }
+  ::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Rootwell — API Reference: Every Call, Resiliency, and Security</h1>
+
+<p class="intro">Every HTTP call this system makes, internal and external, with what protects
+it today and what honestly doesn't yet. Written at the same level of detail as
+<code>docs/TECHNICAL_GUIDE.md</code> so gaps are stated plainly — "here's what's missing and the
+concrete trigger to add it" is a stronger interview answer than pretending everything is hardened.</p>
+
+<h2>1. Internal API call map</h2>
+
+<p>All internal calls are synchronous HTTP + JSON (no message queue, no async/event-driven hop
+anywhere yet — see §3 for what that costs).</p>
+
+<h3>1a. Frontend → Gateway (the only browser-facing boundary)</h3>
+
+<table>
+<thead><tr><th>Method &amp; path</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>POST /session</code></td><td>Start a session</td></tr>
+<tr><td><code>GET /session/{sid}</code></td><td>Full state (chat, symptoms, causes, recommendations)</td></tr>
+<tr><td><code>POST /session/{sid}/message</code></td><td>Send a chat turn</td></tr>
+<tr><td><code>POST /session/{sid}/add-item</code> / <code>/remove-item</code></td><td>Accept/reject a suggested symptom or cause</td></tr>
+<tr><td><code>POST /session/{sid}/advance-to-causes</code></td><td>Move symptom → cause collection</td></tr>
+<tr><td><code>POST /session/{sid}/analyze</code></td><td>Run the full recommendation pipeline</td></tr>
+<tr><td><code>POST /session/{sid}/email/request</code> / <code>/email/confirm</code></td><td>Verification-gated email export</td></tr>
+<tr><td><code>POST /session/{sid}/end</code></td><td>Explicit purge</td></tr>
+<tr><td><code>GET /healthz</code></td><td>Liveness</td></tr>
+</tbody>
+</table>
+
+<p><code>services/gateway/main.py</code> is a thin 1:1 proxy — every route above just calls
+<code>_forward(method, path, body)</code> against the orchestrator with the same body, and
+re-raises the orchestrator's real status code
+(<code>HTTPException(status_code=resp.status_code, detail=resp.text)</code>) rather than
+collapsing every failure into a generic 500. That matters: the frontend can distinguish
+"session not found" (404) from "bad step transition" (400) from "rate limited" (429) instead of
+seeing one opaque error for all of them.</p>
+
+<h3>1b. Gateway → Orchestrator</h3>
+
+<p>Same paths, <code>/session/*</code> → <code>/sessions/*</code> (plural), otherwise identical
+request/response bodies — the gateway adds no transformation, only CORS and rate limiting
+(see §4).</p>
+
+<h3>1c. Orchestrator → the 7 agents + email (the fan-out, one call per pipeline stage)</h3>
+
+<p>Triggered only by <code>POST /sessions/{sid}/analyze</code>, in this exact sequence
+(<code>services/orchestrator/main.py</code>'s <code>analyze()</code>), each a blocking await —
+the next call doesn't start until the previous one returns:</p>
+
+<ol>
+<li><code>POST agent-mapping:/mapping/analyze</code> — <code>{symptom_ids}</code> → <code>{imbalances, reasoning}</code></li>
+<li><code>POST agent-retrieval:/retrieval/candidates</code> — <code>{symptom_ids, imbalances}</code> → <code>{candidates}</code></li>
+<li><code>POST agent-safety:/safety/evaluate</code> — <code>{candidates, profile}</code> → <code>{verdicts}</code></li>
+<li><code>POST agent-scoring:/scoring/rank</code> — <code>{symptom_ids, candidates, verdicts}</code> → <code>{ranked}</code></li>
+<li><code>POST agent-explanation:/explanation/generate</code> — <code>{candidates, ranked, verdicts}</code> → <code>{recommendations}</code></li>
+</ol>
+
+<p>Plus, outside <code>/analyze</code>:</p>
+<ul>
+<li><code>GET agent-intake:/intake/greeting</code> — once, at <code>POST /sessions</code></li>
+<li><code>POST agent-intake:/intake/symptom-turn</code> / <code>/intake/cause-turn</code> — every chat message during collection</li>
+<li><code>POST email:/email/verify</code> — at <code>/email/request</code></li>
+<li><code>POST agent-reporting:/reporting/compile</code> then <code>POST email:/email/send</code> — at <code>/email/confirm</code>, in that order (report must be compiled before it can be sent)</li>
+</ul>
+
+<p><strong>Why sequential, not parallel:</strong> stages 2–5 each depend on the previous stage's
+output (retrieval needs mapping's imbalances; safety needs retrieval's candidate list; scoring
+needs safety's verdicts; explanation needs scoring's ranks) — this is a genuine data-dependency
+chain, not an arbitrary choice. There's no parallelizable fan-out to exploit here today.</p>
+
+<h3>1d. Agents → Knowledge services (Tier 1 reads)</h3>
+
+<table>
+<thead><tr><th>Caller</th><th>Call</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>agent-intake</code></td><td><code>GET knowledge-toxicology:/symptoms</code></td><td>Fetched once per process, cached in a module-level <code>_catalog_cache</code> — not per-request</td></tr>
+<tr><td><code>agent-mapping</code></td><td><code>GET knowledge-toxicology:/symptoms/{id}</code></td><td>One call <strong>per symptom id</strong>, in a loop — see §3 for the N+1-shaped cost this implies</td></tr>
+<tr><td><code>agent-retrieval</code></td><td><code>GET knowledge-botanical:/herbs?symptom_id=...</code></td><td>One call per symptom id, in a loop</td></tr>
+<tr><td><code>agent-retrieval</code></td><td><code>GET knowledge-compound:/compounds?ids=a,b,c</code></td><td>Batched — all needed compound ids in one call, the one place this pattern is already avoided</td></tr>
+<tr><td><code>agent-safety</code></td><td><code>GET knowledge-rules:/rules</code></td><td>Fetches the whole rule set, filters in-process (dataset is tiny; see <code>docs/TECHNICAL_GUIDE.md</code> §1 on why this doesn't need pagination yet)</td></tr>
+</tbody>
+</table>
+
+<div class="callout">
+<strong>Known inefficiency, honestly flagged:</strong> <code>agent-mapping</code> and
+<code>agent-retrieval</code> call their knowledge service once per symptom id sequentially
+rather than batching (the way <code>agent-retrieval</code>→<code>compound</code> already does
+with <code>?ids=</code>). At ~1-5 symptoms per session this is invisible; it's the same
+<em>shape</em> of problem the N+1 Hibernate question (<code>mit-lincoln-lab-technical-qa.md</code>
+Q29) tests — worth being able to say out loud: "I'd add a batched
+<code>?symptom_ids=a,b,c</code> endpoint the same way compound already works, the fix is
+mechanical, it just hasn't been needed yet at this data volume."
+</div>
+
+<hr>
+
+<h2>2. External API calls</h2>
+
+<p>Only two third-party services are ever called, and both are <strong>optional at runtime</strong>
+— see <code>docs/TECHNICAL_GUIDE.md</code> §1's mock-mode discussion for why that's a deliberate
+architecture property, not just a nice-to-have.</p>
+
+<h3>2a. Anthropic (Claude) — <code>shared/shared/llm.py</code></h3>
+
+<ul>
+<li><strong>Called from:</strong> <code>agent-intake</code> (symptom/cause turn NLU), <code>agent-mapping</code> (reasoning summary), <code>agent-explanation</code> (per-herb recommendation text)</li>
+<li><strong>Auth:</strong> <code>ANTHROPIC_API_KEY</code> bearer token, read once at process start via <code>os.environ["ANTHROPIC_API_KEY"]</code> inside <code>_get_client()</code> — never logged, never echoed in any response body</li>
+<li><strong>Call shape:</strong> <code>AsyncAnthropic().messages.create(model=..., system=..., messages=[{"role":"user","content":...}])</code> — one-shot completion, no streaming, no conversation history sent to Anthropic (each call is stateless; the actual chat history lives only in Tier 2 Redis)</li>
+<li><strong>Timeout:</strong> none explicitly set — falls back to the Anthropic SDK's own default. <strong>Gap, honestly noted:</strong> worth an explicit timeout so a slow Anthropic response can't hold a <code>symptom-turn</code>/<code>analyze</code> request open indefinitely; the fix is a one-line <code>timeout=</code> kwarg on the client.</li>
+<li><strong>Fallback on absence/failure:</strong> <code>complete_or_none()</code> returns <code>None</code> if <code>ANTHROPIC_API_KEY</code> is unset (mock mode) — but if the key <strong>is</strong> set and the call itself throws (network error, rate limit, malformed response), that exception is <strong>not caught</strong> and propagates up as an unhandled 500 today. This is the one real gap in the mock-mode safety net: mock mode covers "no key configured," not "key configured but the call failed at runtime." A production hardening pass would wrap the call in a try/except that falls back to the same deterministic template used in mock mode, turning "Anthropic is down" into a graceful degradation instead of a 500.</li>
+</ul>
+
+<h3>2b. Resend (transactional email) — <code>services/email/main.py</code></h3>
+
+<ul>
+<li><strong>Called from:</strong> <code>email</code> service only, two endpoints: verification-code send (<code>/email/verify</code>) and final report send (<code>/email/send</code>)</li>
+<li><strong>Auth:</strong> <code>RESEND_API_KEY</code> bearer token; <code>RESEND_FROM_ADDRESS</code> is the only user-influenceable-adjacent field, and it's a deployment-time env var, never request input</li>
+<li><strong>Timeout:</strong> <code>10.0s</code> on both calls (<code>httpx.AsyncClient(timeout=10.0)</code>)</li>
+<li><strong>Fallback on absence:</strong> <code>MOCK_MODE = not bool(RESEND_API_KEY)</code> — logs the fully rendered email to stdout instead of sending</li>
+<li><strong>Fallback on failure (key present, call fails):</strong> same gap as Anthropic above — <code>resp.raise_for_status()</code> on the send call is not wrapped, so a transient Resend outage becomes a 500 to the user at the exact moment they're trying to export their results and have their session purged. Given the export step immediately triggers <code>purge_session</code> (see <code>docs/ARCHITECTURE.md</code> §4 step 4), <strong>this is the single highest-value place in the whole system to add a retry</strong> — losing a session's data because of one transient email-provider blip, right as the user asked to save it, is the worst-case failure mode in this app.</li>
+</ul>
+
+<hr>
+
+<h2>3. Resiliency: what exists, what's honestly missing</h2>
+
+<table>
+<thead><tr><th>Concern</th><th>Current state</th><th>Gap / trigger to add it</th></tr></thead>
+<tbody>
+<tr><td><strong>Timeouts</strong></td><td>Every internal call has an explicit <code>httpx</code> timeout (10s for agent↔knowledge/agent calls, 30s for gateway↔orchestrator and orchestrator↔agent, since those wrap the <em>whole</em> multi-hop analyze chain). Anthropic SDK call has none.</td><td>Add an explicit Anthropic timeout — see §2a</td></tr>
+<tr><td><strong>Retries / backoff</strong></td><td><strong>None, anywhere.</strong> Every failed call (<code>resp.raise_for_status()</code>) propagates as an exception immediately.</td><td>This is the biggest real gap. The natural fix, and the honest interview answer: exponential backoff with a small retry budget (2-3 attempts) specifically around the Resend send call (§2b) and the Anthropic call, both of which have transient-failure-prone third-party dependencies — <strong>not</strong> around internal agent-to-agent calls, where a failure usually means a real bug (bad request shape), and retrying a broken request 3 times just triples the useless load</td></tr>
+<tr><td><strong>Circuit breaking</strong></td><td>None</td><td>Not yet justified at this scale (7 agents, one call chain, no cascading-failure history) — would become worth it once/if any one knowledge service starts seeing real latency variance under load; premature today</td></tr>
+<tr><td><strong>Idempotency</strong></td><td><code>GET</code> calls are naturally idempotent (safe to retry blindly). <code>POST /sessions</code> creates a new session each call — not idempotent by design (every retry should start fresh, there's no "resume" semantics). <code>POST /email/send</code> <strong>is</strong> effectively idempotent against double-charge-style bugs: the verification token is deleted (<code>await r.delete(_verify_key(...))</code>) on first successful use, so a retried send with the same token+code fails cleanly with "token expired or not found" rather than sending twice.</td><td>The one place idempotency actually matters most (email send) already has it, structurally, via single-use token deletion — worth being able to explain <em>why</em> that pattern works even without a dedicated idempotency-key header (<code>mit-lincoln-lab-technical-qa.md</code> Q36)</td></tr>
+<tr><td><strong>Backpressure / overload protection</strong></td><td>Only the gateway's per-IP rate limiter (§4) — a blunt, request-count-based limit, not a true backpressure mechanism (no queue depth signal, no load-shedding based on downstream latency)</td><td>Fine for a single-instance local system; would need a real signal (e.g., orchestrator call latency, or a queue if one existed) once this runs multi-instance</td></tr>
+<tr><td><strong>Dead-letter / lost-work handling</strong></td><td>None — there's no queue to have a DLQ in front of. Every failure is synchronous and visible to the caller immediately (no silent background failure mode exists today)</td><td>This is actually a point <em>in favor</em> of the current fully-synchronous design: a DLQ exists to catch failures a fire-and-forget/async pipeline would otherwise lose silently. Since nothing here is fire-and-forget, there's nothing that can fail invisibly — the trade is "no async pipeline" for "no DLQ needed," not "a DLQ is missing"</td></tr>
+<tr><td><strong>Self-healing (Tier 1 cache)</strong></td><td>Every <code>knowledge-*</code> service reloads Tier 1 data from <code>seed/data/*.json</code> on its own startup (idempotent <code>load_seed()</code>) — a container restart automatically repopulates it, no manual intervention</td><td>Already resilient to Redis Tier 1 data loss, by construction</td></tr>
+<tr><td><strong>Session data loss on Redis restart (Tier 2)</strong></td><td>Real gap: Tier 2 has no persistence backing it beyond Redis's own (unconfigured) durability — a Redis restart mid-session loses that session's chat/symptom/cause state entirely</td><td>Acceptable today given the TTL/hard-purge lifecycle is already designed around "this is meant to be ephemeral," but worth stating plainly rather than implying Tier 2 is durable</td></tr>
+</tbody>
+</table>
+
+<hr>
+
+<h2>4. Security: boundary by boundary</h2>
+
+<h3>4a. Browser ↔ Gateway (the only externally-reachable boundary)</h3>
+<ul>
+<li><strong>CORS</strong>: <code>CORSMiddleware</code> allow-lists origins from <code>CORS_ALLOW_ORIGINS</code> (default <code>http://localhost:3000</code>), not a wildcard — the frontend's origin is the only one that can call the gateway from a browser context.</li>
+<li><strong>Rate limiting</strong>: per-client-IP, sliding one-minute window, via <code>Redis INCR</code> + <code>EXPIRE</code> (<code>gateway:ratelimit:{ip}:{minute}</code> key), default 60 req/min, <code>429</code> past that. This is the gateway's one piece of abuse-prevention logic and it's coarse (IP-based, trivially bypassed by rotating IPs) — appropriate for a local/demo system, not sufficient alone for a public launch.</li>
+<li><strong>No authentication.</strong> There is no login, no account system — a session id (<code>uuid4().hex</code>, 128 bits of randomness) <em>is</em> the bearer credential (see <code>docs/ARCHITECTURE.md</code> §4). This is a scope decision for an anonymous-by-design app, and it means: anyone who obtains a session id (e.g., via a leaked URL/log line) can read and act on that session until it's purged or expires. No JWT/OAuth2 anywhere in the system yet — see <code>docs/TECHNICAL_GUIDE.md</code> §6 for where that would go if real accounts are ever added.</li>
+</ul>
+
+<h3>4b. Gateway ↔ Orchestrator ↔ Agents ↔ Knowledge services</h3>
+<ul>
+<li><strong>No auth, no mTLS between any internal hop today.</strong> Trust is entirely "if you're on the Docker Compose network, you're trusted" — the perimeter (gateway) is the only enforcement point. This is the same trade-off called out in <code>docs/TECHNICAL_GUIDE.md</code> §4/§6: reasonable at "13 containers on one host," and exactly the boundary a service mesh (Istio, <code>mit-lincoln-lab-technical-qa.md</code> Q8-11) or application-layer JWT passed hop-to-hop would need to close before a genuinely multi-tenant or zero-trust deployment.</li>
+<li><strong>Input validation</strong>: every service boundary validates the incoming body against a Pydantic model before any handler code runs — malformed requests are rejected with a <code>422</code> before they can reach business logic, which is the FastAPI-native version of "validate at every trust boundary."</li>
+<li><strong>Redis has no <code>requirepass</code> configured.</strong> Any container on the compose network can read/write any key, Tier 1 or Tier 2, with no credential. Acceptable for an isolated local Docker network with nothing else attached to it; would be a real finding in any deployment where Redis's network boundary is less tightly controlled.</li>
+</ul>
+
+<h3>4c. Email export anti-abuse (<code>services/email/main.py</code>)</h3>
+<p>Specifically designed so "email me this" can't become an open relay:</p>
+<ul>
+<li><strong>Verification-code gate</strong>: sending requires a prior <code>/email/verify</code> → a 6-digit code delivered to the target address, confirmed via <code>/email/confirm</code> before <code>/email/send</code> will act. Codes expire after 10 minutes (<code>VERIFY_TTL_SECONDS</code>) and are single-use (deleted on consumption — see idempotency note in §3).</li>
+<li><strong>Per-recipient rate limit</strong>: max 3 verification requests per address per hour (<code>RATE_LIMIT_MAX_PER_WINDOW</code> / <code>_WINDOW_SECONDS</code>) — stops someone from using this endpoint to spam-verify (and thus spam) an address that isn't theirs, even without ever completing a send.</li>
+</ul>
+
+<h3>4d. A real finding: unescaped user text in the emailed HTML report</h3>
+<div class="callout">
+<p><code>services/agents/reporting/main.py</code>'s <code>compile_report()</code> builds the HTML
+export by directly f-string-interpolating symptom labels, cause labels, and chat message text
+into HTML tags — e.g. <code>f"&lt;li&gt;{s.get('label')}&lt;/li&gt;"</code> and
+<code>f"&lt;p&gt;...{msg['text']}&lt;/p&gt;"</code> — <strong>with no HTML-escaping.</strong>
+Cause labels and chat text are free-form user input (typed directly, or matched/echoed by the
+LLM in real mode). This is the same category as OWASP's injection class applied to HTML context
+(<code>mit-lincoln-lab-technical-qa.md</code> Q42): if a user's message contains
+<code>&lt;script&gt;</code> or an <code>&lt;img onerror=...&gt;</code> payload, it is written
+verbatim into the HTML email body that gets sent to whatever mail client renders it. The
+realistic blast radius is limited (it only ever affects the recipient's own inbox rendering
+their own submitted data — there's no cross-user exposure since Tier 2 data is
+per-session-private), but it's a genuine gap, not a hypothetical one, and the fix is small:
+HTML-escape every interpolated field (<code>html.escape(...)</code> in Python, or a templating
+engine that escapes by default instead of raw f-strings) before building <code>html_parts</code>.
+Flagging this now rather than silently leaving it, per the instruction to surface security
+issues as soon as they're found — happy to fix it in a follow-up if you want it done now
+instead of just documented.</p>
+</div>
+
+<h3>4e. Secrets handling</h3>
+<ul>
+<li><code>ANTHROPIC_API_KEY</code> / <code>RESEND_API_KEY</code> / <code>RESEND_FROM_ADDRESS</code> are read from environment variables only, sourced from a gitignored <code>.env</code> (<code>.env</code> and <code>.env.local</code> are both in <code>.gitignore</code>) — never committed, never logged, never returned in any response body (verified: no <code>main.py</code> echoes these values back to a caller).</li>
+<li>No secret ever appears in a Redis key or value — verification tokens and codes are app-generated random values (<code>secrets.token_urlsafe</code>, <code>secrets.randbelow</code>), not the API keys themselves.</li>
+</ul>
+
+<hr>
+
+<h2>5. Summary: the honest one-paragraph version</h2>
+
+<p>Every external dependency is optional and fails soft when <em>absent</em> (mock mode), but
+not yet when <em>present-and-failing</em> (no retry/backoff around Anthropic or Resend once a
+key is configured) — that asymmetry is the single most valuable resiliency gap to describe if
+asked "what would you harden first." Security today is perimeter-only (gateway CORS + rate
+limit + email verification gate), nothing internal — appropriate for a single-host local
+system, and the concrete triggers to close each gap (mTLS/Istio, JWT, Redis auth,
+HTML-escaping the report, retry/backoff on the two external calls) are each named above rather
+than left implicit.</p>
+
+</div>
+</body>
+</html>

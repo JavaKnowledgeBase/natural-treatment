@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ARCHITECTURE.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="rootwell--architecture">Rootwell — Architecture</h1>
+<p>This is the as-built system architecture: what actually runs today, how a
+request flows through it, and the structural decisions that aren't obvious
+from reading any single file. For the original product-vision documents
+(scoring formula derivation, UX flow, full design rationale) see
+<code>research docs/application_design.md</code> (v1) and
+<code>research docs/application_design_v2_microservices_agentic.md</code> (v2). This
+document is the &quot;current state + why&quot; companion to those.</p>
+<h2 id="1-one-paragraph-summary">1. One-paragraph summary</h2>
+<p>Rootwell is a conversational web app that takes user-reported symptoms,
+traces them to plausible biochemical root causes, and recommends herbs with
+some evidence behind them. It is built as ~13 independently deployable
+backend services plus a Next.js frontend, all coordinated by one
+orchestrator, with <strong>Redis as the only stateful component in the entire
+system</strong> — there is no SQL/NoSQL database anywhere. The backend is
+mid-migration from all-Python to a polyglot split: services that call an
+LLM stay in Python (FastAPI); every other service is being rewritten in
+Java (Spring Boot). See §7 for migration status.</p>
+<h2 id="2-service-map">2. Service map</h2>
+<pre class="hljs"><code><div>                         ┌─────────────┐
+   Browser  ────────────▶│  frontend   │  Next.js/React (chat UI)
+                         └──────┬──────┘
+                                │ HTTP (NEXT_PUBLIC_GATEWAY_URL)
+                                ▼
+                         ┌─────────────┐
+                         │   gateway   │  BFF: CORS, per-IP rate limit, proxy
+                         └──────┬──────┘
+                                │
+                                ▼
+                         ┌─────────────┐
+                         │ orchestrator│  Owns the session state machine
+                         └──┬───┬───┬──┘      (Tier 2 Redis reads/writes)
+              ┌─────────────┘   │   └─────────────────┐
+              ▼                 ▼                     ▼
+      ┌───────────────┐ ┌───────────────┐     ┌───────────────┐
+      │ agent-intake  │ │ agent-mapping │ ... │ agent-scoring │  (7 stateless
+      │ (LLM, Python) │ │ (LLM, Python) │     │ (Python*)     │   agents)
+      └───────┬───────┘ └───────┬───────┘     └───────────────┘
+              │                 │
+              ▼                 ▼
+      ┌───────────────────────────────────┐
+      │ knowledge-toxicology / -botanical │  Tier 1 reference lookups
+      │ knowledge-compound / -rules       │  (Python*, seeded from JSON)
+      └───────────────────────────────────┘
+
+              plus: email service (Resend/mock), called by orchestrator
+              at the end-of-session export step.
+
+  * = migrating to Java; see §7. Redis backs every Tier 1/2 read+write.
+</div></code></pre>
+<p>Every backend service exposes <code>GET /healthz</code>. The gateway is the <em>only</em>
+thing the frontend ever calls directly — no service is reachable from the
+browser except through it.</p>
+<h3 id="why-this-decomposition">Why this decomposition</h3>
+<p>Each agent maps to one accountable decision in the recommendation pipeline
+(intake → mapping → retrieval → safety → scoring → explanation →
+reporting), and each boundary was drawn where the <strong>trust model changes</strong>:</p>
+<ul>
+<li>Safety verdicts must never depend on an LLM's judgment (a hallucinated
+&quot;this is fine&quot; is a real-harm scenario), so <code>agent-safety</code> is
+deterministic and structurally cannot call an LLM — it doesn't even
+import the LLM wrapper.</li>
+<li>Scoring is a fixed weighted formula (see <code>research docs/application_design_v2...md</code>
+§7), not model output, so it's independently testable and auditable.</li>
+<li>Only three services touch an LLM at all (<code>agent-intake</code>, <code>agent-mapping</code>,
+<code>agent-explanation</code>) — everywhere else, &quot;why was this recommended&quot;
+traces back to code and data, not a model call.</li>
+</ul>
+<h2 id="3-data-model-no-database-redis-only">3. Data model: no database, Redis only</h2>
+<p>There is no SQL/NoSQL database in this system by design. Redis is split
+into two tiers with very different lifecycles:</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Key pattern</th>
+<th>Contents</th>
+<th>Lifecycle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tier 1</strong> (reference)</td>
+<td><code>ref:*</code></td>
+<td>Herb/compound/symptom/rule records, no PII</td>
+<td>Loaded from <code>seed/data/*.json</code> at service startup, 6h TTL, shared across every session</td>
+</tr>
+<tr>
+<td><strong>Tier 2</strong> (session)</td>
+<td><code>session:{sid}:*</code></td>
+<td>One user's chat, symptom/cause cache, recommendations</td>
+<td>TTL'd (idle timeout, default 30 min), <strong>hard-deleted</strong> (<code>UNLINK</code>) the moment a session ends or the user emails themselves the results</td>
+</tr>
+</tbody>
+</table>
+<p>All access goes through <code>shared/shared/cache.py</code> (Python side) — nothing
+talks to Redis directly except that one module and, on the Java side, the
+equivalent <code>RefCacheService</code> per migrated service (read-only for Tier 1;
+Tier 2 read/write stays exclusively in the orchestrator, which stays
+Python regardless of migration since it's the one place session state is
+mutated).</p>
+<p><strong>Why no database at all, not even for Tier 1 reference data:</strong> the
+Tier 1 dataset is small (~18 herbs, 20 symptoms, 18 compounds, 25 rules),
+fully rebuildable from JSON in milliseconds, and read far more often than
+written. A database would add an operational dependency (schema
+migrations, connection pooling, a second technology to run locally) for
+data that fits comfortably in memory and doesn't need relational
+querying — every access pattern here is &quot;fetch by id&quot; or &quot;list all of
+kind X,&quot; which a Redis string/hash already serves in O(1)/O(n) with no
+query planner needed. If the real curated dataset (Phase 2) grows into
+something needing relational queries (e.g. &quot;all herbs with contraindication
+X interacting with compound Y&quot;), that's the point to introduce Postgres —
+not before.</p>
+<h2 id="4-request-flow-a-full-session-end-to-end">4. Request flow: a full session, end to end</h2>
+<ol>
+<li><strong><code>POST /session</code></strong> (gateway → orchestrator) — orchestrator mints a
+<code>uuid4().hex</code> session id, creates the Tier 2 hash/stream keys, asks
+<code>agent-intake</code> for a greeting, and returns <code>{session_id, greeting}</code>.
+The session id itself <em>is</em> the bearer credential — there's no login,
+no account system; possession of the id is the capability. This is a
+deliberate scope decision, not an oversight (see <code>research docs/application_design_v2...md</code>
+for the reasoning) — there's nothing to authenticate against because
+nothing is tied to a real identity until the optional email step.</li>
+<li><strong>Symptom/cause collection</strong> — each <code>POST /session/{sid}/message</code> is
+proxied to the orchestrator, which routes to <code>agent-intake</code>'s
+<code>symptom-turn</code> or <code>cause-turn</code> endpoint depending on <code>current_step</code>.
+Intake either calls Claude (real mode) or runs a deterministic
+keyword-matching fallback (mock mode) — the response shape is
+identical either way, so nothing downstream needs to know which mode
+is active. Matched items are cached; <em>suggested</em> items are surfaced
+but require an explicit <code>/add-item</code> call — the model/heuristic never
+silently adds something the user didn't confirm.</li>
+<li><strong><code>POST /session/{sid}/analyze</code></strong> — the orchestrator runs the full
+pipeline in sequence: <code>agent-mapping</code> (symptoms → candidate biochemical
+imbalances) → <code>agent-retrieval</code> (imbalances/symptoms → candidate herbs,
+by calling <code>knowledge-botanical</code> + <code>knowledge-compound</code>) →
+<code>agent-safety</code> (candidates + volunteered profile → per-herb
+allow/safety-factor verdicts, via <code>knowledge-rules</code>) → <code>agent-scoring</code>
+(candidates + verdicts → ranked, safety-adjusted scores) →
+<code>agent-explanation</code> (ranked list → final natural-language
+recommendations, LLM or template). Each hop is a plain HTTP POST with a
+JSON body/response — no shared in-memory state, no message queue; the
+orchestrator is a synchronous fan-out/fan-in caller, not an event bus.</li>
+<li><strong><code>POST /session/{sid}/email/request</code> → <code>/email/confirm</code></strong> — a
+verification-code gate (10-minute TTL, 3 requests/hour per address)
+sits in front of actually sending anything, specifically so the
+&quot;email me this&quot; feature can't be used as an open relay to spam
+arbitrary addresses. On confirm, <code>agent-reporting</code> deterministically
+templates the full transcript + recommendations into subject/html/text
+(no LLM — the disclaimer text and structure must not vary), the
+<code>email</code> service sends it (or mock-logs it), and the orchestrator
+immediately calls <code>purge_session</code> — Tier 2 data for that session is
+gone the instant the export succeeds.</li>
+<li><strong><code>POST /session/{sid}/end</code></strong> — same hard purge, for a user who just
+walks away without exporting.</li>
+</ol>
+<h2 id="5-cross-cutting-design-rules-structural-not-just-documented">5. Cross-cutting design rules (structural, not just documented)</h2>
+<ul>
+<li><strong>Never proactively ask for personal details.</strong> There is no
+profile-collection step anywhere in the orchestrator's state graph
+(§4.2 above has no such state). Age/pregnancy/medications/allergies/
+conditions are only ever populated via <code>agent-intake</code>'s extraction pass
+over free text the user volunteered unprompted. This is enforced by the
+state machine's shape, not a prompt instruction that could be worked
+around.</li>
+<li><strong>Safety is independent of scoring, and both are independent of the
+LLM.</strong> <code>agent-safety</code> and <code>agent-scoring</code> do not import the LLM wrapper
+at all — verified structurally, not just by convention (see
+<code>docs/TECHNICAL_GUIDE.md</code> for how this was confirmed for the Java
+migration's scope split too).</li>
+<li><strong>Mock mode is a first-class runtime mode, not a test stub.</strong> Every
+service that calls an external API (<code>shared/shared/llm.py</code> for
+Anthropic, <code>services/email/main.py</code> for Resend) checks for the
+corresponding key at import time and switches to a clearly-labeled
+deterministic fallback if it's absent — same response shape, same
+endpoints, zero code branching required by callers. This is what lets
+the whole system run end-to-end with zero external credentials.</li>
+<li><strong>Curation status is threaded through, not stripped.</strong> Every herb
+record carries <code>curation_status: &quot;starter_dataset_unreviewed&quot;</code>, and that
+field survives all the way to the final recommendation and the emailed
+report — a starter/demo dataset is never allowed to look more
+authoritative than it is.</li>
+</ul>
+<h2 id="6-deployment-topology-local">6. Deployment topology (local)</h2>
+<p>Everything runs via <code>infra/docker-compose.yml</code>: one Redis container, one
+container per backend service, one frontend container. Host port mappings
+exist only to dodge two local conflicts on this dev machine (see
+<code>CLAUDE.md</code>'s &quot;Known environment quirks&quot;) — internal container-to-container
+calls always use the plain service name and port 8000
+(<code>http://knowledge-botanical:8000</code>, etc.), regardless of what's mapped on
+the host. There is no reverse proxy, service mesh, or ingress controller in
+front of these services locally — the gateway <em>is</em> the ingress point, doing
+CORS + rate limiting + proxying in application code rather than
+infrastructure. (See <code>docs/TECHNICAL_GUIDE.md</code> for the trade-off discussion
+of when that stops being enough and something like Istio becomes worth the
+operational cost.)</p>
+<p>Phase 2 (deferred by design, tracked in <code>CLAUDE.md</code>'s open items and
+<code>application_design_v2...md</code> §9): actual cloud deployment manifests,
+live fallback to IMPPAT/ChEBI/PubChem/CTD on a Tier 1 cache miss,
+multi-symptom conflict resolution, personalized history across sessions.</p>
+<h2 id="7-language-migration-status-python--java">7. Language migration status (Python → Java)</h2>
+<p>Scope, decided explicitly and re-derived from the code (not assumed):</p>
+<ul>
+<li><strong>Stays Python</strong>: <code>agent-intake</code>, <code>agent-mapping</code>, <code>agent-explanation</code> —
+the only three services that <code>import shared.llm</code> / call Anthropic.</li>
+<li><strong>Moves to Java (Spring Boot)</strong>: everything else —
+<code>knowledge-botanical</code>, <code>knowledge-compound</code>, <code>knowledge-toxicology</code>,
+<code>knowledge-rules</code>, <code>agent-retrieval</code>, <code>agent-safety</code>, <code>agent-scoring</code>,
+<code>agent-reporting</code>, <code>email</code>, <code>orchestrator</code>, <code>gateway</code>.</li>
+<li><strong>Frontend</strong>: stays Next.js/React — not part of this migration.</li>
+<li><strong>Approach</strong>: one service at a time, each verified end-to-end against
+the rest of the (still-mostly-Python) running stack before moving to
+the next, rather than a big-bang rewrite.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>knowledge-botanical</code></td>
+<td>In progress — first slice, Spring Boot 3</td>
+</tr>
+<tr>
+<td><code>knowledge-compound</code>, <code>-toxicology</code>, <code>-rules</code></td>
+<td>Not started (same shape as botanical)</td>
+</tr>
+<tr>
+<td><code>agent-retrieval</code></td>
+<td>Not started</td>
+</tr>
+<tr>
+<td><code>agent-safety</code>, <code>agent-scoring</code>, <code>agent-reporting</code></td>
+<td>Not started</td>
+</tr>
+<tr>
+<td><code>email</code></td>
+<td>Not started</td>
+</tr>
+<tr>
+<td><code>orchestrator</code>, <code>gateway</code></td>
+<td>Not started (last — most central, highest blast radius)</td>
+</tr>
+</tbody>
+</table>
+<p>See <code>docs/TECHNICAL_GUIDE.md</code> for why each Java-side dependency choice was
+made, and <code>docs/DEVELOPER_GUIDE.md</code> for the concrete steps to migrate the
+next service following the same pattern.</p>
+
+</body>
+</html>

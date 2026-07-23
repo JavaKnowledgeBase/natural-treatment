@@ -1,0 +1,13 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: knowledge-botanical
+  data:
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379/0}
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%X{correlationId}] %-5level %logger{36} - %msg%n"
