@@ -59,31 +59,27 @@ export default function SummaryPanel({
         <p className="font-serif text-xl font-semibold text-brand-900">{stepLabels[step] ?? step}</p>
       </div>
 
-      <div className="rounded-xl border border-gold-200 bg-gold-50 p-3 text-xs text-gold-700">
-        {t("disclaimer")}
-      </div>
-
       {isEmpty && (
-        <div className="rounded-xl border border-brand-100 bg-white p-5 shadow-card">
-          <p className="font-serif text-lg font-semibold text-brand-900">{t("introTagline")}</p>
-          <p className="mt-4 text-xs font-medium uppercase tracking-wider text-brand-600">
+        <div className="rounded-lg border border-brand-100 bg-white p-4 shadow-sm">
+          <p className="font-serif text-base font-semibold text-brand-700">{t("introTagline")}</p>
+          <p className="mt-3 text-[11px] font-medium uppercase tracking-wider text-brand-500">
             {t("howItWorksTitle")}
           </p>
-          <ol className="mt-2 space-y-2 text-sm text-stone-600">
-            <li className="flex gap-2">
-              <span className="font-medium text-brand-700">1.</span>
+          <ol className="mt-1.5 space-y-1.5 text-xs leading-relaxed text-stone-600">
+            <li className="flex gap-1.5">
+              <span className="font-medium text-brand-600">1.</span>
               {t("howItWorksStep1")}
             </li>
-            <li className="flex gap-2">
-              <span className="font-medium text-brand-700">2.</span>
+            <li className="flex gap-1.5">
+              <span className="font-medium text-brand-600">2.</span>
               {t("howItWorksStep2")}
             </li>
-            <li className="flex gap-2">
-              <span className="font-medium text-brand-700">3.</span>
+            <li className="flex gap-1.5">
+              <span className="font-medium text-brand-600">3.</span>
               {t("howItWorksStep3")}
             </li>
-            <li className="flex gap-2">
-              <span className="font-medium text-brand-700">4.</span>
+            <li className="flex gap-1.5">
+              <span className="font-medium text-brand-600">4.</span>
               {t("howItWorksStep4")}
             </li>
           </ol>

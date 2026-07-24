@@ -5,7 +5,8 @@
   },
   "Header": {
     "aboutContact": "关于我们与联系方式",
-    "language": "语言"
+    "language": "语言",
+    "trustNote": "一个帮助您了解自身症状的支持空间——并非持证临床医生诊疗的替代品。我们尊重您的隐私：除非您选择将摘要发送到自己的邮箱，否则您分享的信息不会在本次对话之外被保存。"
   },
   "Footer": {
     "tagline": "Natural Remedy Research。仅供参考 — 不能替代医生的专业建议。",

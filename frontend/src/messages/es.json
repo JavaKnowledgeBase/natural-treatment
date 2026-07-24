@@ -5,7 +5,8 @@
   },
   "Header": {
     "aboutContact": "Acerca de y contacto",
-    "language": "Idioma"
+    "language": "Idioma",
+    "trustNote": "Un espacio de apoyo para explorar tus síntomas — no un sustituto de la atención de un profesional médico con licencia. Tu privacidad es respetada: nada de lo que compartas se conserva más allá de esta conversación, a menos que elijas enviarte una copia por correo electrónico."
   },
   "Footer": {
     "tagline": "Natural Remedy Research. Solo con fines informativos — no sustituye el consejo médico.",

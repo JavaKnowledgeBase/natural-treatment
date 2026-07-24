@@ -5,7 +5,8 @@
   },
   "Header": {
     "aboutContact": "À propos et contact",
-    "language": "Langue"
+    "language": "Langue",
+    "trustNote": "Un espace bienveillant pour explorer vos symptômes — non un substitut aux soins d'un professionnel de santé agréé. Votre vie privée est respectée : rien de ce que vous partagez n'est conservé au-delà de cette conversation, sauf si vous choisissez de vous envoyer un résumé par e-mail."
   },
   "Footer": {
     "tagline": "Natural Remedy Research. Informations générales — ne remplace pas un avis médical.",
