@@ -341,19 +341,32 @@ scoring) keys off the English id, and the *live-mode* system prompts
 explicitly instruct Claude to return ids unchanged for exactly this
 reason. Only the **displayed label** is localized:
 - **Symptoms**: a translation table (`SYMPTOM_LABEL_TRANSLATIONS` in
-  `agent-intake`) maps each of the ~20 catalog ids to a translated label
-  per language, used for both matched-symptom chips and suggestion
-  chips, in both mock and live mode.
+  `agent-intake`) maps each catalog id to a translated label per
+  language, used for both matched-symptom chips and suggestion chips, in
+  both mock and live mode. **Must be kept in sync with
+  `seed/data/symptoms.json` by hand** — this table doesn't derive from
+  the seed file, so a symptom added there needs a matching entry added
+  here too, or that symptom silently falls back to its plain English
+  name in every non-English locale. (Found out of sync 2026-07-24 — 12
+  symptoms added in an earlier session were missing here; backfilled and
+  verified id-for-id against `symptoms.json`.)
 - **Herb names**: shown as `"<local name> (<English name>)"` — e.g.
   "अश्वगंधा (Ashwagandha)" — per an explicit user preference, favoring
   genuine established traditional/pharmacopoeia names where one exists
   (तुलसी for holy basil, 甘草 for licorice root — the real native names)
   and falling back to plain phonetic transliteration rather than
-  inventing a name for herbs with no established local one. Applied
-  consistently in `agent-explanation`: the recommendation card title, the
-  mock-mode template fallback, *and* the context handed to Claude for the
-  generated reason sentence, so the same paired name shows up everywhere
-  instead of just the title.
+  inventing a name for herbs with no established local one. Backed by
+  the same pattern as symptoms: a hand-maintained table
+  (`HERB_NAME_TRANSLATIONS` in `agent-explanation`) keyed by herb id,
+  **same sync obligation against `seed/data/herbs.json`** — for a herb
+  missing here, the fallback isn't just an untranslated label, it drops
+  the local-name pairing entirely and shows English-only. (Same
+  2026-07-24 check found 25 herbs missing, including all 20 from the
+  Ayurvedic/TCM expansion round; backfilled and verified id-for-id.)
+  Applied consistently in `agent-explanation`: the recommendation card
+  title, the mock-mode template fallback, *and* the context handed to
+  Claude for the generated reason sentence, so the same paired name
+  shows up everywhere instead of just the title.
 - **Evidence level** (`human_observational`, etc.) is translated the same
   way symptom labels are, but for a different reason than herb names:
   it's an internal enum, not a proper noun, so a raw untranslated token

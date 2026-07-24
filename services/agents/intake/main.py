@@ -120,6 +120,18 @@ SYMPTOM_LABEL_TRANSLATIONS = {
     "poor_circulation": {"hi": "खराब रक्त संचार", "zh": "血液循环不良", "fr": "Mauvaise circulation", "es": "Mala circulación"},
     "cold_hands_feet": {"hi": "हाथ-पैर ठंडे रहना", "zh": "手脚冰凉", "fr": "Mains et pieds froids", "es": "Manos y pies fríos"},
     "occasional_constipation": {"hi": "कभी-कभी कब्ज़", "zh": "偶发性便秘", "fr": "Constipation occasionnelle", "es": "Estreñimiento ocasional"},
+    "acid_reflux": {"hi": "एसिड रिफ्लक्स", "zh": "胃酸反流", "fr": "Reflux acide", "es": "Reflujo ácido"},
+    "loss_of_appetite": {"hi": "भूख न लगना", "zh": "食欲不振", "fr": "Perte d'appétit", "es": "Pérdida de apetito"},
+    "diarrhea": {"hi": "दस्त", "zh": "腹泻", "fr": "Diarrhée", "es": "Diarrea"},
+    "acne": {"hi": "मुंहासे", "zh": "痤疮", "fr": "Acné", "es": "Acné"},
+    "hair_loss": {"hi": "बालों का झड़ना", "zh": "脱发", "fr": "Perte de cheveux", "es": "Caída del cabello"},
+    "nasal_congestion": {"hi": "नाक बंद होना", "zh": "鼻塞", "fr": "Congestion nasale", "es": "Congestión nasal"},
+    "low_libido": {"hi": "कामेच्छा में कमी", "zh": "性欲减退", "fr": "Baisse de la libido", "es": "Baja libido"},
+    "menopausal_symptoms": {"hi": "रजोनिवृत्ति के लक्षण", "zh": "更年期症状", "fr": "Symptômes de la ménopause", "es": "Síntomas de la menopausia"},
+    "blood_sugar_imbalance": {"hi": "रक्त शर्करा असंतुलन", "zh": "血糖失衡", "fr": "Déséquilibre de la glycémie", "es": "Desequilibrio del azúcar en sangre"},
+    "memory_lapses": {"hi": "याददाश्त में कमी", "zh": "记忆力减退", "fr": "Trous de mémoire", "es": "Lapsus de memoria"},
+    "water_retention": {"hi": "जल प्रतिधारण", "zh": "水肿", "fr": "Rétention d'eau", "es": "Retención de líquidos"},
+    "frequent_urination": {"hi": "बार-बार पेशाब आना", "zh": "尿频", "fr": "Mictions fréquentes", "es": "Micción frecuente"},
 }
 
 
