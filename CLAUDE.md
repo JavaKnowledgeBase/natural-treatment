@@ -378,18 +378,39 @@ fixed at the architecture level instead of papering over the symptom.
         Ayurvedic/TCM diagnostic logic, and eventually real expert
         review — flagged to the user directly as a multi-session effort,
         not something to compress into one sitting.
-- [ ] **Scoring quirk noticed 2026-07-23, not yet investigated**: the
-      same top-5 herbs/scores (elderberry, maca, psyllium, passionflower,
-      nettle) showed up across two different symptom combinations tested
-      live (chronic headaches + menstrual discomfort, vs. menstrual
-      discomfort + muscle tension), even though feverfew/chasteberry/
-      cramp_bark — herbs directly linked to those exact symptoms — were
-      confirmed present in the retrieval candidate pool. Looks like
-      `agent-scoring`'s ranking formula may be weighting something
-      (evidence_level tier? a fixed prior?) more heavily than symptom-
-      match strength, but this wasn't confirmed, just observed — flagged
-      as a pre-existing characteristic unrelated to the herb-data
-      addition above, not chased down this session.
+- [ ] **Scoring quirk noticed 2026-07-23 — root cause now confirmed, fix
+      deferred by user request ("check on this later").** Every single
+      recommendation across the entire session (dozens of live tests)
+      came back `confidence_band: "moderate"` — never `high`, never
+      `low`. Traced to `agent-scoring`'s formula
+      (`services/agents/scoring/.../ScoringService.java:54-59`):
+      `0.30×evidence + 0.25×symptomMatch + 0.20×compoundCount +
+      0.15×safety + 0.10×traditionalUse`, banded low(<0.5)/
+      moderate(0.5-0.75)/high(≥0.75). Hand-computed Shatavari's exact
+      live score (0.7325) from this formula to confirm the model is
+      right, not guessed. Three compounding causes:
+      1. `concentrationBioavailability` (20% weight) is based on
+         `compounds.size()`, but **every herb in the dataset has exactly
+         one compound entry** by design pattern — so this component is a
+         near-constant ~0.65 for literally every herb, contributing zero
+         differentiation despite its weight.
+      2. Symptom-match relevance divides by the *requested* symptom
+         count, not the herb's own linked-symptom count — a herb with
+         one exact match out of two reported symptoms gets half credit
+         even though the match itself is perfect. The app's own UX
+         (`ChatPanel`) encourages reporting 2+ symptoms, so this
+         structurally caps scores exactly when users share more, the
+         opposite of the intended incentive.
+      3. `traditionalUse` (10% weight) gives 0.8 to any evidence_level
+         containing "traditional" and only 0.5 to `clinical_trial` — a
+         backwards incentive where better-evidenced herbs score *lower*
+         on this component than weakly-evidenced ones.
+      This also explains the earlier "same top-5 across different
+      symptoms" observation from earlier the same session — not a
+      separate issue, same root cause. **Deliberately not fixed this
+      session** — real design questions here (is `traditionalUse`
+      supposed to invert like this? should compound-count even be a
+      scoring input while every herb has exactly 1?), not a quick patch.
 - [ ] Phase 2 items deferred by design (see v2 doc §9 and README): Cloud
       Run/K8s deployment manifests, live fallback to IMPPAT/ChEBI/PubChem/CTD
       on cache miss, multi-symptom conflict resolution, personalized history
