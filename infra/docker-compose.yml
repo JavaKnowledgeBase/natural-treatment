@@ -223,9 +223,6 @@ services:
       dockerfile: services/gateway/Dockerfile
     ports:
       - "8082:8000"
-    environment:
-      REDIS_URL: redis://redis:6379/0
-      CORS_ALLOW_ORIGINS: http://localhost:3000
     depends_on:
       redis:
         condition: service_healthy
