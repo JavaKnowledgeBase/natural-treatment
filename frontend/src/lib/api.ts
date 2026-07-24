@@ -28,6 +28,14 @@ export type Recommendation = {
   curation_status: string;
 };
 
+export type HerbDetail = {
+  history: string;
+  features: string;
+  pros: string[];
+  cons: string[];
+  references: { title: string; url: string }[];
+};
+
 export type SessionState = {
   meta: { session_id: string; current_step: string };
   chat: ChatMessage[];
@@ -109,4 +117,7 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ herb_name, email, message, name }),
     }),
+
+  getHerbDetail: (herbId: string, language: string) =>
+    request<HerbDetail>(`/herbs/${herbId}/detail?language=${language}`),
 };

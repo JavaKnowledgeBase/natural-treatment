@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 public class RefCacheService {
 
     private static final String HERB_PREFIX = "ref:herb:";
+    private static final String HERB_DETAIL_PREFIX = "ref:herb_detail:";
     private static final String KB_VERSION_KEY = "ref:kb_version";
 
     private final StringRedisTemplate redisTemplate;
@@ -57,6 +58,18 @@ public class RefCacheService {
             }
         }
         return herbs;
+    }
+
+    /** Raw record: {@code {id, en: {...}, hi: {...}?, ...}} -- one key per
+     * language actually curated for this herb, missing keys mean "not yet
+     * translated" (fallback to English happens in the controller, not here,
+     * so this stays a thin, schema-agnostic read like {@link #getHerb}). */
+    public Optional<Map<String, Object>> getHerbDetail(String herbId) {
+        String raw = redisTemplate.opsForValue().get(HERB_DETAIL_PREFIX + herbId);
+        if (raw == null) {
+            return Optional.empty();
+        }
+        return Optional.of(parse(raw));
     }
 
     public Optional<String> getKbVersion() {

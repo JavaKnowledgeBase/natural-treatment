@@ -43,6 +43,8 @@
   },
   "HerbDetail": {
     "moreInfo": "More info",
+    "loading": "Loading...",
+    "notAvailable": "Detailed information for this herb isn't available yet.",
     "historyTitle": "History",
     "featuresTitle": "Features",
     "prosTitle": "What research shows",

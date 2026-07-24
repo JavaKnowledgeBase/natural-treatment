@@ -17,6 +17,7 @@ from shared.cache import get_redis
 
 ORCHESTRATOR_URL = os.environ.get("ORCHESTRATOR_SERVICE_URL", "http://orchestrator:8000")
 EMAIL_URL = os.environ.get("EMAIL_SERVICE_URL", "http://email:8000")
+BOTANICAL_URL = os.environ.get("KNOWLEDGE_BOTANICAL_SERVICE_URL", "http://knowledge-botanical:8000")
 RATE_LIMIT_PER_MINUTE = int(os.environ.get("GATEWAY_RATE_LIMIT_PER_MINUTE", "60"))
 
 app = FastAPI(title="API Gateway")
@@ -150,3 +151,12 @@ async def end_session(sid: str):
 @app.post("/contact")
 async def contact(body: ContactBody):
     return await _forward("POST", "/email/contact", body.model_dump(), base_url=EMAIL_URL)
+
+
+@app.get("/herbs/{herb_id}/detail")
+async def herb_detail(herb_id: str, language: str = "en"):
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.get(f"{BOTANICAL_URL}/herbs/{herb_id}/detail", params={"language": language})
+        if resp.status_code >= 400:
+            raise HTTPException(status_code=resp.status_code, detail=resp.text)
+        return resp.json()

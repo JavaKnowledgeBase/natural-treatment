@@ -43,6 +43,8 @@
   },
   "HerbDetail": {
     "moreInfo": "更多信息",
+    "loading": "加载中...",
+    "notAvailable": "该草药的详细信息暂未提供。",
     "historyTitle": "历史",
     "featuresTitle": "特点",
     "prosTitle": "研究表明",

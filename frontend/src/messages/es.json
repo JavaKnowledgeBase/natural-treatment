@@ -43,6 +43,8 @@
   },
   "HerbDetail": {
     "moreInfo": "Más información",
+    "loading": "Cargando...",
+    "notAvailable": "La información detallada sobre esta hierba aún no está disponible.",
     "historyTitle": "Historia",
     "featuresTitle": "Características",
     "prosTitle": "Lo que muestra la investigación",

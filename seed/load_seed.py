@@ -30,6 +30,7 @@ async def load_seed() -> str:
     compounds = _read("compounds.json")
     symptoms = _read("symptoms.json")
     rules = _read("rules.json")
+    herb_details = _read("herb_details.json")
 
     for herb in herbs:
         await cache.set_ref("herb", herb["id"], herb)
@@ -39,8 +40,12 @@ async def load_seed() -> str:
         await cache.set_ref("symptom", symptom["id"], symptom)
     for rule in rules:
         await cache.set_ref("rule", rule["id"], rule)
+    for detail in herb_details:
+        await cache.set_ref("herb_detail", detail["id"], detail)
 
-    fingerprint = json.dumps([herbs, compounds, symptoms, rules], sort_keys=True).encode("utf-8")
+    fingerprint = json.dumps(
+        [herbs, compounds, symptoms, rules, herb_details], sort_keys=True
+    ).encode("utf-8")
     version = "starter-" + hashlib.sha256(fingerprint).hexdigest()[:12]
     await cache.set_kb_version(version)
     return version

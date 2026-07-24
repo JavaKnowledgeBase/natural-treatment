@@ -74,6 +74,38 @@ public class HerbController {
         return herb.get();
     }
 
+    /**
+     * "Learn more" content for the herb detail modal. Falls back to English
+     * when the requested language hasn't been curated yet for this herb --
+     * same fallback-to-English philosophy as SYMPTOM_LABEL_TRANSLATIONS /
+     * HERB_NAME_TRANSLATIONS in the Python agents, just server-side here
+     * since this is fetched on demand rather than embedded in a prompt.
+     * 404 (not 200-with-empty-body) when the herb has no curated content at
+     * all yet -- lets the frontend show a distinct "not available yet"
+     * state instead of an empty modal.
+     */
+    @SuppressWarnings("unchecked")
+    @GetMapping("/herbs/{herbId}/detail")
+    public Map<String, Object> getHerbDetail(
+            @PathVariable String herbId, @RequestParam(defaultValue = "en") String language) {
+        Optional<Map<String, Object>> record = refCacheService.getHerbDetail(herbId);
+        if (record.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "No detail content for herb '" + herbId + "' yet");
+        }
+        Map<String, Object> byLanguage = record.get();
+        Object requested = byLanguage.get(language);
+        Object fallback = byLanguage.get("en");
+        if (requested instanceof Map<?, ?> found) {
+            return (Map<String, Object>) found;
+        }
+        if (fallback instanceof Map<?, ?> found) {
+            return (Map<String, Object>) found;
+        }
+        throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "No detail content for herb '" + herbId + "' in any language");
+    }
+
     @SuppressWarnings("unchecked")
     private boolean linkedSymptomsContain(Map<String, Object> herb, String symptomId) {
         Object linked = herb.get("linked_symptoms");

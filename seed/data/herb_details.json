@@ -1,0 +1,80 @@
+[
+  {
+    "id": "ashwagandha",
+    "en": {
+      "history": "Withania somnifera has been used in Ayurvedic medicine for over 3,000 years, classified in classical texts such as the Charaka Samhita as a \"rasayana\" (rejuvenative) herb for building strength, vitality, and resilience to stress.",
+      "features": "Classified as an adaptogen -- a class of herbs traditionally used to help the body adapt to physical and mental stress. Most modern research has focused on its effects on stress, anxiety, and cortisol levels.",
+      "pros": [
+        "A 2024 systematic review and meta-analysis of 9 randomized controlled trials (558 participants) found significant reductions in perceived stress, anxiety scores, and serum cortisol compared to placebo.",
+        "Multiple double-blind, placebo-controlled trials report improved sleep quality and stress-related symptoms within 8 weeks."
+      ],
+      "cons": [
+        "Can interact with thyroid medication and may raise thyroid hormone levels -- caution advised for anyone with a thyroid condition.",
+        "Not recommended during pregnancy.",
+        "Most trials are short-term (8-12 weeks), so long-term safety data is limited; some trials reported mild-to-moderate adverse events."
+      ],
+      "references": [
+        {
+          "title": "Effects of Ashwagandha (Withania Somnifera) on stress and anxiety: A systematic review and meta-analysis",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/39348746/"
+        },
+        {
+          "title": "Adaptogenic and Anxiolytic Effects of Ashwagandha Root Extract in Healthy Adults: A Double-blind, Randomized, Placebo-controlled Clinical Study",
+          "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6979308/"
+        }
+      ]
+    }
+  },
+  {
+    "id": "turmeric",
+    "en": {
+      "history": "A cornerstone of both Ayurvedic and Traditional Chinese Medicine for thousands of years, turmeric has long been used both as a culinary spice and medicinally for digestive complaints, wound healing, and inflammatory conditions across South Asia.",
+      "features": "Curcumin, its primary active compound, has documented anti-inflammatory and antioxidant activity and is the most-studied component of the root.",
+      "pros": [
+        "A network meta-analysis of 17 studies found turmeric preparations significantly reduced knee osteoarthritis pain (WOMAC scores).",
+        "Randomized, double-blind trials show measurable reductions in inflammatory markers alongside standard osteoarthritis care."
+      ],
+      "cons": [
+        "Curcumin has poor natural bioavailability on its own -- it's often paired with piperine (black pepper extract) to improve absorption.",
+        "Generally less effective than ibuprofen for direct pain relief in head-to-head comparisons, though appears safer for short-term use.",
+        "May increase bleeding risk when combined with blood-thinning medication; high doses can cause GI upset."
+      ],
+      "references": [
+        {
+          "title": "Effect of turmeric products on knee osteoarthritis: a systematic review and network meta-analysis",
+          "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12309109/"
+        },
+        {
+          "title": "Efficacy and safety of curcumin and its combination with boswellic acid in osteoarthritis: a comparative, randomized, double-blind, placebo-controlled study",
+          "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5761198/"
+        }
+      ]
+    }
+  },
+  {
+    "id": "chamomile",
+    "en": {
+      "history": "Used since ancient Egyptian, Greek, and Roman times as a calming remedy for digestive complaints and as a mild sedative, chamomile remains one of the most widely consumed herbal teas globally, long associated with soothing sleep and stomach upset.",
+      "features": "Most researched for its calming effects -- primarily studied for generalized anxiety disorder (GAD) and sleep quality rather than everyday situational stress.",
+      "pros": [
+        "A systematic review and meta-analysis of 12 randomized trials found significant improvement in GAD symptoms (HAM-A scale) after 2-4 weeks, and improved sleep quality.",
+        "Widely regarded as a gentle, low-risk option compared to many other calming herbs."
+      ],
+      "cons": [
+        "Evidence for general (non-GAD) anxiety and for insomnia specifically is mixed and inconsistent across trials.",
+        "Can cause allergic reactions in people sensitive to ragweed, daisies, or related plants in the Asteraceae family.",
+        "May interact with blood-thinning medication."
+      ],
+      "references": [
+        {
+          "title": "Therapeutic efficacy and safety of chamomile for state anxiety, generalized anxiety disorder, insomnia, and sleep quality: A systematic review and meta-analysis of randomized trials and quasi-randomized trials",
+          "url": "https://onlinelibrary.wiley.com/doi/10.1002/ptr.6349"
+        },
+        {
+          "title": "The Effect of Oral Chamomile on Anxiety: A Systematic Review of Clinical Trials",
+          "url": "https://e-cnr.org/DOIx.php?id=10.7762%2Fcnr.2024.13.2.139"
+        }
+      ]
+    }
+  }
+]

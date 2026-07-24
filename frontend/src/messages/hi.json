@@ -43,6 +43,8 @@
   },
   "HerbDetail": {
     "moreInfo": "और जानकारी",
+    "loading": "लोड हो रहा है...",
+    "notAvailable": "इस जड़ी-बूटी के बारे में विस्तृत जानकारी अभी उपलब्ध नहीं है।",
     "historyTitle": "इतिहास",
     "featuresTitle": "विशेषताएं",
     "prosTitle": "शोध क्या दर्शाता है",
