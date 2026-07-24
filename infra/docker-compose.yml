@@ -236,11 +236,13 @@ services:
       args:
         # NEXT_PUBLIC_* vars are inlined at build time -- this must be a
         # build arg, not just the runtime `environment:` below, or a real
-        # `next build` would silently bake in nothing.
-        NEXT_PUBLIC_GATEWAY_URL: http://localhost:8082
+        # `next build` would silently bake in nothing. Reads from .env via
+        # Compose's own ${VAR} substitution (not env_file:, which only
+        # reaches the container's runtime environment, too late for this).
+        NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL:-http://localhost:8082}
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_GATEWAY_URL: http://localhost:8082
+      NEXT_PUBLIC_GATEWAY_URL: ${NEXT_PUBLIC_GATEWAY_URL:-http://localhost:8082}
     depends_on:
       - gateway
