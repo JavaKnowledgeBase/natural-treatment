@@ -103,4 +103,10 @@ export const api = {
 
   endSession: (sid: string) =>
     request<{ status: string; purged_keys: number }>(`/session/${sid}/end`, { method: "POST" }),
+
+  contact: (herb_name: string, email: string, message: string, name?: string) =>
+    request<{ status: string; id: string | null }>("/contact", {
+      method: "POST",
+      body: JSON.stringify({ herb_name, email, message, name }),
+    }),
 };

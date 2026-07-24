@@ -16,6 +16,7 @@ from pydantic import BaseModel
 from shared.cache import get_redis
 
 ORCHESTRATOR_URL = os.environ.get("ORCHESTRATOR_SERVICE_URL", "http://orchestrator:8000")
+EMAIL_URL = os.environ.get("EMAIL_SERVICE_URL", "http://email:8000")
 RATE_LIMIT_PER_MINUTE = int(os.environ.get("GATEWAY_RATE_LIMIT_PER_MINUTE", "60"))
 
 app = FastAPI(title="API Gateway")
@@ -47,9 +48,9 @@ def _too_many_requests():
     return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded, please slow down."})
 
 
-async def _forward(method: str, path: str, json_body: dict | None = None) -> dict:
+async def _forward(method: str, path: str, json_body: dict | None = None, base_url: str = ORCHESTRATOR_URL) -> dict:
     async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.request(method, f"{ORCHESTRATOR_URL}{path}", json=json_body)
+        resp = await client.request(method, f"{base_url}{path}", json=json_body)
         if resp.status_code >= 400:
             raise HTTPException(status_code=resp.status_code, detail=resp.text)
         return resp.json()
@@ -82,6 +83,13 @@ class EmailRequestBody(BaseModel):
 class EmailConfirmBody(BaseModel):
     verification_token: str
     code: str
+
+
+class ContactBody(BaseModel):
+    name: str | None = None
+    email: str
+    herb_name: str
+    message: str
 
 
 @app.get("/healthz")
@@ -137,3 +145,8 @@ async def email_confirm(sid: str, body: EmailConfirmBody):
 @app.post("/session/{sid}/end")
 async def end_session(sid: str):
     return await _forward("POST", f"/sessions/{sid}/end")
+
+
+@app.post("/contact")
+async def contact(body: ContactBody):
+    return await _forward("POST", "/email/contact", body.model_dump(), base_url=EMAIL_URL)

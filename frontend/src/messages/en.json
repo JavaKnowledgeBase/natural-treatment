@@ -41,6 +41,24 @@
     "stepResults": "Results ready",
     "stepEmailSent": "Sent — session ended"
   },
+  "HerbDetail": {
+    "moreInfo": "More info",
+    "historyTitle": "History",
+    "featuresTitle": "Features",
+    "prosTitle": "What research shows",
+    "consTitle": "Things to know",
+    "referencesTitle": "References",
+    "sourcingPrompt": "Not sure where to find this? Contact us and we can point you toward common sources.",
+    "contactButton": "Contact us",
+    "namePlaceholder": "Your name (optional)",
+    "emailPlaceholder": "Your email",
+    "messagePlaceholder": "Anything else you'd like to share?",
+    "sendButton": "Send",
+    "sending": "Sending...",
+    "sentMessage": "Thanks — we'll be in touch.",
+    "errorMessage": "Couldn't send that. Please try again.",
+    "close": "Close"
+  },
   "ChatPanel": {
     "placeholderSymptom": "Tell me how you're feeling...",
     "placeholderCause": "What might have contributed to this?",

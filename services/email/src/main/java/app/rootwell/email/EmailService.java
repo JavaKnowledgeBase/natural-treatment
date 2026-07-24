@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * Port of services/email/main.py -- verification-gated export via Resend,
@@ -110,6 +111,48 @@ public class EmailService {
                 "text", req.text()));
         Object messageId = result.get("id");
         return new SendResponse("sent", messageId == null ? null : String.valueOf(messageId));
+    }
+
+    /** Herb-sourcing inquiry, sent to our own inbox with the user's address as
+     * reply-to -- no verification token needed since it never sends to an
+     * address the caller supplies. All caller-supplied fields are HTML-escaped
+     * before interpolation (see ReportingService.java for the same pattern,
+     * fixed there after an earlier unescaped-interpolation finding). */
+    public SendResponse contact(ContactRequest req) {
+        String safeName = HtmlUtils.htmlEscape(blankToPlaceholder(req.name(), "(not provided)"));
+        String safeEmail = HtmlUtils.htmlEscape(req.email());
+        String safeHerb = HtmlUtils.htmlEscape(req.herbName());
+        String safeMessage = HtmlUtils.htmlEscape(req.message());
+
+        String subject = "Remedy sourcing inquiry: " + req.herbName();
+        String text = "Herb: " + req.herbName() + "\nFrom: " + blankToPlaceholder(req.name(), "(not provided)")
+                + " <" + req.email() + ">\n\n" + req.message();
+        String html = "<div style=\"font-family:Arial,sans-serif;color:#1c2b22;\">"
+                + "<p><strong>Herb:</strong> " + safeHerb + "</p>"
+                + "<p><strong>From:</strong> " + safeName + " (" + safeEmail + ")</p>"
+                + "<p><strong>Message:</strong><br/>" + safeMessage.replace("\n", "<br/>") + "</p>"
+                + "</div>";
+
+        if (mockMode) {
+            System.out.printf("[email:mock] --- CONTACT INQUIRY --- herb=%s from=%s <%s>%n",
+                    req.herbName(), req.name(), req.email());
+            System.out.printf("[email:mock] message: %s%n", req.message());
+            return new SendResponse("mock_sent", "mock-" + randomHex(8));
+        }
+
+        Map<String, Object> result = resendClient.send(Map.of(
+                "from", fromAddress,
+                "to", java.util.List.of(fromAddress),
+                "reply_to", req.email(),
+                "subject", subject,
+                "html", html,
+                "text", text));
+        Object messageId = result.get("id");
+        return new SendResponse("sent", messageId == null ? null : String.valueOf(messageId));
+    }
+
+    private String blankToPlaceholder(String value, String placeholder) {
+        return (value == null || value.isBlank()) ? placeholder : value;
     }
 
     private String verificationSubject(String language) {

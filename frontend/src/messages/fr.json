@@ -41,6 +41,24 @@
     "stepResults": "Résultats prêts",
     "stepEmailSent": "Envoyé — session terminée"
   },
+  "HerbDetail": {
+    "moreInfo": "En savoir plus",
+    "historyTitle": "Histoire",
+    "featuresTitle": "Caractéristiques",
+    "prosTitle": "Ce que montre la recherche",
+    "consTitle": "À savoir",
+    "referencesTitle": "Références",
+    "sourcingPrompt": "Vous ne savez pas où trouver cela ? Contactez-nous, nous pouvons vous indiquer des sources courantes.",
+    "contactButton": "Nous contacter",
+    "namePlaceholder": "Votre nom (facultatif)",
+    "emailPlaceholder": "Votre e-mail",
+    "messagePlaceholder": "Autre chose à partager ?",
+    "sendButton": "Envoyer",
+    "sending": "Envoi...",
+    "sentMessage": "Merci — nous vous recontacterons.",
+    "errorMessage": "Échec de l'envoi. Veuillez réessayer.",
+    "close": "Fermer"
+  },
   "ChatPanel": {
     "placeholderSymptom": "Dites-moi comment vous vous sentez...",
     "placeholderCause": "Qu'est-ce qui aurait pu y contribuer ?",

@@ -29,4 +29,9 @@ public class EmailController {
     public SendResponse send(@RequestBody SendRequest req) {
         return emailService.send(req);
     }
+
+    @PostMapping("/email/contact")
+    public SendResponse contact(@RequestBody ContactRequest req) {
+        return emailService.contact(req);
+    }
 }

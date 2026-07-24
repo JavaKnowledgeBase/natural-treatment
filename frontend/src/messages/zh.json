@@ -41,6 +41,24 @@
     "stepResults": "结果已生成",
     "stepEmailSent": "已发送 — 对话已结束"
   },
+  "HerbDetail": {
+    "moreInfo": "更多信息",
+    "historyTitle": "历史",
+    "featuresTitle": "特点",
+    "prosTitle": "研究表明",
+    "consTitle": "需要了解的事项",
+    "referencesTitle": "参考文献",
+    "sourcingPrompt": "不知道去哪里购买？联系我们，我们会为您指出常见的获取渠道。",
+    "contactButton": "联系我们",
+    "namePlaceholder": "您的姓名（可选）",
+    "emailPlaceholder": "您的邮箱",
+    "messagePlaceholder": "还有什么想告诉我们的吗？",
+    "sendButton": "发送",
+    "sending": "发送中...",
+    "sentMessage": "谢谢——我们会尽快与您联系。",
+    "errorMessage": "发送失败，请重试。",
+    "close": "关闭"
+  },
   "ChatPanel": {
     "placeholderSymptom": "告诉我您现在感觉如何……",
     "placeholderCause": "您觉得可能是什么原因造成的？",

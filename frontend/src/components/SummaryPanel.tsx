@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { CachedItem, Recommendation } from "@/lib/api";
+import { herbDetails } from "@/data/herbDetails";
+import HerbDetailModal from "./HerbDetailModal";
 
 const CONFIDENCE_BADGE: Record<string, string> = {
   high: "bg-brand-100 text-brand-800",
@@ -40,6 +43,8 @@ export default function SummaryPanel({
   onRemoveCause: (id: string) => void;
 }) {
   const t = useTranslations("SummaryPanel");
+  const tHerb = useTranslations("HerbDetail");
+  const [openHerb, setOpenHerb] = useState<{ id: string; name: string } | null>(null);
 
   const isEmpty = symptoms.length === 0 && causes.length === 0 && recommendations.length === 0;
 
@@ -118,7 +123,20 @@ export default function SummaryPanel({
                     {t("confidenceLabel", { band: r.confidence_band })}
                   </span>
                 </div>
-                <p className="mt-1 text-sm text-stone-600">{r.reason}</p>
+                <p className="mt-1 text-sm text-stone-600">
+                  {r.reason}
+                  {herbDetails[r.herb_id] && (
+                    <>
+                      {" "}
+                      <button
+                        onClick={() => setOpenHerb({ id: r.herb_id, name: r.herb_name })}
+                        className="font-medium text-brand-700 underline decoration-brand-200 underline-offset-2 hover:text-brand-900"
+                      >
+                        {tHerb("moreInfo")}
+                      </button>
+                    </>
+                  )}
+                </p>
                 <p className="mt-1 text-xs text-stone-400">
                   {t("evidenceLevel")}: {t("evidenceLevelValue", { level: r.evidence_level })}
                 </p>
@@ -127,6 +145,10 @@ export default function SummaryPanel({
             ))}
           </ol>
         </div>
+      )}
+
+      {openHerb && (
+        <HerbDetailModal herbId={openHerb.id} herbName={openHerb.name} onClose={() => setOpenHerb(null)} />
       )}
     </div>
   );

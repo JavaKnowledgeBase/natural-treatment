@@ -41,6 +41,24 @@
     "stepResults": "परिणाम तैयार हैं",
     "stepEmailSent": "भेजा गया — बातचीत समाप्त"
   },
+  "HerbDetail": {
+    "moreInfo": "और जानकारी",
+    "historyTitle": "इतिहास",
+    "featuresTitle": "विशेषताएं",
+    "prosTitle": "शोध क्या दर्शाता है",
+    "consTitle": "जानने योग्य बातें",
+    "referencesTitle": "संदर्भ",
+    "sourcingPrompt": "यह कहाँ मिलेगा, यह नहीं पता? हमसे संपर्क करें, हम आपको सामान्य स्रोतों की जानकारी देंगे।",
+    "contactButton": "हमसे संपर्क करें",
+    "namePlaceholder": "आपका नाम (वैकल्पिक)",
+    "emailPlaceholder": "आपका ईमेल",
+    "messagePlaceholder": "कुछ और साझा करना चाहेंगे?",
+    "sendButton": "भेजें",
+    "sending": "भेजा जा रहा है...",
+    "sentMessage": "धन्यवाद — हम जल्द ही संपर्क करेंगे।",
+    "errorMessage": "भेजने में समस्या हुई। कृपया पुनः प्रयास करें।",
+    "close": "बंद करें"
+  },
   "ChatPanel": {
     "placeholderSymptom": "बताइए आप कैसा महसूस कर रहे हैं...",
     "placeholderCause": "इसमें किन बातों का योगदान हो सकता है?",
