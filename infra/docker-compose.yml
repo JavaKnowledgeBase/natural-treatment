@@ -37,6 +37,20 @@ services:
       dockerfile: seed/Dockerfile
     restart: "no"
 
+  # Long-running companion to seed-loader: reseeds Tier 1 on a fixed
+  # interval (default 1h, well under REF_TTL_SECONDS' 6h) so a stack left
+  # running for days/weeks doesn't silently go empty between deploys.
+  # Nothing depends_on this -- only seed-loader (above) gates startup
+  # ordering -- so a slow/restarting refresher can't block the rest of
+  # the stack from coming up.
+  seed-refresher:
+    <<: *backend-service
+    build:
+      context: ..
+      dockerfile: seed/Dockerfile
+    command: ["python", "-u", "-m", "seed.load_seed", "--loop"]
+    restart: unless-stopped
+
   knowledge-botanical:
     <<: *backend-service
     build:

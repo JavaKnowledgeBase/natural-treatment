@@ -46,8 +46,27 @@ async def load_seed() -> str:
     return version
 
 
-if __name__ == "__main__":
+async def refresh_loop(interval_seconds: int) -> None:
+    """Reseeds on a fixed interval so long-running stacks never outlive
+    REF_TTL_SECONDS between deploys. Run as a separate long-lived
+    container (seed-refresher) alongside the one-shot seed-loader used
+    for startup ordering -- see infra/docker-compose.yml.
+    """
     import asyncio
 
-    loaded_version = asyncio.run(load_seed())
-    print(f"Seed loaded into Tier 1 cache. kb_version={loaded_version}")
+    while True:
+        version = await load_seed()
+        print(f"[seed-refresher] reseeded Tier 1 cache. kb_version={version}")
+        await asyncio.sleep(interval_seconds)
+
+
+if __name__ == "__main__":
+    import asyncio
+    import sys
+
+    if "--loop" in sys.argv:
+        interval = int(os.environ.get("SEED_REFRESH_INTERVAL_SECONDS", 3600))
+        asyncio.run(refresh_loop(interval))
+    else:
+        loaded_version = asyncio.run(load_seed())
+        print(f"Seed loaded into Tier 1 cache. kb_version={loaded_version}")
