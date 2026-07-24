@@ -30,6 +30,7 @@ export async function generateMetadata({
   unstable_setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "Metadata" });
   return {
+    metadataBase: new URL("https://naturalremedyresearch.com"),
     title: t("title"),
     description: t("description"),
   };
