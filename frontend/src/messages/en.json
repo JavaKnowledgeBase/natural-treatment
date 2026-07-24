@@ -20,6 +20,12 @@
     "purgedBody": "Your summary is on its way, and everything from this conversation has now been cleared from our system. Whenever you're ready, feel free to refresh this page to start a new, separate conversation."
   },
   "SummaryPanel": {
+    "introTagline": "Trace your symptoms to their root cause, naturally.",
+    "howItWorksTitle": "How it works",
+    "howItWorksStep1": "Tell us what's bothering you — no forms, just chat.",
+    "howItWorksStep2": "Share what might be contributing (stress, sleep, diet...).",
+    "howItWorksStep3": "Get herb suggestions ranked by evidence, with safety notes.",
+    "howItWorksStep4": "Export a summary by email, or just close the tab.",
     "currentStep": "Current step",
     "disclaimer": "We're here to help you explore, not to replace care from a licensed clinician. And your privacy matters to us — nothing you share here is kept beyond this conversation unless you choose to email yourself a copy.",
     "symptoms": "Symptoms",

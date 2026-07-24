@@ -20,6 +20,12 @@
     "purgedBody": "Tu resumen está en camino, y todo lo relacionado con esta conversación ya ha sido eliminado de nuestro sistema. Cuando quieras, no dudes en actualizar esta página para comenzar una nueva conversación, independiente de esta."
   },
   "SummaryPanel": {
+    "introTagline": "Encuentra la causa raíz de tus síntomas, de forma natural.",
+    "howItWorksTitle": "Cómo funciona",
+    "howItWorksStep1": "Cuéntanos qué te preocupa — sin formularios, solo conversación.",
+    "howItWorksStep2": "Comparte lo que podría estar contribuyendo (estrés, sueño, alimentación...).",
+    "howItWorksStep3": "Recibe sugerencias de hierbas clasificadas por evidencia, con notas de seguridad.",
+    "howItWorksStep4": "Exporta un resumen por correo electrónico, o simplemente cierra la pestaña.",
     "currentStep": "Paso actual",
     "disclaimer": "Estamos aquí para ayudarte a explorar, no para reemplazar la atención de un profesional de la salud con licencia. Y tu privacidad nos importa — nada de lo que compartas aquí se conserva más allá de esta conversación, a menos que elijas enviarte una copia por correo electrónico.",
     "symptoms": "Síntomas",

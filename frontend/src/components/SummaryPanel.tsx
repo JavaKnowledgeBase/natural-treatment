@@ -41,6 +41,8 @@ export default function SummaryPanel({
 }) {
   const t = useTranslations("SummaryPanel");
 
+  const isEmpty = symptoms.length === 0 && causes.length === 0 && recommendations.length === 0;
+
   const stepLabels: Record<string, string> = {
     greeting: t("stepGreeting"),
     symptom_collection: t("stepSymptomCollection"),
@@ -60,6 +62,33 @@ export default function SummaryPanel({
       <div className="rounded-xl border border-gold-200 bg-gold-50 p-3 text-xs text-gold-700">
         {t("disclaimer")}
       </div>
+
+      {isEmpty && (
+        <div className="rounded-xl border border-brand-100 bg-white p-5 shadow-card">
+          <p className="font-serif text-lg font-semibold text-brand-900">{t("introTagline")}</p>
+          <p className="mt-4 text-xs font-medium uppercase tracking-wider text-brand-600">
+            {t("howItWorksTitle")}
+          </p>
+          <ol className="mt-2 space-y-2 text-sm text-stone-600">
+            <li className="flex gap-2">
+              <span className="font-medium text-brand-700">1.</span>
+              {t("howItWorksStep1")}
+            </li>
+            <li className="flex gap-2">
+              <span className="font-medium text-brand-700">2.</span>
+              {t("howItWorksStep2")}
+            </li>
+            <li className="flex gap-2">
+              <span className="font-medium text-brand-700">3.</span>
+              {t("howItWorksStep3")}
+            </li>
+            <li className="flex gap-2">
+              <span className="font-medium text-brand-700">4.</span>
+              {t("howItWorksStep4")}
+            </li>
+          </ol>
+        </div>
+      )}
 
       <div>
         <p className="mb-2 text-sm font-medium text-stone-700">
