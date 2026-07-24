@@ -6,7 +6,7 @@
   "Header": {
     "aboutContact": "About & Contact",
     "language": "Language",
-    "trustNote": "A supportive space to explore your symptoms — not a substitute for licensed medical care. Your privacy is respected: nothing you share is stored beyond this conversation unless you choose to email yourself a copy."
+    "trustNote": "Informational support only, not a substitute for licensed medical care. Your conversation stays private."
   },
   "Footer": {
     "tagline": "Natural Remedy Research. Informational only — not medical advice.",
@@ -23,10 +23,8 @@
   "SummaryPanel": {
     "introTagline": "Trace your symptoms to their root cause, naturally.",
     "howItWorksTitle": "How it works",
-    "howItWorksStep1": "Tell us what's bothering you — no forms, just chat.",
-    "howItWorksStep2": "Share what might be contributing (stress, sleep, diet...).",
-    "howItWorksStep3": "Get herb suggestions ranked by evidence, with safety notes.",
-    "howItWorksStep4": "Export a summary by email, or just close the tab.",
+    "howItWorksStep1": "Chat about your symptoms and what might be contributing (stress, sleep, diet...).",
+    "howItWorksStep2": "Get evidence-ranked herb suggestions with safety notes — export by email anytime.",
     "currentStep": "Current step",
     "disclaimer": "We're here to help you explore, not to replace care from a licensed clinician. And your privacy matters to us — nothing you share here is kept beyond this conversation unless you choose to email yourself a copy.",
     "symptoms": "Symptoms",

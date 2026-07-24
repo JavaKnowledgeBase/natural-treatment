@@ -6,7 +6,7 @@
   "Header": {
     "aboutContact": "Acerca de y contacto",
     "language": "Idioma",
-    "trustNote": "Un espacio de apoyo para explorar tus síntomas — no un sustituto de la atención de un profesional médico con licencia. Tu privacidad es respetada: nada de lo que compartas se conserva más allá de esta conversación, a menos que elijas enviarte una copia por correo electrónico."
+    "trustNote": "Solo apoyo informativo, no un sustituto de la atención de un profesional médico con licencia. Tu conversación permanece privada."
   },
   "Footer": {
     "tagline": "Natural Remedy Research. Solo con fines informativos — no sustituye el consejo médico.",
@@ -23,10 +23,8 @@
   "SummaryPanel": {
     "introTagline": "Encuentra la causa raíz de tus síntomas, de forma natural.",
     "howItWorksTitle": "Cómo funciona",
-    "howItWorksStep1": "Cuéntanos qué te preocupa — sin formularios, solo conversación.",
-    "howItWorksStep2": "Comparte lo que podría estar contribuyendo (estrés, sueño, alimentación...).",
-    "howItWorksStep3": "Recibe sugerencias de hierbas clasificadas por evidencia, con notas de seguridad.",
-    "howItWorksStep4": "Exporta un resumen por correo electrónico, o simplemente cierra la pestaña.",
+    "howItWorksStep1": "Conversa sobre tus síntomas y lo que podría estar contribuyendo (estrés, sueño, alimentación...).",
+    "howItWorksStep2": "Recibe sugerencias de hierbas clasificadas por evidencia, con notas de seguridad — exportables por correo en cualquier momento.",
     "currentStep": "Paso actual",
     "disclaimer": "Estamos aquí para ayudarte a explorar, no para reemplazar la atención de un profesional de la salud con licencia. Y tu privacidad nos importa — nada de lo que compartas aquí se conserva más allá de esta conversación, a menos que elijas enviarte una copia por correo electrónico.",
     "symptoms": "Síntomas",

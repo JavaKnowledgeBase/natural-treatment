@@ -74,14 +74,6 @@ export default function SummaryPanel({
               <span className="font-medium text-brand-600">2.</span>
               {t("howItWorksStep2")}
             </li>
-            <li className="flex gap-1.5">
-              <span className="font-medium text-brand-600">3.</span>
-              {t("howItWorksStep3")}
-            </li>
-            <li className="flex gap-1.5">
-              <span className="font-medium text-brand-600">4.</span>
-              {t("howItWorksStep4")}
-            </li>
           </ol>
         </div>
       )}

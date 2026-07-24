@@ -6,7 +6,7 @@
   "Header": {
     "aboutContact": "À propos et contact",
     "language": "Langue",
-    "trustNote": "Un espace bienveillant pour explorer vos symptômes — non un substitut aux soins d'un professionnel de santé agréé. Votre vie privée est respectée : rien de ce que vous partagez n'est conservé au-delà de cette conversation, sauf si vous choisissez de vous envoyer un résumé par e-mail."
+    "trustNote": "Un soutien informatif uniquement, non un substitut aux soins d'un professionnel de santé agréé. Votre conversation reste privée."
   },
   "Footer": {
     "tagline": "Natural Remedy Research. Informations générales — ne remplace pas un avis médical.",
@@ -23,10 +23,8 @@
   "SummaryPanel": {
     "introTagline": "Retrouvez la cause profonde de vos symptômes, naturellement.",
     "howItWorksTitle": "Comment ça marche",
-    "howItWorksStep1": "Dites-nous ce qui vous préoccupe — pas de formulaire, juste une conversation.",
-    "howItWorksStep2": "Partagez ce qui pourrait y contribuer (stress, sommeil, alimentation...).",
-    "howItWorksStep3": "Recevez des suggestions de plantes classées selon les preuves, avec des notes de sécurité.",
-    "howItWorksStep4": "Exportez un résumé par e-mail, ou fermez simplement l'onglet.",
+    "howItWorksStep1": "Discutez de vos symptômes et de ce qui pourrait y contribuer (stress, sommeil, alimentation...).",
+    "howItWorksStep2": "Recevez des suggestions de plantes classées selon les preuves, avec des notes de sécurité — exportables par e-mail à tout moment.",
     "currentStep": "Étape en cours",
     "disclaimer": "Nous sommes là pour vous aider à explorer, pas pour remplacer les soins d'un professionnel de santé agréé. Et votre vie privée compte pour nous — rien de ce que vous partagez ici n'est conservé au-delà de cette conversation, sauf si vous choisissez de vous en envoyer une copie par e-mail.",
     "symptoms": "Symptômes",
